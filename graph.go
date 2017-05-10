@@ -3,10 +3,12 @@ package fabric
 type Signal int
 
 const (
-	Incomplete Signal = iota
+	Waiting Signal = iota
+	Started
 	Complete
 	Abort
 	AbortRetry
+	// PartialAbort
 )
 
 // Graph can be either UI DDAG, Temporal DAG or VDG
@@ -21,6 +23,12 @@ type Node struct {
 }
 
 // TODO: differentiate between UI nodes, temporal nodes, and virtual nodes
+//		UI nodes: list of CDS nodes, list of allowed Access Types, Invariants per Access Type
+//		let's not forget that a "Node" IS a thread (technically) -- a node here is for global bookkeeping
+//		So, a thread will be either a UI thread, a temporal thread, or a virtual thread
+//		still though, it would be best to assign a thread a "UI node" (using a global assignment function)
+//		spawn temporal threads from each UI thread (?) -- since they are permanent
+//		each UI thread will have an "interally global" temporal DAG Graph structure
 // TODO: will need a UI uniqueness verification (for CDS node reference)
 // TODO: how will we define a "CDS node"?
 
@@ -35,6 +43,8 @@ func NewGraph() *Graph {
 
 // GenerateGraph will create a graph given a list of nodes and map of edges
 func GenerateGraph(nodes []Node, edges map[int][]int) *Graph {
+	// TODO: should we just be supplied a list of node ids,
+	// 		 and then generate nodes in a Waiting State (?)
 	return &Graph{
 		Nodes: nodes,
 		Edges: edges,
@@ -64,7 +74,6 @@ func (g *Graph) GetAdjacents(node int) []int {
 
 // Recursive Depth-First-Search; used for Cycle Detection
 func (g *Graph) cycleDfs(start int, seen, done []int) (bool, []int) {
-
 	seen = append(seen, start)
 	adj := g.Edges[start]
 	for _, v := range adj {
@@ -98,6 +107,8 @@ func (g *Graph) RemoveNode(node int) {
 // should this just generate a node id and add it?
 func (g *Graph) AppendNode(node int) {
 	// TODO: add node to nodes list
+	// verify that node id is not already in list
+	// verify that CDS sub-graph is not the same as in other UIs
 }
 
 // AppendEdge adds an edge that points from dependent to dependency
