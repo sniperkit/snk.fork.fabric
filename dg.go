@@ -24,7 +24,11 @@ type DGNode struct {
 }
 
 func (u *DGNode) ID() int {
-	// TODO: assigns an ID to a node
+	return u.Id
+}
+
+func (u *DGNode) NewID() int {
+	// TODO: be able to assign the node a new Id
 }
 
 // TODO: differentiate between UI nodes, temporal nodes, and virtual nodes
