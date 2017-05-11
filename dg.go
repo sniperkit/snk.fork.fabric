@@ -13,13 +13,18 @@ const (
 
 // Graph can be either UI DDAG, Temporal DAG or VDG
 type Graph struct {
-	Nodes []Node
+	Nodes []DGNode
 	Edges map[int][]int // each node (id) has a list of node ids that it points too
 }
 
-type Node struct {
+// Dependency Graph Node
+type DGNode struct {
 	Id    int
 	State Signal
+}
+
+func (u *DGNode) ID() int {
+	// TODO: assigns an ID to a node
 }
 
 // TODO: differentiate between UI nodes, temporal nodes, and virtual nodes
@@ -34,7 +39,7 @@ type Node struct {
 
 // NewGraph creates a new empty graph
 func NewGraph() *Graph {
-	var nodes []Node
+	var nodes []DGNode
 	return &Graph{
 		Nodes: nodes,
 		Edges: make(map[int][]int),
@@ -42,7 +47,7 @@ func NewGraph() *Graph {
 }
 
 // GenerateGraph will create a graph given a list of nodes and map of edges
-func GenerateGraph(nodes []Node, edges map[int][]int) *Graph {
+func GenerateGraph(nodes []DGNode, edges map[int][]int) *Graph {
 	// TODO: should we just be supplied a list of node ids,
 	// 		 and then generate nodes in a Waiting State (?)
 	return &Graph{
@@ -97,8 +102,8 @@ func (g *Graph) cycleDfs(start int, seen, done []int) (bool, []int) {
 // NOTE: this method cannot be used on UI DDAGs
 func (g *Graph) RemoveNode(node int) {
 	// TODO:
-	// remove node from node list
-	// remove all of nodes edges from edges map
+	// 		remove node from node list
+	// 		remove all of nodes edges from edges map
 }
 
 // TODO: determine how Node IDs should be generated? Just incrementally?
@@ -107,8 +112,8 @@ func (g *Graph) RemoveNode(node int) {
 // should this just generate a node id and add it?
 func (g *Graph) AppendNode(node int) {
 	// TODO: add node to nodes list
-	// verify that node id is not already in list
-	// verify that CDS sub-graph is not the same as in other UIs
+	// 		verify that node id is not already in list
+	// 		verify that CDS sub-graph is not the same as in other UIs
 }
 
 // AppendEdge adds an edge that points from dependent to dependency
@@ -122,9 +127,9 @@ func (g *Graph) RemoveEdge(source, dest int) {
 
 func (g *Graph) AppendSubGraph(graph Graph) {
 	// TODO:
-	// add all nodes in new graph to existing graph
-	// add all edges in new graph to existing graph
-	// cycle detection on new total graph
+	// 		add all nodes in new graph to existing graph
+	// 		add all edges in new graph to existing graph
+	// 		cycle detection on new total graph
 }
 
 // NOTE: this method cannot be used on UI DDAGs

@@ -1,16 +1,21 @@
 package fabric
 
-// TODO: How to generically define a CDS
-//		A set of Nodes (each node holds typed data)
-//		A set of edges (often pointers e.g. linked lists)
-// TODO: Methods for virtualizing a CDS into UIs
-//		Partitioning Rules (by regexp for KVs, section cuts (for linear ordered CDS graphs), etc.)
-//		Node Subset Definitions (for UIs that will have overlap, generically defining subsets of CDS nodes work best)
-//		Sub-graph definitions
-// TODO: How to assign CDS sub-graphs to a UI
+// TODO: We still need a way to have the information for the ENTIRE CDS in order to create
+// 		objects that are section types of a CDS.
 
-// CDS Subgraph
-type Subgraph interface {
-	NodeCount() int
-	EdgeCount() int
+// TODO: create a map between elements of a CDS and Nodes (?)
+
+// So we will want extensional lists of nodes per UI,
+// and thus, we could potentially wrap our original CDS elements to be Nodes
+// and wrap our CDS itself to match the CDS interface.
+
+// Example of a CDS: https://golang.org/src/container/list/list.go
+
+type Node interface {
+	ID() int // assigns an ID to a node
+}
+
+type CDS interface {
+	ListNodes() []Node
+	ListEdges() map[Node][]Node
 }
