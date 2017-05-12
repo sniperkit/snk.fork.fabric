@@ -1,17 +1,5 @@
 package fabric
 
-// NOTE: edges are always unique per-node, but can be shared by multiple (2) nodes
-// NOTE: How exactly are we going to make sure a UI knows which CDS elements it can only address
-// 		Extensional Lists vs. Intensional Conditions
-// 		Intensional Conditions would have to be part of a Breadth-First or Depth-First traversal,
-// 		then every node would be compared against the conditions, and if it passed, would be
-// 		considered acccessible by the UI.
-// 		Since these complete-traversal checks could be computationally expensive to perform everytime
-// 		we want to execute an access procedure, we instead will prefer the creation of extensional
-// 		lists that are attached to a UI that can be checked.
-//		However, there is a special case where a UI refers to the entire CDS: in which case we will
-//		use a special denotation that any node or edge is accessible with that UI.
-
 /* Sub-graphs are non-disjoint collections of nodes and edges */
 type Subgraph struct {
 	Nodes []int

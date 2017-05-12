@@ -5,7 +5,7 @@ package fabric
 	generating UIs from a CDS.
 */
 type UI interface {
-	CDS
+	CDS // CDS Access
 	NodeCount() int
 	EdgeCount() int
 }

@@ -23,14 +23,6 @@ type DGNode struct {
 	State Signal
 }
 
-func (u *DGNode) ID() int {
-	return u.Id
-}
-
-func (u *DGNode) NewID() int {
-	// TODO: be able to assign the node a new Id
-}
-
 // TODO: differentiate between UI nodes, temporal nodes, and virtual nodes
 //		UI nodes: list of CDS nodes, list of allowed Access Types, Invariants per Access Type
 //		let's not forget that a "Node" IS a thread (technically) -- a node here is for global bookkeeping
@@ -39,7 +31,6 @@ func (u *DGNode) NewID() int {
 //		spawn temporal threads from each UI thread (?) -- since they are permanent
 //		each UI thread will have an "interally global" temporal DAG Graph structure
 // TODO: will need a UI uniqueness verification (for CDS node reference)
-// TODO: how will we define a "CDS node"?
 
 // NewGraph creates a new empty graph
 func NewGraph() *Graph {
@@ -139,4 +130,9 @@ func (g *Graph) AppendSubGraph(graph Graph) {
 // NOTE: this method cannot be used on UI DDAGs
 func (g *Graph) RemoveSubGraph(nodes []int) {
 	// TODO: removes list of nodes and all their edges (that they are sources for)
+}
+
+// UI Uniquness Verification
+func (g *graph) UniquenessVerification() bool {
+	// TODO: verify that all UIs in the UI dependency graph are 'totality-unique'
 }
