@@ -1,11 +1,5 @@
 package fabric
 
-// Example of a CDS: https://golang.org/src/container/list/list.go
-// TODO: Convert Element to satisfy Node Interface type
-//		then convert the list object to satisfy CDS Interface
-//		note that elements should be wrapped to have actual integer IDs
-//		that can be returned with the ID() method.
-
 // wrap data structure elements to become generic CDS Nodes
 type Node interface {
 	ID() int // returns node id

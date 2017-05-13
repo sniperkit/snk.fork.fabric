@@ -29,7 +29,8 @@ func (s *Subgraph) EdgeCount() int {
 }
 
 /*
-	Branches are all nodes and edges for a particuliar branch (usually of a tree graph)
+	Branches are all nodes and edges for a particuliar branch
+	(usually of a tree graph)
 	A branch is technically a sub-graph as well.
 */
 type Branch struct {

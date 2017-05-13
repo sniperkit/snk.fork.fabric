@@ -132,7 +132,7 @@ func (g *Graph) RemoveSubGraph(nodes []int) {
 	// TODO: removes list of nodes and all their edges (that they are sources for)
 }
 
-// UI Uniquness Verification
+// UI Uniqueness Verification
 func (g *graph) UniquenessVerification() bool {
 	// TODO: verify that all UIs in the UI dependency graph are 'totality-unique'
 }

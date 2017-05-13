@@ -1,6 +1,7 @@
 package main
 
-// NOTE: this is based on a Go package found here: https://golang.org/src/container/list/list.go
+// NOTE: this is based on a Go package:
+// https://golang.org/src/container/list/list.go
 
 import (
 	"log"
@@ -35,11 +36,13 @@ func NewList() *list {
 }
 
 func (l *list) ListNodes() (fabric.NodeList, error) {
-	// TODO: traverse list and wrap each element as an elementNode, and return elementNode slice
+	// TODO: traverse list and wrap each element as an elementNode,
+	// and return elementNode slice
 }
 
 func (l *list) ListEdges(nodes fabric.NodeList) (fabric.EdgesMap, error) {
-	// TODO: traverse NodeList add each Node as a Key, and its next and previous elements in []int slice
+	// TODO: traverse NodeList add each Node as a Key, and its next
+	// and previous elements in []int slice
 }
 
 func main() {
