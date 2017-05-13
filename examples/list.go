@@ -1,6 +1,6 @@
 package main
 
-// NOTE: this is based on a Go package:
+// NOTE: this is based on a doubly-linked ring Go package:
 // 		https://golang.org/src/container/list/list.go
 
 import (
@@ -11,7 +11,7 @@ import (
 
 type Element struct {
 	next, prev *Element
-	list       *List
+	list       *Ring
 	Value      interface{}
 }
 
@@ -27,23 +27,23 @@ func (e *ElementNode) ID() int {
 }
 
 // list satisfies fabric CDS interface
-type List struct {
+type Ring struct {
 	Root Element
 	Len  int
 }
 
-func NewList() *List {
-	return &List{}
+func NewRing() *Ring {
+	return &Ring{}
 }
 
-func (l *List) ListNodes() (fabric.NodeList, error) {
+func (r *Ring) ListNodes() (fabric.NodeList, error) {
 	var nl fabric.NodeList
 	// TODO: traverse list and wrap each element as an elementNode,
 	// and return elementNode slice
 	return nl, nil
 }
 
-func (l *List) ListEdges(nodes fabric.NodeList) (fabric.EdgeList, error) {
+func (r *Ring) ListEdges(nodes fabric.NodeList) (fabric.EdgeList, error) {
 	var el fabric.EdgeList
 	// TODO: traverse NodeList add each Node as a Key, and its next
 	// and previous elements in []int slice
@@ -53,14 +53,14 @@ func (l *List) ListEdges(nodes fabric.NodeList) (fabric.EdgeList, error) {
 
 func main() {
 
-	var myList List
+	myRing := NewRing()
 
-	nodes, err := myList.ListNodes()
+	nodes, err := myRing.ListNodes()
 	if err != nil {
 		log.Printf("Error while traversing CDS and creating node objects: ", err)
 	}
 
-	edges, err := myList.ListEdges(nodes)
+	edges, err := myRing.ListEdges(nodes)
 	if err != nil {
 		log.Printf("Error while adding edges to Edges Map: ", err)
 	}
