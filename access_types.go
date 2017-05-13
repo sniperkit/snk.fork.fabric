@@ -5,3 +5,4 @@ package fabric
 // TODO: determine if this is a complete function signature
 //		for an AccessProcedure.
 type AccessProcedure func(DGNode)
+type ProceduresList []AccessProcedure

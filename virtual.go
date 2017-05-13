@@ -14,5 +14,6 @@ const (
 
 type Virtual interface {
 	UI
+	ListProcedures() ProceduresList
 	Lifecycle() Life
 }
