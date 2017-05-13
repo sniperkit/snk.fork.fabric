@@ -58,7 +58,7 @@ func (g *Graph) CycleDetect() bool {
 
 	for _, v := range g.Nodes {
 		if !contains(done, v.Id) {
-			result, done = g.cycleDfs(v.Id, seen, done)
+			result, _ := g.cycleDfs(v.Id, seen, done)
 			if result {
 				return true
 			}
@@ -81,11 +81,11 @@ func (g *Graph) cycleDfs(start int, seen, done []int) (bool, []int) {
 			continue
 		}
 
-		if contains(seen, i) {
+		if contains(seen, v) {
 			return true, done
 		}
 
-		if g.cycleDfs(v, seen, done) {
+		if result, done := g.cycleDfs(v, seen, done); result {
 			return true, done
 		}
 	}
@@ -138,7 +138,8 @@ func (g *Graph) RemoveSubGraph(nodes []int) {
 // when creating the UI dependency graph; can be called
 // with the creation of each UI if needed for more "real-time"
 // verification.
-func (g *graph) UniquenessVerification() bool {
+func (g *Graph) UniquenessVerification() bool {
 	// TODO: verify that all UIs in the UI dependency
 	// 		 graph are 'totality-unique'.
+	return false
 }

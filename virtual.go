@@ -9,12 +9,10 @@ type Life int
 const (
 	Idle Life = iota
 	Running
-	Complete
+	Finished
 )
 
 type Virtual interface {
 	UI
-	NodeCount() int
-	EdgeCount() int
 	Lifecycle() Life
 }

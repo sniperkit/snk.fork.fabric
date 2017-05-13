@@ -23,7 +23,7 @@ func (s *Subgraph) NodeCount() int {
 
 func (s *Subgraph) EdgeCount() int {
 	var total int
-	for i, v := range s.Edges {
+	for _, v := range s.Edges {
 		total += len(v)
 	}
 	return total
@@ -40,6 +40,8 @@ type Branch struct {
 }
 
 func NewBranch(root int) *Branch {
+	var nodes []int
+	var edges map[int][]int
 	// TODO: grab all children nodes recursively
 	return &Branch{
 		Nodes: nodes,
@@ -53,7 +55,7 @@ func (b *Branch) NodeCount() int {
 
 func (b *Branch) EdgeCount() int {
 	var total int
-	for i, v := range b.Edges {
+	for _, v := range b.Edges {
 		total += len(v)
 	}
 	return total
@@ -85,7 +87,7 @@ func (p *Partition) NodeCount() int {
 
 func (p *Partition) EdgeCount() int {
 	var total int
-	for i, v := range p.Edges {
+	for _, v := range p.Edges {
 		total += len(v)
 	}
 	return total
@@ -112,7 +114,7 @@ func (s *Subset) NodeCount() int {
 
 func (s *Subset) EdgeCount() int {
 	var total int
-	for i, v := range s.Edges {
+	for _, v := range s.Edges {
 		total += len(v)
 	}
 	return total
@@ -133,12 +135,15 @@ func NewDisjoint(nodes []int, edges map[int][]int) *Disjoint {
 
 // UICompose takes a list of UI CDS graphs and composes them into a new single disjoint
 func UICompose(graphs []*UI) *Disjoint {
+	dj := &Disjoint{}
+
 	// TODO: Create a disjoint from a list of sub-graphs, branches, other disjoints, etc.
 	// 		add nodes to list and verify uniqueness of list (as each node is added)
 	// 		add edges to map and verify each nodes (key) edge list is unique (as we are adding edges)
 	// TODO: a possible optimization could be checking the uniqueness of each edge list ONCE after
 	// 		all edges have been added, but ONLY for nodes that have had edges added to them,
 	// 		and just create a new unique edge list for each of these nodes.
+	return dj
 }
 
 func (d *Disjoint) NodeCount() int {
@@ -147,7 +152,7 @@ func (d *Disjoint) NodeCount() int {
 
 func (d *Disjoint) EdgeCount() int {
 	var total int
-	for i, v := range d.Edges {
+	for _, v := range d.Edges {
 		total += len(v)
 	}
 	return total
