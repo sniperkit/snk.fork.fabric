@@ -1,7 +1,7 @@
 package main
 
 // NOTE: this is based on a Go package:
-// https://golang.org/src/container/list/list.go
+// 		https://golang.org/src/container/list/list.go
 
 import (
 	"log"
@@ -18,7 +18,8 @@ type element struct {
 // elementNode satisfies fabric Node interface
 type elementNode struct {
 	element
-	Id int
+	Id        int
+	Immutable bool
 }
 
 func (e *elementNode) ID() int {
@@ -59,6 +60,7 @@ func main() {
 		log.Printf("Error while adding edges to Edges Map: ", err)
 	}
 
-	// TODO: now we can add nodes and edges as needed to a UI object
+	// TODO: now we can add nodes and edges as needed to a UI
+	//		object.
 
 }

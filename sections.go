@@ -8,7 +8,8 @@ type Subgraph struct {
 
 func NewSubgraph(nodes []int) *Subgraph {
 
-	// TODO: will grab all edges from nodes that connect to other nodes that are in our list
+	// TODO: will grab all edges from nodes that connect to
+	//		other nodes that are in our list.
 
 	return &Subgraph{
 		Nodes: nodes,
@@ -68,8 +69,9 @@ type Partition struct {
 }
 
 func NewPartition(start, end int) *Partition {
-	// TODO: adds all nodes between and including the start and end node
-	// will also grab all edges for these nodes
+	// TODO: adds all nodes between and including the start
+	//		and end node; will also grab all edges for these
+	//		nodes.
 	var nodes []int
 	return &Partition{
 		Nodes: nodes,
@@ -96,7 +98,8 @@ type Subset struct {
 }
 
 func NewSubset(nodes []int) *Subset {
-	// TODO: grab all (and only all) edges that are connected to a node in the list of nodes supplied
+	// TODO: grab all (and only all) edges that are connected
+	//		to a node in the list of nodes supplied.
 	return &Subset{
 		Nodes: nodes,
 		Edges: make(map[int][]int),

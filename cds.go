@@ -3,10 +3,12 @@ package fabric
 // wrap data structure elements to become generic CDS Nodes
 type Node interface {
 	ID() int // returns node id
+	Immutable() bool
 }
 
 type NodeList []Node
 
+// REFACTOR: Determine how to add an immutable boolean to an edge
 type EdgesMap map[Node][]Node
 
 // add these methods to data structure objects to use as CDS
@@ -16,7 +18,8 @@ type CDS interface {
 }
 
 /*
-	DS = Data Structure; used when a UI will have access to entire CDS
+	DS = Data Structure; used when a UI will have
+	access to entire CDS.
 */
 type DS struct {
 	Nodes []int

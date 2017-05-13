@@ -124,15 +124,21 @@ func (g *Graph) AppendSubGraph(graph Graph) {
 	// TODO:
 	// 		add all nodes in new graph to existing graph
 	// 		add all edges in new graph to existing graph
-	// 		cycle detection on new total graph
+	// 		cycle detection on new total graph.
 }
 
 // NOTE: this method cannot be used on UI DDAGs
 func (g *Graph) RemoveSubGraph(nodes []int) {
-	// TODO: removes list of nodes and all their edges (that they are sources for)
+	// TODO: removes list of nodes and all their edges
+	//		(that they are sources for).
 }
 
-// UI Uniqueness Verification
+// UI Uniqueness Verification;
+// slow-running processs, should only be called once
+// when creating the UI dependency graph; can be called
+// with the creation of each UI if needed for more "real-time"
+// verification.
 func (g *graph) UniquenessVerification() bool {
-	// TODO: verify that all UIs in the UI dependency graph are 'totality-unique'
+	// TODO: verify that all UIs in the UI dependency
+	// 		 graph are 'totality-unique'.
 }
