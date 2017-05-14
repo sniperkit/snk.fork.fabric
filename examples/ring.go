@@ -51,6 +51,9 @@ func (r *Ring) ListEdges(nodes fabric.NodeList) (fabric.EdgeList, error) {
 	return el, nil
 }
 
+// TODO: Will need an initialization function that creates all
+//		dependency graph permanent node assignments and verifications.
+
 func main() {
 
 	myRing := NewRing()

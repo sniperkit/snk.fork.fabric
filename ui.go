@@ -8,6 +8,8 @@ type UI interface {
 	CDS // CDS Access
 	NodeCount() int
 	EdgeCount() int
+	Dependents() []UI
+	Dependencies() []UI
 }
 
 // FIXME: UIs are not necessarily immutable,
