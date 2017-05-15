@@ -15,19 +15,46 @@ type Element struct {
 	Value      interface{}
 }
 
+type ElementEdge struct {
+	Id          int
+	Source      ElementNode
+	Destination ElementNode
+	Imm         bool
+}
+
+func (e *ElementEdge) ID() {
+	return e.ID()
+}
+
+func (e *ElementEdge) Source() ElementNode {
+	return e.Source()
+}
+
+func (e *ElementEdge) Destination() ElementNode {
+	return e.Destination()
+}
+
+func (e *ElementEdge) Immutable() bool {
+	return e.Imm
+}
+
 // elementNode satisfies fabric Node interface
 type ElementNode struct {
-	Element   // NOTE: if an Element struct did not contain information on edges, we could have put an Edges field in this Node struct
-	Id        int
-	Immutable bool
+	Element // NOTE: if an Element struct did not contain information on edges, we could have put an Edges field in this Node struct
+	Edges   []ElementEdge
+	Id      int
+	Imm     bool
 }
 
 func (e *ElementNode) ID() int {
 	return e.Id
 }
 
-// TODO: add Immutable method to ElementNode and
-//		create edges in main function differently,
+func (e *ElementNode) Immutable() bool {
+	return e.Imm
+}
+
+// TODO: create edges in main function differently,
 //		will need an edge object with methods
 
 // list satisfies fabric CDS interface
@@ -43,14 +70,16 @@ func NewRing() *Ring {
 func (r *Ring) ListNodes() (fabric.NodeList, error) {
 	var nl fabric.NodeList
 	// TODO: traverse list and wrap each element as an elementNode,
-	// and return elementNode slice
+	//		add edges to ElementNode with Ids
+	// 		and return elementNode slice
 	return nl, nil
 }
 
 func (r *Ring) ListEdges(nodes fabric.NodeList) (fabric.EdgeList, error) {
 	var el fabric.EdgeList
-	// TODO: traverse NodeList add each Node as a Key, and its next
-	// and previous elements in []int slice
+	// TODO: traverse NodeList add each Nodes edge to edge slice
+	//		check that edge slice does not already contain edge ID
+	// 		return edge lsit.
 
 	return el, nil
 }
