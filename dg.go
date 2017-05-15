@@ -18,9 +18,11 @@ type Graph struct {
 }
 
 // Dependency Graph Node
-type DGNode struct {
-	Id    int
-	State Signal
+type DGNode interface {
+	Id() int
+	State() Signal
+	NodeCount() int
+	EdgeCount() int
 }
 
 // TODO: differentiate between UI nodes, temporal nodes, and virtual nodes

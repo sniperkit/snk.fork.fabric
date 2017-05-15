@@ -5,14 +5,6 @@ package fabric
 //		assignments, etc. virtual nodes will need a
 //		lifecycle / lifespan.
 
-type Life int
-
-const (
-	Idle Life = iota
-	Running
-	Finished
-)
-
 // NOTE: Virtual Dependency Graph Nodes can only have other
 //		VDG nodes as dependents or dependencies
 type Virtual interface {
@@ -20,7 +12,6 @@ type Virtual interface {
 	Dependents() []Virtual
 	Dependencies() []Virtual
 	ListProcedures() ProceduresList
-	Lifecycle() Life
 	IsRoot() bool // specifies whether VDG node is root node or not
 }
 

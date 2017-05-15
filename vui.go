@@ -5,5 +5,4 @@ type VUI interface {
 	Dependents() []Node
 	Dependencies() []Node
 	ListProcedures() ProceduresList
-	Lifecycle() Life
 }
