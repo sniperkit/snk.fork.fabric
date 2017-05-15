@@ -26,6 +26,10 @@ func (e *ElementNode) ID() int {
 	return e.Id
 }
 
+// TODO: add Immutable method to ElementNode and
+//		create edges in main function differently,
+//		will need an edge object with methods
+
 // list satisfies fabric CDS interface
 type Ring struct {
 	Root Element
