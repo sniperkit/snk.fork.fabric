@@ -1,17 +1,16 @@
 package fabric
 
-// TODO: figure out the types of virtuals and what each virtual
-//		interface will require in terms of UI or Temporal Node
-//		assignments, etc. virtual nodes will need a
-//		lifecycle / lifespan.
+type VDG interface {
+	Root() Virtual
+	ListNodes() []Virtual
+}
 
 // NOTE: Virtual Dependency Graph Nodes can only have other
 //		VDG nodes as dependents or dependencies
 type Virtual interface {
-	UI
+	DGNode
 	Dependents() []Virtual
 	Dependencies() []Virtual
-	ListProcedures() ProceduresList
 	IsRoot() bool // specifies whether VDG node is root node or not
 }
 

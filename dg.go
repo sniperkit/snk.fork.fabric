@@ -8,43 +8,34 @@ const (
 	Complete
 	Abort
 	AbortRetry
-	// PartialAbort
+	// TODO: PartialAbort (??)
 )
+
+// Dependency Graph Node
+// every DGNode has an id, a state, and a set of Access Procedures
+type DGNode interface {
+	ID() int
+	State() Signal
+	ListProcedures() []ProceduresList
+}
 
 // Graph can be either UI DDAG, Temporal DAG or VDG
 type Graph struct {
 	Nodes []DGNode
-	Edges map[int][]int // each node (id) has a list of node ids that it points too
+	Edges map[DGNode][]DGNode // each node (id) has a list of node ids that it points too
 }
-
-// Dependency Graph Node
-type DGNode interface {
-	Id() int
-	State() Signal
-	NodeCount() int
-	EdgeCount() int
-}
-
-// TODO: differentiate between UI nodes, temporal nodes, and virtual nodes
-//		UI nodes: list of CDS nodes, list of allowed Access Types, Invariants per Access Type
-//		let's not forget that a "Node" IS a thread (technically) -- a node here is for global bookkeeping
-//		So, a thread will be either a UI thread, a temporal thread, or a virtual thread
-//		still though, it would be best to assign a thread a "UI node" (using a global assignment function)
-//		spawn temporal threads from each UI thread (?) -- since they are permanent
-//		each UI thread will have an "interally global" temporal DAG Graph structure
-// TODO: will need a UI uniqueness verification (for CDS node reference)
 
 // NewGraph creates a new empty graph
 func NewGraph() *Graph {
 	var nodes []DGNode
 	return &Graph{
 		Nodes: nodes,
-		Edges: make(map[int][]int),
+		Edges: make(map[DGNode][]DGNode),
 	}
 }
 
 // GenerateGraph will create a graph given a list of nodes and map of edges
-func GenerateGraph(nodes []DGNode, edges map[int][]int) *Graph {
+func GenerateGraph(nodes []DGNode, edges map[DGNode][]DGNode) *Graph {
 	// TODO: should we just be supplied a list of node ids,
 	// 		 and then generate nodes in a Waiting State (?)
 	return &Graph{
@@ -55,12 +46,12 @@ func GenerateGraph(nodes []DGNode, edges map[int][]int) *Graph {
 
 // CycleDetect will check whether a graph has cycles or not
 func (g *Graph) CycleDetect() bool {
-	var seen []int
-	var done []int
+	var seen []DGNode
+	var done []DGNode
 
 	for _, v := range g.Nodes {
-		if !contains(done, v.Id) {
-			result, _ := g.cycleDfs(v.Id, seen, done)
+		if !contains(done, v) {
+			result, _ := g.cycleDfs(v, seen, done)
 			if result {
 				return true
 			}
@@ -70,12 +61,12 @@ func (g *Graph) CycleDetect() bool {
 }
 
 // GetAdjacents will return the list of nodes a supplied node points too
-func (g *Graph) GetAdjacents(node int) []int {
+func (g *Graph) GetAdjacents(node DGNode) []DGNode {
 	return g.Edges[node]
 }
 
 // Recursive Depth-First-Search; used for Cycle Detection
-func (g *Graph) cycleDfs(start int, seen, done []int) (bool, []int) {
+func (g *Graph) cycleDfs(start DGNode, seen, done []DGNode) (bool, []DGNode) {
 	seen = append(seen, start)
 	adj := g.Edges[start]
 	for _, v := range adj {
@@ -97,28 +88,26 @@ func (g *Graph) cycleDfs(start int, seen, done []int) (bool, []int) {
 }
 
 // NOTE: this method cannot be used on UI DDAGs
-func (g *Graph) RemoveNode(node int) {
+func (g *Graph) RemoveNode(node DGNode) {
 	// TODO:
 	// 		remove node from node list
 	// 		remove all of nodes edges from edges map
 }
 
-// TODO: determine how Node IDs should be generated? Just incrementally?
-
 // Does append node even need an argument?
 // should this just generate a node id and add it?
-func (g *Graph) AppendNode(node int) {
+func (g *Graph) AppendNode(node DGNode) {
 	// TODO: add node to nodes list
 	// 		verify that node id is not already in list
 	// 		verify that CDS sub-graph is not the same as in other UIs
 }
 
 // AppendEdge adds an edge that points from dependent to dependency
-func (g *Graph) AppendEdge(source, dest int) {
+func (g *Graph) AppendEdge(source, dest DGNode) {
 	// TODO: add an edge to edges map which is source dependent on destination
 }
 
-func (g *Graph) RemoveEdge(source, dest int) {
+func (g *Graph) RemoveEdge(source, dest DGNode) {
 	// TODO: removes the edge between source and dest in the edges map
 }
 
@@ -130,7 +119,7 @@ func (g *Graph) AppendSubGraph(graph Graph) {
 }
 
 // NOTE: this method cannot be used on UI DDAGs
-func (g *Graph) RemoveSubGraph(nodes []int) {
+func (g *Graph) RemoveSubGraph(nodes []DGNode) {
 	// TODO: removes list of nodes and all their edges
 	//		(that they are sources for).
 }
@@ -144,4 +133,10 @@ func (g *Graph) UniquenessVerification() bool {
 	// TODO: verify that all UIs in the UI dependency
 	// 		 graph are 'totality-unique'.
 	return false
+}
+
+func (g *Graph) Coverage() bool {
+	// TODO: returns whether or not every node and edge is addressed
+	//		by at least one UI in our UI ddag.
+	return true
 }

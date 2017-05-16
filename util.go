@@ -1,8 +1,9 @@
 package fabric
 
-func contains(s []int, i int) bool {
+// contains checks if DGNode is already in DGNode slice or not
+func contains(s []DGNode, i DGNode) bool {
 	for _, v := range s {
-		if i == v {
+		if i.ID() == v.ID() {
 			return true
 		}
 	}

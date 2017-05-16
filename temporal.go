@@ -4,8 +4,6 @@ package fabric
 type Temporal interface {
 	DGNode
 	Root() UI
-	ListProcedures() []ProceduresList
-	Dependents() []Temporal
 	Dependencies() []Temporal
 }
 

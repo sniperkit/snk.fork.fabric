@@ -5,10 +5,19 @@ package fabric
 // TODO: determine if this is a complete function signature
 //		for an AccessProcedure.
 
-// TODO: Determine where we are going to specify invariants for an
-//		access procedure. We could probably do it in some sort of
-//		structure that is assigned to a depndency graph node.
-//		As every dependency graph node has a set of access procedures
-//		that it is allowed to perform.
+// FIXME:
+// An invariant is assigned to an Access Type that is assigned to
+// an UI.
+
+// Every Access Procedure has a set of invariants for some UI ...
+// This means that an Access Procedure should be "constructed" before
+// being assigned to a DGNode
+
 type AccessProcedure func(DGNode)
 type ProceduresList []AccessProcedure
+
+func CreateProcedure(s Section) AccessProcedure {
+	// TODO: creates a procedure with specified invariants
+
+	return func(d DGNode) {}
+}

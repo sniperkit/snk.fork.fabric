@@ -1,5 +1,10 @@
 package fabric
 
+type Section interface {
+	NodeCount() int
+	EdgeCount() int
+}
+
 /* Sub-graphs are non-disjoint collections of nodes and edges */
 type Subgraph struct {
 	Nodes []int
@@ -133,8 +138,8 @@ func NewDisjoint(nodes []int, edges map[int][]int) *Disjoint {
 	}
 }
 
-// UICompose takes a list of UI CDS graphs and composes them into a new single disjoint
-func UICompose(graphs []*UI) *Disjoint {
+// ComposeSections takes a list of UI CDS graphs and composes them into a new single disjoint
+func ComposeSections(graphs []*Section) *Disjoint {
 	dj := &Disjoint{}
 
 	// TODO: Create a disjoint from a list of sub-graphs, branches, other disjoints, etc.
