@@ -17,6 +17,9 @@ type DGNode interface {
 	ID() int
 	State() Signal
 	ListProcedures() []ProceduresList
+	Dependents() []DGNode
+	Dependencies() []DGNode
+	IsBoundary() bool
 }
 
 // Graph can be either UI DDAG, Temporal DAG or VDG

@@ -1,5 +1,6 @@
 package fabric
 
+// TODO: Finish specifying VDG interface
 type VDG interface {
 	Root() Virtual
 	ListNodes() []Virtual
@@ -9,8 +10,6 @@ type VDG interface {
 //		VDG nodes as dependents or dependencies
 type Virtual interface {
 	DGNode
-	Dependents() []Virtual
-	Dependencies() []Virtual
 	IsRoot() bool // specifies whether VDG node is root node or not
 }
 

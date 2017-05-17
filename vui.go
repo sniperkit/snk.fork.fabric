@@ -2,7 +2,6 @@ package fabric
 
 type VUI interface {
 	UI
-	Dependents() []VUI
 }
 
 // TODO: VUIs can be part of VUI Dependency Graphs

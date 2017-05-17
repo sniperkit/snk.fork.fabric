@@ -9,10 +9,6 @@ package fabric
 */
 type UI interface {
 	DGNode
-	UIDependencies() []UI
-	VUIDependencies() []VUI
-	TemporalDependencies() []Temporal
-	VDGDependencies() []VDG
 	Sections() Section
 	Unique() bool // specifies whether a UI is strictly unique or not
 }
