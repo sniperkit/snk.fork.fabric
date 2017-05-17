@@ -9,3 +9,8 @@ This might be useful for when we want too execute one atomic procedure, signal c
 Virtual Threads are often spawned by "routers" ...
 
 This code package is less of a "here are some functions and objects. Use them." And more of a "here are some interfaces. Implement them." And this allows the package to behave more as a design guidance tool rather than a strict dependency.
+
+
+## Code Generator
+
+- Provide a small DSL that can be used to generate boilerplate for projects that will be using the `fabric` package.

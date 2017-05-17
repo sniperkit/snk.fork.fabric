@@ -5,5 +5,3 @@ type Temporal interface {
 	DGNode
 	Root() UI
 }
-
-// TODO: will need a way to apply a partial ordering to Temporal Nodes

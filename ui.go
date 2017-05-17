@@ -9,6 +9,6 @@ package fabric
 */
 type UI interface {
 	DGNode
-	Sections() Section
+	Section() Section
 	Unique() bool // specifies whether a UI is strictly unique or not
 }

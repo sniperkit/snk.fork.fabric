@@ -3,7 +3,7 @@ package fabric
 // TODO: Finish specifying VDG interface
 type VDG interface {
 	Root() Virtual
-	ListNodes() []Virtual
+	ListNodes() VirtualNodes
 }
 
 // NOTE: Virtual Dependency Graph Nodes can only have other
@@ -12,6 +12,8 @@ type Virtual interface {
 	DGNode
 	IsRoot() bool // specifies whether VDG node is root node or not
 }
+
+type VirtualNodes []Virtual
 
 // NOTE: Virtual Dependency Graphs are always trees with a root node
 //		which is a dependency for multiple UIs. It represents that those

@@ -16,10 +16,10 @@ const (
 type DGNode interface {
 	ID() int
 	State() Signal
-	ListProcedures() []ProceduresList
+	ListProcedures() ProcedureList
 	Dependents() []DGNode
 	Dependencies() []DGNode
-	IsBoundary() bool
+	IsBoundary() bool // TODO: decide if this is necessary (??)
 }
 
 // Graph can be either UI DDAG, Temporal DAG or VDG
@@ -38,6 +38,7 @@ func NewGraph() *Graph {
 }
 
 // GenerateGraph will create a graph given a list of nodes and map of edges
+// TODO: how will this compare to Partial Orderings (??)
 func GenerateGraph(nodes []DGNode, edges map[DGNode][]DGNode) *Graph {
 	// TODO: should we just be supplied a list of node ids,
 	// 		 and then generate nodes in a Waiting State (?)
@@ -89,6 +90,11 @@ func (g *Graph) cycleDfs(start DGNode, seen, done []DGNode) (bool, []DGNode) {
 	done = append(done, start)
 	return false, done
 }
+
+// FIXME: It is important to note that adding a removing nodes
+//		will only be a thing for dynamic nodes, and that the
+//		permanent UI and temporal nodes will not be added or removed
+//		during the lifespan of the global dependency graph
 
 // NOTE: this method cannot be used on UI DDAGs
 func (g *Graph) RemoveNode(node DGNode) {

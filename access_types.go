@@ -1,19 +1,47 @@
 package fabric
 
-// Every Access Procedure has a set of invariants for some UI ...
-// This means that an Access Procedure should be "constructed" before
-// being assigned to a DGNode
-
-// TODO: Access Types can have priorities and can be used to create
-//		partial orderings for DGs.
-//		Access Types can be a generic thing like "write" type and have
-//		a list of access procedures which are "write" procedures. (!!)
-
-type AccessProcedure func(DGNode)
-type ProceduresList []AccessProcedure
-
-func CreateProcedure(s Section) AccessProcedure {
-	// TODO: creates a procedure with specified invariants
-
-	return func(d DGNode) {}
+// AccessType is the interface to define how an access procedure should
+// behave; Create an Access Procedure function signature type and add
+// these methods to it.
+type AccessType interface {
+	Name() string                       // the "class" of action (e.g. "read")
+	Priority() int                      // priorities are not a necessity but can be helpful
+	Commit() error                      // acidic transaction primitive, define how
+	Rollback() error                    // acidic transaction primitive
+	InvariantNodes(s *Section) NodeList // used to calculate which nodes will be invariant
+	InvariantEdges(s *Section) EdgeList // used to calculate which edges will be invariant
 }
+
+type ProcedureList []AccessType
+
+/*
+
+	Example:
+
+	type Procedure func(node) error
+
+	func (p *Procedure) Name() string {
+		// return class name
+	}
+
+	func (p *Procedure) Priority() int {
+		// calculate priority
+	}
+
+	func (p *Procedure) Commit() {
+		// commit sub-routine; when an operation completes
+	}
+
+	func (p *Procedure) Rollback() {
+		// rollback sub-routine; when
+	}
+
+	func (p *Procedure) InvariantNodes(s *Section) NodeList{
+		// calculate invariant nodes for a section
+	}
+
+	func (p *Procedure) InvariantEdges(s *Section) EdgeList{
+		// calculate invariant edges for a section
+	}
+
+*/
