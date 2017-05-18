@@ -5,20 +5,49 @@ type Section interface {
 	EdgeCount() int
 }
 
-/* Sub-graphs are non-disjoint collections of nodes and edges */
-type Subgraph struct {
-	Nodes []int
-	Edges map[int][]int
+/*
+	DS = Data Structure; used when a UI will have
+	access to entire CDS.
+*/
+
+type DS struct {
+	Nodes NodeList
+	Edges EdgeList
 }
 
-func NewSubgraph(nodes []int) *Subgraph {
+// TODO: accept CDS as arguement and return entire CDS
+//		as a section.
+func NewDS(nodes NodeList, edges EdgeList) *DS {
+	return &DS{
+		Nodes: nodes,
+		Edges: edges,
+	}
+}
+
+func (s *DS) NodeCount() int {
+	return len(s.Nodes)
+}
+
+func (s *DS) EdgeCount() int {
+	return len(s.Edges)
+}
+
+/* Sub-graphs are non-disjoint collections of nodes and edges */
+type Subgraph struct {
+	Nodes NodeList
+	Edges EdgeList
+}
+
+func NewSubgraph(nodes []Node) *Subgraph {
 
 	// TODO: will grab all edges from nodes that connect to
 	//		other nodes that are in our list.
 
+	var edges EdgeList
+
 	return &Subgraph{
 		Nodes: nodes,
-		Edges: make(map[int][]int),
+		Edges: edges,
 	}
 }
 
@@ -27,11 +56,7 @@ func (s *Subgraph) NodeCount() int {
 }
 
 func (s *Subgraph) EdgeCount() int {
-	var total int
-	for _, v := range s.Edges {
-		total += len(v)
-	}
-	return total
+	return len(s.Edges)
 }
 
 /*
@@ -40,13 +65,14 @@ func (s *Subgraph) EdgeCount() int {
 	A branch is technically a sub-graph as well.
 */
 type Branch struct {
-	Nodes []int
-	Edges map[int][]int
+	Nodes NodeList
+	Edges EdgeList
 }
 
-func NewBranch(root int) *Branch {
-	var nodes []int
-	var edges map[int][]int
+func NewBranch(root Node) *Branch {
+	var nodes NodeList
+	var edges EdgeList
+
 	// TODO: grab all children nodes recursively
 	return &Branch{
 		Nodes: nodes,
@@ -59,11 +85,7 @@ func (b *Branch) NodeCount() int {
 }
 
 func (b *Branch) EdgeCount() int {
-	var total int
-	for _, v := range b.Edges {
-		total += len(v)
-	}
-	return total
+	return len(b.Edges)
 }
 
 /*
@@ -71,18 +93,20 @@ func (b *Branch) EdgeCount() int {
 	(i.e. each node can only have at most 2 edges)
 */
 type Partition struct {
-	Nodes []int
-	Edges map[int][]int
+	Nodes NodeList
+	Edges EdgeList
 }
 
-func NewPartition(start, end int) *Partition {
+func NewPartition(start, end Node) *Partition {
 	// TODO: adds all nodes between and including the start
 	//		and end node; will also grab all edges for these
 	//		nodes.
-	var nodes []int
+	var nodes NodeList
+	var edges EdgeList
+
 	return &Partition{
 		Nodes: nodes,
-		Edges: make(map[int][]int),
+		Edges: edges,
 	}
 }
 
@@ -91,25 +115,23 @@ func (p *Partition) NodeCount() int {
 }
 
 func (p *Partition) EdgeCount() int {
-	var total int
-	for _, v := range p.Edges {
-		total += len(v)
-	}
-	return total
+	return len(p.Edges)
 }
 
 /* Subsets are used for generic node selection (but not generic edge selection) */
 type Subset struct {
-	Nodes []int
-	Edges map[int][]int
+	Nodes NodeList
+	Edges EdgeList
 }
 
-func NewSubset(nodes []int) *Subset {
+func NewSubset(nodes NodeList) *Subset {
 	// TODO: grab all (and only all) edges that are connected
 	//		to a node in the list of nodes supplied.
+	var edges EdgeList
+
 	return &Subset{
 		Nodes: nodes,
-		Edges: make(map[int][]int),
+		Edges: edges,
 	}
 }
 
@@ -118,20 +140,16 @@ func (s *Subset) NodeCount() int {
 }
 
 func (s *Subset) EdgeCount() int {
-	var total int
-	for _, v := range s.Edges {
-		total += len(v)
-	}
-	return total
+	return len(s.Edges)
 }
 
 /* Disjoints are a collection of arbitrary nodes and arbitrary edges */
 type Disjoint struct {
-	Nodes []int
-	Edges map[int][]int
+	Nodes NodeList
+	Edges EdgeList
 }
 
-func NewDisjoint(nodes []int, edges map[int][]int) *Disjoint {
+func NewDisjoint(nodes NodeList, edges EdgeList) *Disjoint {
 	return &Disjoint{
 		Nodes: nodes,
 		Edges: edges,
@@ -156,9 +174,5 @@ func (d *Disjoint) NodeCount() int {
 }
 
 func (d *Disjoint) EdgeCount() int {
-	var total int
-	for _, v := range d.Edges {
-		total += len(v)
-	}
-	return total
+	return len(d.Edges)
 }
