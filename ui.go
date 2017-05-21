@@ -6,9 +6,19 @@ package fabric
 
 	It is recommended that if the user wants to assign multiple
 	sections to a UI to use the ComposeSections() function.
+
+	This interface defintion satisfies both UI and VUI objects.
 */
 type UI interface {
 	DGNode
 	Section() Section
-	Unique() bool // specifies whether a UI is strictly unique or not
+	Unique() bool  // specifies whether a UI is *strictly* unique or not
+	Virtual() bool // specifies whether a UI is virtual or not
 }
+
+// NOTE: VUIs can be part of VUI Dependency Graphs
+//		but each VUI *must* have a lifespan shorter than its dependents.
+//		A VUI can have both real and virtual dependents and it can
+// 		have both real and virtual dependencies. The key is that all
+//		of its virtual dependencies must have lifespans shorter than
+//		it's lifespan.
