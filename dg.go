@@ -1,5 +1,9 @@
 package fabric
 
+import (
+	"reflect"
+)
+
 type Signal int
 
 const (
@@ -11,10 +15,20 @@ const (
 	// TODO: PartialAbort (??)
 )
 
+type NodeType int
+
+const (
+	UINode NodeType = iota
+	TemporalNode
+	VUINode
+	VirtualNode
+)
+
 // Dependency Graph Node
 // every DGNode has an id, a state, and a set of Access Procedures
 type DGNode interface {
 	ID() int
+	Type() NodeType // specifies whether node is UI, VUI, etc.
 	State() Signal
 	Priority() int // not necessary, but can be useful
 	ListProcedures() ProcedureList
@@ -47,6 +61,7 @@ func (d *DGNode) IsLeafBoundary() bool {
 
 // Graph can be either UI DDAG, Temporal DAG or VDG
 type Graph struct {
+	CDS
 	Nodes []DGNode
 	Edges map[DGNode][]DGNode // each node (id) has a list of node ids that it points too
 }
@@ -103,20 +118,85 @@ func (g *Graph) cycleDfs(start DGNode, seen, done []DGNode) (bool, []DGNode) {
 	return false, done
 }
 
-// UI Uniqueness Verification;
-// slow-running processs, should only be called once
-// when creating the UI dependency graph; can be called
-// with the creation of each UI if needed for more "real-time"
-// verification.
-func (g *Graph) UniquenessVerification() bool {
-	// TODO: verify that all UIs in the UI dependency
-	// 		 graph are 'totality-unique'.
-	return false
+// Totality-Uniqueness check for the UI nodes of a graph...
+// should only be called once when creating the UI dependency graph;
+// can be called with the creation of each UI if needed for
+// more "real-time" verification.
+func (g *Graph) TotalityUnique() bool {
+	// grab all UI nodes
+	uiSlice := make([]DGNode, 0)
+	for _, v := range g.Nodes {
+		if v.Type() == UINode {
+			uiSlice = append(uiSlice, v)
+		}
+	}
+
+	for i, n := range uiSlice {
+		// compare the UI to all other UIs
+		for i2, n2 := range g.Nodes {
+			if i != i2 {
+				// if UI is same as other UI return false
+				// i.e. graph is not totality-unique
+				if reflect.DeepEqual(n, n2) {
+					return false
+				}
+			}
+		}
+	}
+
+	return true
 }
 
-func (g *Graph) Coverage() bool {
+// Covered returns true if all CDS nodes and edges are covered
+func (g *Graph) Covered() bool {
 	// TODO: returns whether or not every node and edge is addressed
 	//		by at least one UI in our UI ddag.
+
+	// grab all UI nodes
+	uiSlice := make([]UI, 0)
+	for _, v := range g.Nodes {
+		if v.Type() == UINode {
+			uiSlice = append(uiSlice, v.(UI))
+		}
+	}
+
+	// grab all CDS nodes and edges
+	nodes := g.ListNodes()
+	edges := g.ListEdges()
+
+FIRST:
+	// for every node in the CDS
+	for _, v := range nodes {
+		// check that at least one UI contains it
+		for _, u := range uiSlice {
+			s := u.Section()
+			uiCDSNodes := s.ListNodes()
+			// if UI contains node; check next CDS node
+			if uiContainsNode(uiCDSNodes, v) {
+				continue FIRST
+			}
+		}
+		// if CDS node is checked in every UI and does not show up
+		return false
+	}
+
+SECOND:
+	// for every edge in the CDS
+	for _, v := range edges {
+		// check that at least one UI contains it
+		for _, u := range uiSlice {
+			s := u.Section()
+			uiCDSEdges := s.ListEdges()
+			// if UI contains edge; check next CDS edge
+			if uiContainsEdge(uiCDSEdges, v) {
+				continue SECOND
+			}
+		}
+
+		// if CDS edge is checked in every UI and does not show up
+		return false
+	}
+
 	return true
 }
 

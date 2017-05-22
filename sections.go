@@ -1,8 +1,8 @@
 package fabric
 
 type Section interface {
-	NodeCount() int
-	EdgeCount() int
+	ListNodes() NodeList
+	ListEdges() EdgeList
 }
 
 /*
@@ -24,12 +24,12 @@ func NewDS(nodes NodeList, edges EdgeList) *DS {
 	}
 }
 
-func (s *DS) NodeCount() int {
-	return len(s.Nodes)
+func (s *DS) ListNodes() NodeList {
+	return s.Nodes
 }
 
-func (s *DS) EdgeCount() int {
-	return len(s.Edges)
+func (s *DS) ListEdges() EdgeList {
+	return s.Edges
 }
 
 /* Sub-graphs are non-disjoint collections of nodes and edges */
@@ -51,12 +51,12 @@ func NewSubgraph(nodes []Node) *Subgraph {
 	}
 }
 
-func (s *Subgraph) NodeCount() int {
-	return len(s.Nodes)
+func (s *Subgraph) ListNodes() NodeList {
+	return s.Nodes
 }
 
-func (s *Subgraph) EdgeCount() int {
-	return len(s.Edges)
+func (s *Subgraph) ListEdges() EdgeList {
+	return s.Edges
 }
 
 /*
@@ -80,12 +80,12 @@ func NewBranch(root Node) *Branch {
 	}
 }
 
-func (b *Branch) NodeCount() int {
-	return len(b.Nodes)
+func (b *Branch) ListNodes() NodeList {
+	return b.Nodes
 }
 
-func (b *Branch) EdgeCount() int {
-	return len(b.Edges)
+func (b *Branch) ListEdges() EdgeList {
+	return b.Edges
 }
 
 /*
@@ -110,12 +110,12 @@ func NewPartition(start, end Node) *Partition {
 	}
 }
 
-func (p *Partition) NodeCount() int {
-	return len(p.Nodes)
+func (p *Partition) ListNodes() NodeList {
+	return p.Nodes
 }
 
-func (p *Partition) EdgeCount() int {
-	return len(p.Edges)
+func (p *Partition) ListEdges() EdgeList {
+	return p.Edges
 }
 
 /* Subsets are used for generic node selection (but not generic edge selection) */
@@ -135,12 +135,12 @@ func NewSubset(nodes NodeList) *Subset {
 	}
 }
 
-func (s *Subset) NodeCount() int {
-	return len(s.Nodes)
+func (s *Subset) ListNodes() NodeList {
+	return s.Nodes
 }
 
-func (s *Subset) EdgeCount() int {
-	return len(s.Edges)
+func (s *Subset) ListEdges() EdgeList {
+	return s.Edges
 }
 
 /* Disjoints are a collection of arbitrary nodes and arbitrary edges */
@@ -169,10 +169,10 @@ func ComposeSections(graphs []*Section) *Disjoint {
 	return dj
 }
 
-func (d *Disjoint) NodeCount() int {
-	return len(d.Nodes)
+func (d *Disjoint) ListNodes() NodeList {
+	return d.Nodes
 }
 
-func (d *Disjoint) EdgeCount() int {
-	return len(d.Edges)
+func (d *Disjoint) ListEdges() EdgeList {
+	return d.Edges
 }
