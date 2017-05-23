@@ -22,6 +22,8 @@ type Virtual interface {
 type VDG interface {
 	ID() int
 	Root() Virtual
+	ListNodes() []Virtual
+	ListEdges() map[Virtual][]Virtual
 	Space() []UI // Space() lists all (V)UIs that the VDG is associated to
 }
 
