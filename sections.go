@@ -1,35 +1,9 @@
 package fabric
 
+// NOTE: a CDS satisfies the Section interface
 type Section interface {
 	ListNodes() NodeList
 	ListEdges() EdgeList
-}
-
-/*
-	DS = Data Structure; used when a UI will have
-	access to entire CDS.
-*/
-
-type DS struct {
-	Nodes NodeList
-	Edges EdgeList
-}
-
-// TODO: accept CDS as arguement and return entire CDS
-//		as a section.
-func NewDS(nodes NodeList, edges EdgeList) *DS {
-	return &DS{
-		Nodes: nodes,
-		Edges: edges,
-	}
-}
-
-func (s *DS) ListNodes() NodeList {
-	return s.Nodes
-}
-
-func (s *DS) ListEdges() EdgeList {
-	return s.Edges
 }
 
 /* Sub-graphs are non-disjoint collections of nodes and edges */
@@ -38,7 +12,9 @@ type Subgraph struct {
 	Edges EdgeList
 }
 
-func NewSubgraph(nodes []Node) *Subgraph {
+// FIXME: Where to get edge information from
+//		may need to just pass in (expect) full CDS edge list ...
+func NewSubgraph(nodes NodeList) *Subgraph {
 
 	// TODO: will grab all edges from nodes that connect to
 	//		other nodes that are in our list.

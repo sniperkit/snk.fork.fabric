@@ -7,7 +7,7 @@ package fabric
 	It is recommended that if the user wants to assign multiple
 	sections to a UI to use the ComposeSections() function.
 
-	This interface defintion satisfies both UI and VUI objects.
+	This interface definition satisfies both UI and VUI objects.
 */
 type UI interface {
 	DGNode

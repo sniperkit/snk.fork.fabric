@@ -26,7 +26,7 @@ const (
 )
 
 // Dependency Graph Node
-// every DGNode has an id, a state, and a set of Access Procedures
+// every DGNode has an id, a Type, a state, and a set of Access Procedures
 type DGNode interface {
 	ID() int
 	Type() NodeType // specifies whether node is UI, VUI, etc.
@@ -150,9 +150,6 @@ func (g *Graph) TotalityUnique() bool {
 
 // Covered returns true if all CDS nodes and edges are covered
 func (g *Graph) Covered() bool {
-	// TODO: returns whether or not every node and edge is addressed
-	//		by at least one UI in our UI ddag.
-
 	// grab all UI nodes
 	uiSlice := make([]UI, 0)
 	for _, v := range g.Nodes {
@@ -251,11 +248,6 @@ func (g *Graph) RemoveVirtual(node Virtual) {
 	g.Nodes = newList
 }
 
-// FIXME: Virtual Edges will be dynamic and will cause a lot of
-//		slice copying (when a virtual node has a real dependent)
-//		for the real dependent node. This will especially hold true
-//		for when that real node has multiple virtual dependencies.
-
 // AppendEdge adds an edge that points from dependent to dependency
 func (g *Graph) AddVirtualEdge(source, dest DGNode) {
 	// Add edge to source node
@@ -311,7 +303,7 @@ func (g *Graph) Dependencies(n DGNode) []DGNode {
 // FIXME: Do we need this global VUI dependents check ??
 // TODO: Check that all VUIs dependents lists do not get shorter
 //		over the course of their lifespan. If a dependent has ended
-//		its lifecycle before a VUI finishes it's lifespan then the
+//		its lifecycle before a VUI finishes it's own lifespan then the
 //		VUI needs to abort its operation.
 func (g *Graph) CheckVUIDependents() bool {
 	// TODO: check the dependents of a VUI node to be sure

@@ -36,7 +36,7 @@ type VDG interface {
 /*
 	// Example:
 
-	// VDG definitions should ALWAYS encapsulate a graph.
+	// NOTE: VDG definitions should ALWAYS encapsulate a graph!!!
 	type MyVDG struct{
 		*fabric.Graph
 		Id int
