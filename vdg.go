@@ -27,7 +27,7 @@ type VDG interface {
 	Space() []UI // Space() lists all (V)UIs that the VDG is associated to
 }
 
-// IMPORTANT: VDGs will run independent of all other dependency graphs
+// IMPORTANT: **VDGs will run independent** of all other dependency graphs
 //		in other words, a VDG does not have any dependents or dependencies
 // 		on any (V)UIs! It simply has associations to (V)UIs. The purpose
 // 		of a VDG is to order temporary threads (even if they are

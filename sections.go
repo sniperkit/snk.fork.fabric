@@ -12,14 +12,23 @@ type Subgraph struct {
 	Edges EdgeList
 }
 
-// FIXME: Where to get edge information from
-//		may need to just pass in (expect) full CDS edge list ...
-func NewSubgraph(nodes NodeList) *Subgraph {
+// NewSubgraph will grab all edges from nodes that connect to
+// other nodes that are in our list.
+func NewSubgraph(nodes NodeList, c CDS) *Subgraph {
 
-	// TODO: will grab all edges from nodes that connect to
-	//		other nodes that are in our list.
+	edges := make(EdgeList, 0)
 
-	var edges EdgeList
+	for _, n := range nodes {
+		cdsEdges := c.ListEdges()
+		for _, e := range cdsEdges {
+			s := e.Source()
+			d := e.Destination()
+			if d.ID() == n.ID() && containsNode(nodes, s) {
+				edges = append(edges, e)
+			}
+		}
+
+	}
 
 	return &Subgraph{
 		Nodes: nodes,
@@ -45,16 +54,31 @@ type Branch struct {
 	Edges EdgeList
 }
 
-func NewBranch(root Node) *Branch {
-	var nodes NodeList
-	var edges EdgeList
+func NewBranch(root Node, c CDS) *Branch {
+	nodes := c.ListNodes()
+	edges := c.ListEdges()
 
 	// TODO: grab all children nodes recursively
+	// dfs()
+
 	return &Branch{
 		Nodes: nodes,
 		Edges: edges,
 	}
 }
+
+/*
+TODO:
+func dfs(root Node, seen []Node, done []Node, c CDS) []Node {
+	seen = append(seen, root)
+	edges := c.ListEdges()
+	// for each edge
+	//	check if edge contains root as source
+	// ...
+	//  if edge contains root as source, call dfs on destination
+
+}
+*/
 
 func (b *Branch) ListNodes() NodeList {
 	return b.Nodes
@@ -73,12 +97,13 @@ type Partition struct {
 	Edges EdgeList
 }
 
-func NewPartition(start, end Node) *Partition {
+func NewPartition(start, end Node, c CDS) *Partition {
 	// TODO: adds all nodes between and including the start
 	//		and end node; will also grab all edges for these
 	//		nodes.
-	var nodes NodeList
-	var edges EdgeList
+	nodes := c.ListNodes()
+	edges := c.ListEdges()
+	// TODO: recursive grab of nodes
 
 	return &Partition{
 		Nodes: nodes,
@@ -100,10 +125,20 @@ type Subset struct {
 	Edges EdgeList
 }
 
-func NewSubset(nodes NodeList) *Subset {
-	// TODO: grab all (and only all) edges that are connected
-	//		to a node in the list of nodes supplied.
-	var edges EdgeList
+// NewSubset grabs all (and only all) edges that are connected
+// to a node in the list of nodes supplied.
+func NewSubset(nodes NodeList, c CDS) *Subset {
+	cdsEdges := c.ListEdges()
+	edges := make(EdgeList, 0)
+	for _, n := range nodes {
+		for _, e := range cdsEdges {
+			if e.Source() == n || e.Destination() == n {
+				if !containsEdge(edges, e) {
+					edges = append(edges, e)
+				}
+			}
+		}
+	}
 
 	return &Subset{
 		Nodes: nodes,
@@ -132,17 +167,35 @@ func NewDisjoint(nodes NodeList, edges EdgeList) *Disjoint {
 	}
 }
 
-// ComposeSections takes a list of UI CDS graphs and composes them into a new single disjoint
+// ComposeSections takes a list of CDS graphs (sections) and composes them into a new single disjoint
 func ComposeSections(graphs []*Section) *Disjoint {
-	dj := &Disjoint{}
+	nodes := make(NodeList, 0)
+	edges := make(EdgeList, 0)
 
-	// TODO: Create a disjoint from a list of sub-graphs, branches, other disjoints, etc.
-	// 		add nodes to list and verify uniqueness of list (as each node is added)
-	// 		add edges to map and verify each nodes (key) edge list is unique (as we are adding edges)
-	// TODO: a possible optimization could be checking the uniqueness of each edge list ONCE after
-	// 		all edges have been added, but ONLY for nodes that have had edges added to them,
-	// 		and just create a new unique edge list for each of these nodes.
-	return dj
+	for _, g := range graphs {
+		gn := g.ListNodes()
+		ge := g.ListEdges()
+
+		// add graph nodes to Disjoint node list
+		for _, n := range gn {
+			if !containsNode(nodes, n) {
+				nodes = append(nodes, n)
+			}
+		}
+
+		// add graph edges to disjoint edge list
+		for _, e := range ge {
+			if !containsEdge(edges, e) {
+				edges = append(edges, e)
+			}
+		}
+
+	}
+
+	return &Disjoint{
+		Nodes: nodes,
+		Edges: edges,
+	}
 }
 
 func (d *Disjoint) ListNodes() NodeList {

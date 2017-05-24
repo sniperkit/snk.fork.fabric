@@ -9,6 +9,15 @@ import (
 	"github.com/JKhawaja/fabric"
 )
 
+// FIXME: How will we address the dynamics of the ring structure, since it is very likely
+//		that nodes in the structure will be added and removed very often.
+
+//		One possible solution: could be that we assign the entire ring to a UI, then we can
+//		assign each structural node to its own VUI. This will note the fact that any given
+//		structural node can be temporary relative to the overall data structure.
+
+//		The other idea: is that ...
+
 type Element struct {
 	next, prev *Element
 	list       *Ring
@@ -57,17 +66,19 @@ func (e *ElementNode) Immutable() bool {
 // TODO: create edges in main function differently,
 //		will need an edge object with methods
 
-// list satisfies fabric CDS interface
+// ring satisfies fabric CDS interface
 type Ring struct {
-	Root Element
-	Len  int
+	Root  Element
+	Len   int
+	Nodes fabric.NodeList
+	Edges fabric.EdgeList
 }
 
 func NewRing() *Ring {
 	return &Ring{}
 }
 
-func (r *Ring) ListNodes() (fabric.NodeList, error) {
+func (r *Ring) CreateNodes() error {
 	var nl fabric.NodeList
 	// TODO: traverse list and wrap each element as an elementNode,
 	//		add edges to ElementNode with Ids
@@ -75,13 +86,21 @@ func (r *Ring) ListNodes() (fabric.NodeList, error) {
 	return nl, nil
 }
 
-func (r *Ring) ListEdges(nodes fabric.NodeList) (fabric.EdgeList, error) {
+func (r *Ring) CreateEdges() error {
 	var el fabric.EdgeList
 	// TODO: traverse NodeList add each Nodes edge to edge slice
 	//		check that edge slice does not already contain edge ID
 	// 		return edge lsit.
 
 	return el, nil
+}
+
+func (r *Ring) ListNodes() fabric.NodeList {
+	return r.Nodes
+}
+
+func (r *Ring) ListEdges() fabric.EdgeList {
+	return r.Edges
 }
 
 // TODO: Will need an initialization function that creates all
@@ -91,18 +110,19 @@ func main() {
 
 	myRing := NewRing()
 
-	nodes, err := myRing.ListNodes()
+	err := myRing.CreateNodes()
 	if err != nil {
 		log.Printf("Error while traversing CDS and creating node objects: ", err)
 	}
 
-	edges, err := myRing.ListEdges(nodes)
+	err = myRing.CreateEdges(nodes)
 	if err != nil {
 		log.Printf("Error while adding edges to Edges Map: ", err)
 	}
 
-	log.Println(edges)
+	nodes := myRing.ListNodes()
+	edges := myRing.ListEdges()
 
-	// TODO: now we can add nodes and edges as needed to a UI
-	//		object.
+	log.Println(nodes)
+	log.Println(edges)
 }

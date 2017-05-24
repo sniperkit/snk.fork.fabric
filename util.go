@@ -10,7 +10,17 @@ func contains(s []DGNode, i DGNode) bool {
 	return false
 }
 
-func uiContainsNode(l NodeList, n Node) bool {
+func edgeContains(l EdgeList, e Edge) bool {
+	for _, v := range l {
+		if e.ID() == v.ID() {
+			return true
+		}
+	}
+	return false
+}
+
+// TODO: change to containsNode
+func containsNode(l NodeList, n Node) bool {
 	for _, v := range l {
 		if v.ID() == n.ID() {
 			return true
@@ -19,7 +29,8 @@ func uiContainsNode(l NodeList, n Node) bool {
 	return false
 }
 
-func uiContainsEdge(l EdgeList, e Edge) bool {
+// TODO: change to containsEdge
+func containsEdge(l EdgeList, e Edge) bool {
 	for _, v := range l {
 		if v.ID() == e.ID() {
 			return true

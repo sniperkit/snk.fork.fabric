@@ -170,7 +170,7 @@ FIRST:
 			s := u.Section()
 			uiCDSNodes := s.ListNodes()
 			// if UI contains node; check next CDS node
-			if uiContainsNode(uiCDSNodes, v) {
+			if containsNode(uiCDSNodes, v) {
 				continue FIRST
 			}
 		}
@@ -186,7 +186,7 @@ SECOND:
 			s := u.Section()
 			uiCDSEdges := s.ListEdges()
 			// if UI contains edge; check next CDS edge
-			if uiContainsEdge(uiCDSEdges, v) {
+			if containsEdge(uiCDSEdges, v) {
 				continue SECOND
 			}
 		}
