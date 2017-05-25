@@ -19,7 +19,6 @@ func edgeContains(l EdgeList, e Edge) bool {
 	return false
 }
 
-// TODO: change to containsNode
 func containsNode(l NodeList, n Node) bool {
 	for _, v := range l {
 		if v.ID() == n.ID() {
@@ -29,7 +28,6 @@ func containsNode(l NodeList, n Node) bool {
 	return false
 }
 
-// TODO: change to containsEdge
 func containsEdge(l EdgeList, e Edge) bool {
 	for _, v := range l {
 		if v.ID() == e.ID() {

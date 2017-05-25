@@ -4,4 +4,4 @@ import (
 	"github.com/JKhawaja/fabric"
 )
 
-/* Access Types */
+/* Single-UI Dependency Graph code */
