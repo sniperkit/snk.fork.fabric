@@ -55,11 +55,10 @@ type Branch struct {
 }
 
 func NewBranch(root Node, c CDS) *Branch {
-	nodes := c.ListNodes()
-	edges := c.ListEdges()
+	edges := make(EdgeList, 0)
+	nodes := make(NodeList, 0)
 
-	// TODO: grab all children nodes recursively
-	// dfs()
+	nodes, edges = dfs(root, nodes, edges, c)
 
 	return &Branch{
 		Nodes: nodes,
@@ -67,18 +66,26 @@ func NewBranch(root Node, c CDS) *Branch {
 	}
 }
 
-/*
-TODO:
-func dfs(root Node, seen []Node, done []Node, c CDS) []Node {
-	seen = append(seen, root)
-	edges := c.ListEdges()
-	// for each edge
-	//	check if edge contains root as source
-	// ...
-	//  if edge contains root as source, call dfs on destination
+func dfs(start Node, nodes NodeList, edges EdgeList, c CDS) (NodeList, EdgeList) {
+	// if node is not already in branch -- add
+	if !containsNode(nodes, start) {
+		nodes = append(nodes, start)
+	}
 
+	for _, e := range c.ListEdges() {
+		// for all edges in CDS with node as source
+		if e.Source() == start {
+			if !containsEdge(edges, e) {
+				// add edge to branch
+				edges = append(edges, e)
+				// for the destination node, add node and its edges to branch
+				nodes, edges = dfs(e.Destination(), nodes, edges, c)
+			}
+		}
+	}
+
+	return nodes, edges
 }
-*/
 
 func (b *Branch) ListNodes() NodeList {
 	return b.Nodes
@@ -98,17 +105,39 @@ type Partition struct {
 }
 
 func NewPartition(start, end Node, c CDS) *Partition {
-	// TODO: adds all nodes between and including the start
-	//		and end node; will also grab all edges for these
-	//		nodes.
-	nodes := c.ListNodes()
-	edges := c.ListEdges()
-	// TODO: recursive grab of nodes
+	nodes := make(NodeList, 0)
+	edges := make(EdgeList, 0)
+
+	nodes, edges = partDFS(start, end, nodes, edges, c)
 
 	return &Partition{
 		Nodes: nodes,
 		Edges: edges,
 	}
+}
+
+func partDFS(start, end Node, nodes NodeList, edges EdgeList, c CDS) (NodeList, EdgeList) {
+	// add node to partition nodes
+	if !containsNode(nodes, start) {
+		nodes = append(nodes, start)
+		if start.ID() == end.ID() {
+			return nodes, edges
+		}
+	}
+
+	for _, e := range c.ListEdges() {
+		// for all edges in CDS with node as source
+		if e.Source() == start {
+			if !containsEdge(edges, e) {
+				// add edge to branch
+				edges = append(edges, e)
+				// for the destination node, add node and its edge to branch
+				nodes, edges = partDFS(e.Destination(), end, nodes, edges, c)
+			}
+		}
+	}
+
+	return nodes, edges
 }
 
 func (p *Partition) ListNodes() NodeList {
@@ -168,7 +197,7 @@ func NewDisjoint(nodes NodeList, edges EdgeList) *Disjoint {
 }
 
 // ComposeSections takes a list of CDS graphs (sections) and composes them into a new single disjoint
-func ComposeSections(graphs []*Section) *Disjoint {
+func ComposeSections(graphs []Section) *Disjoint {
 	nodes := make(NodeList, 0)
 	edges := make(EdgeList, 0)
 

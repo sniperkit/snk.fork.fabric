@@ -83,16 +83,21 @@ func (r *Ring) CreateNodes() error {
 	// TODO: traverse list and wrap each element as an elementNode,
 	//		add edges to ElementNode with Ids
 	// 		and return elementNode slice
-	return nl, nil
+
+	r.Nodes = nl
+
+	return nil
 }
 
 func (r *Ring) CreateEdges() error {
 	var el fabric.EdgeList
 	// TODO: traverse NodeList add each Nodes edge to edge slice
 	//		check that edge slice does not already contain edge ID
-	// 		return edge lsit.
+	// 		return edge list.
 
-	return el, nil
+	r.Edges = el
+
+	return nil
 }
 
 func (r *Ring) ListNodes() fabric.NodeList {
