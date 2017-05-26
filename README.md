@@ -24,5 +24,11 @@ Make sure that all VDG operations are safe to operate independently from the mai
 
 In summation, using a VDG is making the following assumptions -- all access types that the VDG will be using are okay to be used without dependency management from our graph. As well as all VDG operations may occur at any given time independent of our global graph as well. They are simply a temporary secondary dependency graph that will operate on our CDS independent of our main graph.
 
+### Handling CDS Manipulation
 
+One possible answer is that the ordering of nodes as chosen by the developer should always be such that manipulation access procedures are ordered before or after a read or write e.g. the priority of a read and write procedure could be greater than the priority of a manipulation procedure.
+
+So, while it is possible to use fabric to perform dirty reads and writes, etc. It is not the purpose of fabric to be full-proof, but rather to empower the developer to more easily implement full-proof (as defined by the spec of the system) concurrency control in their software.
+
+Actually, the purpose of behavior avoidance is not to disallow a behavior from being designed into the system, but rather to be able to verify more easily that a certain behavior (or lack of behavior) exists in the system design.
 
