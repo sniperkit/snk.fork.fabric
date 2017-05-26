@@ -1,22 +1,11 @@
-package main
+package ring
 
 // NOTE: this is based on a doubly-linked ring Go package:
 // 		https://golang.org/src/container/list/list.go
 
 import (
-	"log"
-
 	"github.com/JKhawaja/fabric"
 )
-
-// FIXME: How will we address the dynamics of the ring structure, since it is very likely
-//		that nodes in the structure will be added and removed very often.
-
-//		One possible solution: could be that we assign the entire ring to a UI, then we can
-//		assign each structural node to its own VUI. This will note the fact that any given
-//		structural node can be temporary relative to the overall data structure.
-
-//		The other idea: is that ...
 
 type Element struct {
 	next, prev *Element
@@ -63,9 +52,6 @@ func (e *ElementNode) Immutable() bool {
 	return e.Imm
 }
 
-// TODO: create edges in main function differently,
-//		will need an edge object with methods
-
 // ring satisfies fabric CDS interface
 type Ring struct {
 	Root  Element
@@ -106,28 +92,4 @@ func (r *Ring) ListNodes() fabric.NodeList {
 
 func (r *Ring) ListEdges() fabric.EdgeList {
 	return r.Edges
-}
-
-// TODO: Will need an initialization function that creates all
-//		dependency graph permanent node assignments and verifications.
-
-func main() {
-
-	myRing := NewRing()
-
-	err := myRing.CreateNodes()
-	if err != nil {
-		log.Printf("Error while traversing CDS and creating node objects: ", err)
-	}
-
-	err = myRing.CreateEdges(nodes)
-	if err != nil {
-		log.Printf("Error while adding edges to Edges Map: ", err)
-	}
-
-	nodes := myRing.ListNodes()
-	edges := myRing.ListEdges()
-
-	log.Println(nodes)
-	log.Println(edges)
 }
