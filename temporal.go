@@ -4,8 +4,8 @@ package fabric
 // assigned to a particular UI.
 type Temporal interface {
 	DGNode
-	Root() UI
-	Virtual() bool
+	GetRoot() UI
+	IsVirtual() bool
 }
 
 /*
