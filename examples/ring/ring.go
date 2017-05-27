@@ -14,22 +14,22 @@ type Element struct {
 }
 
 type ElementEdge struct {
-	Id          int
-	Source      ElementNode
-	Destination ElementNode
-	Imm         bool
+	Id                 int
+	SourceElement      ElementNode
+	DestinationElement ElementNode
+	Imm                bool
 }
 
-func (e *ElementEdge) ID() {
-	return e.ID()
+func (e *ElementEdge) ID() int {
+	return e.Id
 }
 
 func (e *ElementEdge) Source() ElementNode {
-	return e.Source()
+	return e.SourceElement
 }
 
 func (e *ElementEdge) Destination() ElementNode {
-	return e.Destination()
+	return e.DestinationElement
 }
 
 func (e *ElementEdge) Immutable() bool {

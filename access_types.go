@@ -4,12 +4,12 @@ package fabric
 // behave; Create an Access Procedure function signature type and add
 // these methods to it.
 type AccessType interface {
-	Name() string                       // the "class" of action (e.g. "read")
-	Priority() int                      // priorities are not a necessity but can be helpful
-	Commit() error                      // acidic transaction primitive, define how
-	Rollback() error                    // acidic transaction primitive
-	InvariantNodes(s *Section) NodeList // used to calculate which nodes will be invariant
-	InvariantEdges(s *Section) EdgeList // used to calculate which edges will be invariant
+	Name() string                      // the "class" of action (e.g. "read")
+	Priority() int                     // priorities are not a necessity but can be helpful
+	Commit() error                     // acidic transaction primitive, define how
+	Rollback() error                   // acidic transaction primitive
+	InvariantNodes(s Section) NodeList // used to calculate which nodes will be invariant
+	InvariantEdges(s Section) EdgeList // used to calculate which edges will be invariant
 }
 
 type ProcedureList []AccessType
@@ -28,20 +28,26 @@ type ProcedureList []AccessType
 		// calculate priority
 	}
 
-	func (p *Procedure) Commit() {
+	func (p *Procedure) Commit() error {
 		// commit sub-routine; when an operation completes
+		return nil
 	}
 
-	func (p *Procedure) Rollback() {
+	func (p *Procedure) Rollback() error {
 		// rollback sub-routine; when
+		return nil
 	}
 
-	func (p *Procedure) InvariantNodes(s *Section) NodeList{
+	func (p *Procedure) InvariantNodes(s fabric.Section) fabric.NodeList{
 		// calculate invariant nodes for a section
+		var nl fabric.NodeList
+		return nl
 	}
 
-	func (p *Procedure) InvariantEdges(s *Section) EdgeList{
+	func (p *Procedure) InvariantEdges(s fabric.Section) fabric.EdgeList{
 		// calculate invariant edges for a section
+		var el fabric.NodeList
+		return el
 	}
 
 	// Now this is where we can create as many objects of Type
