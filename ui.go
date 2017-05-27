@@ -11,9 +11,9 @@ package fabric
 */
 type UI interface {
 	DGNode
-	Section() Section
-	Unique() bool  // specifies whether a UI is *strictly* unique or not
-	Virtual() bool // specifies whether a UI is virtual or not
+	GetSection() Section
+	IsUnique() bool  // specifies whether a UI is *strictly* unique or not (a UI will always have totality-uniqueness)
+	IsVirtual() bool // specifies whether a UI is virtual or not
 }
 
 // NOTE: VUIs can be part of VUI Dependency Graphs

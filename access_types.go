@@ -3,6 +3,10 @@ package fabric
 // AccessType is the interface to define how an access procedure should
 // behave; Create an Access Procedure function signature type and add
 // these methods to it.
+
+// IMPORTANT: AccessTypes should always return an error value as this
+//		will allow you to properly utilize the Commit() and Rollback()
+//		methods.
 type AccessType interface {
 	Name() string                      // the "class" of action (e.g. "read")
 	Priority() int                     // priorities are not a necessity but can be helpful

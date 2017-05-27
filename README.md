@@ -6,9 +6,7 @@ This code package is less of a "here are some functions and objects. Use them." 
 
 In other words: **the purpose of this package is to use it in creating your own CDS packages**. Another option is to take an existing data structure package and **fabric-ate** (hehe, get it?) a new package from it.
 
-One thing that this package does is enable a developer to turn any data structure implementation into a Concurrent Data Structure "Fabric-Friendly" package (or easily create a new CDS package out of the original data-structure code).
-
-## Code Generator (WIP)
+## Boilerplate Generator (WIP)
 
 - Provide a small DSL that can be used to generate boilerplate for projects that will be using the `fabric` package.
 
@@ -33,12 +31,3 @@ The answer to CDS manipulation is that the ordering of nodes as chosen by the de
 So, while it is possible to use fabric to perform dirty reads and writes, etc. It is not the purpose of fabric to be full-proof, but rather to empower the developer to more easily implement full-proof (as defined by the spec of the system) concurrency control in their software.
 
 Actually, the purpose of behavior avoidance is *not* to disallow a behavior from being designed into the system, but rather to be able to verify more easily that a certain behavior (or lack of behavior) exists in the system design.
-
-## Verifying Behaviors
-
-We could still use a formal verification section in the paper that briefly discusses using the ideas found in the paper (e.g. in the Fabric package) to verify that a certain CDS system (CDS + Accessing Processes) either maintains a certain defined behavior or avoids a certain defined behavior.
-
-The section will describe a rudimentary approach to: defining approaches to verification.
-
-For example, if we have a CDS system that we design using the `fabric` package (or a similar dependency) ...
-
