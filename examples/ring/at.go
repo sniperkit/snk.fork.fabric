@@ -6,13 +6,14 @@ import (
 
 /* Access Types */
 
-// NOTE: we are treating access types almost like classes of functions
-//		classes defined by some function type. There are numerous other
+// NOTE: we are treating access types almost like classes of functions.
+//		These classes are defined by some function type. There are numerous other
 //		classes we could add to our collection here.
-//		For example, we could have a function type for removing multiple
+
+//		For example: we could have a function type for removing multiple
 //		elements from the ring. Or, we could have function types for
-//		updating a value in an element, perhaps if the value is integers
-//		the functions of that type could be 'add' and 'subtract', etc.
+//		updating a value in an element e.g. if the value type is integer,
+//		the functions could be 'add' and 'subtract', etc.
 
 // Total-Invariance
 //	Next(); READ
