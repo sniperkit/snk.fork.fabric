@@ -67,6 +67,7 @@ func NewRing() *Ring {
 func (r *Ring) CreateNodes() error {
 	var nl fabric.NodeList
 	// TODO: traverse list and wrap each element as an elementNode,
+	// 		use DFS resursion to traverse nodes ...
 	//		add edges to ElementNode with Ids
 	// 		and return elementNode slice
 

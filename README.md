@@ -33,3 +33,13 @@ The answer to CDS manipulation is that the ordering of nodes as chosen by the de
 So, while it is possible to use fabric to perform dirty reads and writes, etc. It is not the purpose of fabric to be full-proof, but rather to empower the developer to more easily implement full-proof (as defined by the spec of the system) concurrency control in their software.
 
 Actually, the purpose of behavior avoidance is *not* to disallow a behavior from being designed into the system, but rather to be able to verify more easily that a certain behavior (or lack of behavior) exists in the system design.
+
+### Built-in Verifiers
+
+There are already some built-in verification methods in the fabric package. For dependency graphs we check things like:
+
+- `CycleDetect()`; which ensures that the graph is a DAG
+- `TotalityUnique()`; which ensures that all UIs are totality-unique
+- `Covered()`; which ensures that every node and edge in the CDS has been addressed
+- `CheckVUIDependents()`
+

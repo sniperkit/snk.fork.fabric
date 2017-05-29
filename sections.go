@@ -14,17 +14,20 @@ type Subgraph struct {
 
 // NewSubgraph will grab all edges from nodes that connect to
 // other nodes that are in our list.
-func NewSubgraph(nodes NodeList, c CDS) *Subgraph {
-
+func NewSubgraph(nodes NodeList, cp *CDS) *Subgraph {
+	c := *cp
 	edges := make(EdgeList, 0)
 
-	for _, n := range nodes {
+	for _, np := range nodes {
+		n := *np
 		cdsEdges := c.ListEdges()
-		for _, e := range cdsEdges {
-			s := e.Source()
-			d := e.Destination()
-			if d.ID() == n.ID() && containsNode(nodes, s) {
-				edges = append(edges, e)
+		for _, ep := range cdsEdges {
+			e := *ep
+			sp := e.Source()
+			dp := e.Destination()
+			d := *dp
+			if d.ID() == n.ID() && containsNode(nodes, sp) {
+				edges = append(edges, ep)
 			}
 		}
 
@@ -54,11 +57,11 @@ type Branch struct {
 	Edges EdgeList
 }
 
-func NewBranch(root Node, c CDS) *Branch {
+func NewBranch(root *Node, cp *CDS) *Branch {
 	edges := make(EdgeList, 0)
 	nodes := make(NodeList, 0)
 
-	nodes, edges = dfs(root, nodes, edges, c)
+	nodes, edges = dfs(root, nodes, edges, cp)
 
 	return &Branch{
 		Nodes: nodes,
@@ -66,20 +69,22 @@ func NewBranch(root Node, c CDS) *Branch {
 	}
 }
 
-func dfs(start Node, nodes NodeList, edges EdgeList, c CDS) (NodeList, EdgeList) {
+func dfs(start *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeList) {
+	c := *cp
 	// if node is not already in branch -- add
 	if !containsNode(nodes, start) {
 		nodes = append(nodes, start)
 	}
 
-	for _, e := range c.ListEdges() {
+	for _, ep := range c.ListEdges() {
+		e := *ep
 		// for all edges in CDS with node as source
 		if e.Source() == start {
-			if !containsEdge(edges, e) {
+			if !containsEdge(edges, ep) {
 				// add edge to branch
-				edges = append(edges, e)
+				edges = append(edges, ep)
 				// for the destination node, add node and its edges to branch
-				nodes, edges = dfs(e.Destination(), nodes, edges, c)
+				nodes, edges = dfs(e.Destination(), nodes, edges, cp)
 			}
 		}
 	}
@@ -104,11 +109,11 @@ type Partition struct {
 	Edges EdgeList
 }
 
-func NewPartition(start, end Node, c CDS) *Partition {
+func NewPartition(start, end *Node, cp *CDS) *Partition {
 	nodes := make(NodeList, 0)
 	edges := make(EdgeList, 0)
 
-	nodes, edges = partDFS(start, end, nodes, edges, c)
+	nodes, edges = partDFS(start, end, nodes, edges, cp)
 
 	return &Partition{
 		Nodes: nodes,
@@ -116,23 +121,27 @@ func NewPartition(start, end Node, c CDS) *Partition {
 	}
 }
 
-func partDFS(start, end Node, nodes NodeList, edges EdgeList, c CDS) (NodeList, EdgeList) {
+func partDFS(startp, endp *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeList) {
+	c := *cp
+	start := *startp
+	end := *endp
 	// add node to partition nodes
-	if !containsNode(nodes, start) {
-		nodes = append(nodes, start)
+	if !containsNode(nodes, startp) {
+		nodes = append(nodes, startp)
 		if start.ID() == end.ID() {
 			return nodes, edges
 		}
 	}
 
-	for _, e := range c.ListEdges() {
+	for _, ep := range c.ListEdges() {
+		e := *ep
 		// for all edges in CDS with node as source
-		if e.Source() == start {
-			if !containsEdge(edges, e) {
+		if e.Source() == startp {
+			if !containsEdge(edges, ep) {
 				// add edge to branch
-				edges = append(edges, e)
+				edges = append(edges, ep)
 				// for the destination node, add node and its edge to branch
-				nodes, edges = partDFS(e.Destination(), end, nodes, edges, c)
+				nodes, edges = partDFS(e.Destination(), endp, nodes, edges, cp)
 			}
 		}
 	}
@@ -156,14 +165,16 @@ type Subset struct {
 
 // NewSubset grabs all (and only all) edges that are connected
 // to a node in the list of nodes supplied.
-func NewSubset(nodes NodeList, c CDS) *Subset {
+func NewSubset(nodes NodeList, cp *CDS) *Subset {
+	c := *cp
 	cdsEdges := c.ListEdges()
 	edges := make(EdgeList, 0)
 	for _, n := range nodes {
-		for _, e := range cdsEdges {
+		for _, ep := range cdsEdges {
+			e := *ep
 			if e.Source() == n || e.Destination() == n {
-				if !containsEdge(edges, e) {
-					edges = append(edges, e)
+				if !containsEdge(edges, ep) {
+					edges = append(edges, ep)
 				}
 			}
 		}
@@ -197,11 +208,12 @@ func NewDisjoint(nodes NodeList, edges EdgeList) *Disjoint {
 }
 
 // ComposeSections takes a list of CDS graphs (sections) and composes them into a new single disjoint
-func ComposeSections(graphs []Section) *Disjoint {
+func ComposeSections(graphs []*Section) *Disjoint {
 	nodes := make(NodeList, 0)
 	edges := make(EdgeList, 0)
 
-	for _, g := range graphs {
+	for _, gp := range graphs {
+		g := *gp
 		gn := g.ListNodes()
 		ge := g.ListEdges()
 

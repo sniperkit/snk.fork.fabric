@@ -6,18 +6,20 @@ type Node interface {
 	Immutable() bool
 }
 
-type NodeList []Node
+// A list of references to each node in the CDS
+type NodeList []*Node
 
 // NOTE: for undirected edges, choice of source and destination
 //		are up to the developer.
 type Edge interface {
 	ID() int // returns edge id
-	Source() Node
-	Destination() Node
+	Source() *Node
+	Destination() *Node
 	Immutable() bool
 }
 
-type EdgeList []Edge
+// A list of references to each edge in the CDS
+type EdgeList []*Edge
 
 // add these methods to data structure objects to use as CDS
 type CDS interface {
