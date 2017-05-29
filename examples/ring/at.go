@@ -22,11 +22,13 @@ import (
 type ElementRead func(*Element) *Element
 
 func (r *ElementRead) Name() string {
-	return ""
+	var n string
+	return n
 }
 
 func (r *ElementRead) Priority() int {
-	return 0
+	var p int
+	return p
 }
 
 func (r *ElementRead) Commit() error {
@@ -56,13 +58,13 @@ func (r *ElementRead) InvariantEdges(s fabric.Section) fabric.EdgeList {
 type RingRead func(*Ring) *Element
 
 func (r *RingRead) Name() string {
-	return ""
-
+	var n string
+	return n
 }
 
 func (r *RingRead) Priority() int {
-	return 0
-
+	var p int
+	return p
 }
 
 func (r *RingRead) Commit() error {
@@ -89,13 +91,13 @@ func (r *RingRead) InvariantEdges(s fabric.Section) fabric.EdgeList {
 type ElementDelete func(*Element) interface{}
 
 func (e *ElementDelete) Name() string {
-	return ""
-
+	var n string
+	return n
 }
 
 func (e *ElementDelete) Priority() int {
-	return 0
-
+	var p int
+	return p
 }
 
 func (e *ElementDelete) Commit() error {
@@ -123,13 +125,13 @@ func (e *ElementDelete) InvariantEdges(s fabric.Section) fabric.EdgeList {
 type CreateElement func(interface{}) *Element
 
 func (c *CreateElement) Name() string {
-	return ""
-
+	var n string
+	return n
 }
 
 func (c *CreateElement) Priority() int {
-	return 0
-
+	var p int
+	return p
 }
 
 func (c *CreateElement) Commit() error {
@@ -157,13 +159,13 @@ func (c *CreateElement) InvariantEdges(s fabric.Section) fabric.EdgeList {
 type CreateInsertElement func(interface{}, *Element) *Element
 
 func (c *CreateInsertElement) Name() string {
-	return ""
-
+	var n string
+	return n
 }
 
 func (c *CreateInsertElement) Priority() int {
-	return 0
-
+	var p int
+	return p
 }
 
 func (c *CreateInsertElement) Commit() error {
@@ -191,13 +193,13 @@ func (c *CreateInsertElement) InvariantEdges(s fabric.Section) fabric.EdgeList {
 type ValueInvariant func(*Element)
 
 func (v *ValueInvariant) Name() string {
-	return ""
-
+	var n string
+	return n
 }
 
 func (v *ValueInvariant) Priority() int {
-	return 0
-
+	var p int
+	return p
 }
 
 func (v *ValueInvariant) Commit() error {
@@ -224,13 +226,13 @@ func (v *ValueInvariant) InvariantEdges(s fabric.Section) fabric.EdgeList {
 type MarkValueInvariant func(*Element, *Element)
 
 func (m *MarkValueInvariant) Name() string {
-	return ""
-
+	var n string
+	return n
 }
 
 func (m *MarkValueInvariant) Priority() int {
-	return 0
-
+	var p int
+	return p
 }
 
 func (m *MarkValueInvariant) Commit() error {
@@ -258,13 +260,13 @@ func (m *MarkValueInvariant) InvariantEdges(s fabric.Section) fabric.EdgeList {
 type RingInsert func(*Ring)
 
 func (r *RingInsert) Name() string {
-	return ""
-
+	var n string
+	return n
 }
 
 func (r *RingInsert) Priority() int {
-	return 0
-
+	var p int
+	return p
 }
 
 func (r *RingInsert) Commit() error {
