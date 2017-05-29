@@ -23,8 +23,8 @@ func NewSubgraph(nodes NodeList, cp *CDS) *Subgraph {
 		cdsEdges := c.ListEdges()
 		for _, ep := range cdsEdges {
 			e := *ep
-			sp := e.Source()
-			dp := e.Destination()
+			sp := e.GetSource()
+			dp := e.GetDestination()
 			d := *dp
 			if d.ID() == n.ID() && containsNode(nodes, sp) {
 				edges = append(edges, ep)
@@ -79,12 +79,12 @@ func dfs(start *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeLi
 	for _, ep := range c.ListEdges() {
 		e := *ep
 		// for all edges in CDS with node as source
-		if e.Source() == start {
+		if e.GetSource() == start {
 			if !containsEdge(edges, ep) {
 				// add edge to branch
 				edges = append(edges, ep)
 				// for the destination node, add node and its edges to branch
-				nodes, edges = dfs(e.Destination(), nodes, edges, cp)
+				nodes, edges = dfs(e.GetDestination(), nodes, edges, cp)
 			}
 		}
 	}
@@ -136,12 +136,12 @@ func partDFS(startp, endp *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeL
 	for _, ep := range c.ListEdges() {
 		e := *ep
 		// for all edges in CDS with node as source
-		if e.Source() == startp {
+		if e.GetSource() == startp {
 			if !containsEdge(edges, ep) {
 				// add edge to branch
 				edges = append(edges, ep)
 				// for the destination node, add node and its edge to branch
-				nodes, edges = partDFS(e.Destination(), endp, nodes, edges, cp)
+				nodes, edges = partDFS(e.GetDestination(), endp, nodes, edges, cp)
 			}
 		}
 	}
@@ -172,7 +172,7 @@ func NewSubset(nodes NodeList, cp *CDS) *Subset {
 	for _, n := range nodes {
 		for _, ep := range cdsEdges {
 			e := *ep
-			if e.Source() == n || e.Destination() == n {
+			if e.GetSource() == n || e.GetDestination() == n {
 				if !containsEdge(edges, ep) {
 					edges = append(edges, ep)
 				}
