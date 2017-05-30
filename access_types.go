@@ -8,10 +8,10 @@ package fabric
 // 	will allow you to properly utilize the Commit() and Rollback()
 // 	methods.
 type AccessType interface {
-	Name() string             // the "class" of action (e.g. "read")
+	Class() string            // the "class" of action (e.g. "read")
 	Priority() int            // priorities are not a necessity but can be helpful
-	Commit() error            // acidic transaction primitive, define how
-	Rollback() error          // acidic transaction primitive
+	Commit(*DGNode) error     // acidic transaction primitive, define how
+	Rollback(*DGNode) error   // acidic transaction primitive
 	InvariantNode(*Node) bool // used to calculate if a CDS node should remain invariant
 	InvariantEdge(*Edge) bool // used to calculate if a CDS edge should remain invariant
 }
@@ -31,20 +31,22 @@ type ProcedureList []AccessType
 
 	type Procedure func(node) error
 
-	func (p *Procedure) Name() string {
+	func (p *Procedure) Class() string {
 		// return class name
+		return "Read"
 	}
 
 	func (p *Procedure) Priority() int {
 		// calculate priority
 	}
 
-	func (p *Procedure) Commit() error {
+	func (p *Procedure) Commit(np *fabric.DGNode) error {
 		// commit sub-routine; when an operation completes
+		n.
 		return nil
 	}
 
-	func (p *Procedure) Rollback() error {
+	func (p *Procedure) Rollback(np *fabric.DGNode) error {
 		// rollback sub-routine; when
 		return nil
 	}
@@ -65,4 +67,39 @@ type ProcedureList []AccessType
 	// So we can use two different instantiations of a procedure in
 	// two different DG nodes.
 
+*/
+
+/*
+	EXAMPLE:
+
+	Inside a Thread:
+
+	go func() {
+		// Create an access Procedure variable
+
+		var myProcedure ProcedureType = func(node) (node, error){
+			// do stuff ...
+		}
+
+		// Then we can call methods with that procedure
+		mrProcedure.Commit()
+	}()
+
+
+	Outside of a Thread:
+
+	func MyProcedure(*node, int) error {
+		// do stuff ...
+	}
+
+	go func() {
+		// convert to access type object
+		p := ProcedureType(MyProcedure)
+		// convert to fiber interface object
+		i := fiber.AcccessType(p)
+		// call access type method
+		i.Commit()
+		commi
+		i.Rollback()
+	}()
 */

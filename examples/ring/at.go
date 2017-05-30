@@ -1,5 +1,9 @@
 package ring
 
+import (
+	"github.com/JKhawaja/fabric"
+)
+
 /* Access Types */
 
 // NOTE: we are treating access types almost like classes of functions.
@@ -17,9 +21,8 @@ package ring
 
 type ElementRead func(*ElementNode) (*ElementNode, error)
 
-func (r *ElementRead) Name() string {
-	var n string
-	return n
+func (r *ElementRead) Class() string {
+	return "ElementRead"
 }
 
 func (r *ElementRead) Priority() int {
@@ -27,11 +30,11 @@ func (r *ElementRead) Priority() int {
 	return p
 }
 
-func (r *ElementRead) Commit() error {
+func (r *ElementRead) Commit(np *fabric.DGNode) error {
 	return nil
 }
 
-func (r *ElementRead) Rollback() error {
+func (r *ElementRead) Rollback(np *fabric.DGNode) error {
 	return nil
 }
 
@@ -51,9 +54,8 @@ func (e *ElementRead) InvariantEdge(edge *ElementEdge) bool {
 
 type RingRead func(*Ring) (*ElementNode, error)
 
-func (r *RingRead) Name() string {
-	var n string
-	return n
+func (r *RingRead) Class() string {
+	return "RingRead"
 }
 
 func (r *RingRead) Priority() int {
@@ -61,11 +63,11 @@ func (r *RingRead) Priority() int {
 	return p
 }
 
-func (r *RingRead) Commit() error {
+func (r *RingRead) Commit(np *fabric.DGNode) error {
 	return nil
 }
 
-func (r *RingRead) Rollback() error {
+func (r *RingRead) Rollback(np *fabric.DGNode) error {
 	return nil
 }
 
@@ -84,9 +86,8 @@ func (r *RingRead) InvariantEdge(e *ElementEdge) bool {
 
 type ElementDelete func(*ElementNode) (interface{}, error)
 
-func (e *ElementDelete) Name() string {
-	var n string
-	return n
+func (e *ElementDelete) Class() string {
+	return "ElementDelete"
 }
 
 func (e *ElementDelete) Priority() int {
@@ -94,11 +95,11 @@ func (e *ElementDelete) Priority() int {
 	return p
 }
 
-func (e *ElementDelete) Commit() error {
+func (e *ElementDelete) Commit(np *fabric.DGNode) error {
 	return nil
 }
 
-func (e *ElementDelete) Rollback() error {
+func (e *ElementDelete) Rollback(np *fabric.DGNode) error {
 	return nil
 }
 
@@ -118,9 +119,8 @@ func (e *ElementDelete) InvariantEdge(edge *ElementEdge) bool {
 
 type CreateElement func(interface{}) (*ElementNode, error)
 
-func (c *CreateElement) Name() string {
-	var n string
-	return n
+func (c *CreateElement) Class() string {
+	return "CreateElement"
 }
 
 func (c *CreateElement) Priority() int {
@@ -128,11 +128,11 @@ func (c *CreateElement) Priority() int {
 	return p
 }
 
-func (c *CreateElement) Commit() error {
+func (c *CreateElement) Commit(np *fabric.DGNode) error {
 	return nil
 }
 
-func (c *CreateElement) Rollback() error {
+func (c *CreateElement) Rollback(np *fabric.DGNode) error {
 	return nil
 }
 
@@ -152,9 +152,8 @@ func (c *CreateElement) InvariantEdge(edge *ElementEdge) bool {
 
 type CreateInsertElement func(interface{}, *ElementNode) (*ElementNode, error)
 
-func (c *CreateInsertElement) Name() string {
-	var n string
-	return n
+func (c *CreateInsertElement) Class() string {
+	return "CreateInsertElement"
 }
 
 func (c *CreateInsertElement) Priority() int {
@@ -162,11 +161,11 @@ func (c *CreateInsertElement) Priority() int {
 	return p
 }
 
-func (c *CreateInsertElement) Commit() error {
+func (c *CreateInsertElement) Commit(np *fabric.DGNode) error {
 	return nil
 }
 
-func (c *CreateInsertElement) Rollback() error {
+func (c *CreateInsertElement) Rollback(np *fabric.DGNode) error {
 	return nil
 }
 
@@ -186,9 +185,8 @@ func (c *CreateInsertElement) InvariantEdge(edge *ElementEdge) bool {
 
 type ValueInvariant func(*ElementNode) error
 
-func (v *ValueInvariant) Name() string {
-	var n string
-	return n
+func (v *ValueInvariant) Class() string {
+	return "ValueInvariant"
 }
 
 func (v *ValueInvariant) Priority() int {
@@ -196,11 +194,11 @@ func (v *ValueInvariant) Priority() int {
 	return p
 }
 
-func (v *ValueInvariant) Commit() error {
+func (v *ValueInvariant) Commit(np *fabric.DGNode) error {
 	return nil
 }
 
-func (v *ValueInvariant) Rollback() error {
+func (v *ValueInvariant) Rollback(np *fabric.DGNode) error {
 	return nil
 }
 
@@ -219,9 +217,8 @@ func (v *ValueInvariant) InvariantEdge(edge *ElementEdge) bool {
 
 type MarkValueInvariant func(*ElementNode, *ElementNode) error
 
-func (m *MarkValueInvariant) Name() string {
-	var n string
-	return n
+func (m *MarkValueInvariant) Class() string {
+	return "MarkValueInvariant"
 }
 
 func (m *MarkValueInvariant) Priority() int {
@@ -229,11 +226,11 @@ func (m *MarkValueInvariant) Priority() int {
 	return p
 }
 
-func (m *MarkValueInvariant) Commit() error {
+func (m *MarkValueInvariant) Commit(np *fabric.DGNode) error {
 	return nil
 }
 
-func (m *MarkValueInvariant) Rollback() error {
+func (m *MarkValueInvariant) Rollback(np *fabric.DGNode) error {
 	return nil
 }
 
@@ -253,9 +250,8 @@ func (m *MarkValueInvariant) InvariantEdge(edge *ElementEdge) bool {
 
 type RingInsert func(*Ring) error
 
-func (r *RingInsert) Name() string {
-	var n string
-	return n
+func (r *RingInsert) Class() string {
+	return "RingInsert"
 }
 
 func (r *RingInsert) Priority() int {
@@ -263,11 +259,11 @@ func (r *RingInsert) Priority() int {
 	return p
 }
 
-func (r *RingInsert) Commit() error {
+func (r *RingInsert) Commit(np *fabric.DGNode) error {
 	return nil
 }
 
-func (r *RingInsert) Rollback() error {
+func (r *RingInsert) Rollback(np *fabric.DGNode) error {
 	return nil
 }
 
