@@ -3,19 +3,19 @@ package ring
 /* Access Types */
 
 // NOTE: we are treating access types almost like classes of functions.
-//		These classes are defined by some function type. There are numerous other
-//		classes we could add to our collection here.
+// 	These classes are defined by some function type. There are numerous other
+// 	classes we could add to our collection here.
 
-//		For example: we could have a function type for removing multiple
-//		elements from the ring. Or, we could have function types for
-//		updating a value in an element e.g. if the value type is integer,
-//		the functions could be 'add' and 'subtract', etc.
+// 	For example: we could have a function type for removing multiple
+// 	elements from the ring. Or, we could have function types for
+// 	updating a value in an element e.g. if the value type is integer,
+// 	the functions could be 'add' and 'subtract', etc.
 
 // Total-Invariance
 //	Next(); READ
 //	Previous(); READ
 
-type ElementRead func(*ElementNode) *ElementNode
+type ElementRead func(*ElementNode) (*ElementNode, error)
 
 func (r *ElementRead) Name() string {
 	var n string
@@ -49,7 +49,7 @@ func (e *ElementRead) InvariantEdge(edge *ElementEdge) bool {
 //	Front(); READ
 //	Back(); READ
 
-type RingRead func(*Ring) *ElementNode
+type RingRead func(*Ring) (*ElementNode, error)
 
 func (r *RingRead) Name() string {
 	var n string
@@ -82,7 +82,7 @@ func (r *RingRead) InvariantEdge(e *ElementEdge) bool {
 // Delete an element
 // Remove(); MANIP
 
-type ElementDelete func(*ElementNode) interface{}
+type ElementDelete func(*ElementNode) (interface{}, error)
 
 func (e *ElementDelete) Name() string {
 	var n string
@@ -113,10 +113,10 @@ func (e *ElementDelete) InvariantEdge(edge *ElementEdge) bool {
 }
 
 // Create (default position)
-//	PushFront(); MANIP -- creates new node (w/ value) and puts in front
-//	PushBack(); MANIP -- creates new node (w/ value) and puts in back
+// 	PushFront(); MANIP -- creates new node (w/ value) and puts in front
+// 	PushBack(); MANIP -- creates new node (w/ value) and puts in back
 
-type CreateElement func(interface{}) *ElementNode
+type CreateElement func(interface{}) (*ElementNode, error)
 
 func (c *CreateElement) Name() string {
 	var n string
@@ -150,7 +150,7 @@ func (c *CreateElement) InvariantEdge(edge *ElementEdge) bool {
 // 	InsertBefore(); MANIP -- creates new node (w/ value)
 //	InsertAfter(); MANIP -- creates new node (w/ value)
 
-type CreateInsertElement func(interface{}, *ElementNode) *ElementNode
+type CreateInsertElement func(interface{}, *ElementNode) (*ElementNode, error)
 
 func (c *CreateInsertElement) Name() string {
 	var n string
@@ -181,10 +181,10 @@ func (c *CreateInsertElement) InvariantEdge(edge *ElementEdge) bool {
 }
 
 // Value-Invariance
-//		MoveToFront();MANIP
-//		MoveToBack(); MANIP
+// 	MoveToFront();MANIP
+// 	MoveToBack(); MANIP
 
-type ValueInvariant func(*ElementNode)
+type ValueInvariant func(*ElementNode) error
 
 func (v *ValueInvariant) Name() string {
 	var n string
@@ -217,7 +217,7 @@ func (v *ValueInvariant) InvariantEdge(edge *ElementEdge) bool {
 // MoveBefore(); MANIP
 // MoveAfter(); MANIP
 
-type MarkValueInvariant func(*ElementNode, *ElementNode)
+type MarkValueInvariant func(*ElementNode, *ElementNode) error
 
 func (m *MarkValueInvariant) Name() string {
 	var n string
@@ -248,10 +248,10 @@ func (m *MarkValueInvariant) InvariantEdge(edge *ElementEdge) bool {
 }
 
 // Adds multiple nodes and edges (inserts a ring)
-//		PushFrontList(); MANIP
-//		PushBackList(); MANIP
+// 	PushFrontList(); MANIP
+// 	PushBackList(); MANIP
 
-type RingInsert func(*Ring)
+type RingInsert func(*Ring) error
 
 func (r *RingInsert) Name() string {
 	var n string

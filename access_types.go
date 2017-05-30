@@ -5,8 +5,8 @@ package fabric
 // these methods to it.
 
 // IMPORTANT: AccessTypes should always return an error value as this
-//		will allow you to properly utilize the Commit() and Rollback()
-//		methods.
+// 	will allow you to properly utilize the Commit() and Rollback()
+// 	methods.
 type AccessType interface {
 	Name() string             // the "class" of action (e.g. "read")
 	Priority() int            // priorities are not a necessity but can be helpful
@@ -16,18 +16,18 @@ type AccessType interface {
 	InvariantEdge(*Edge) bool // used to calculate if a CDS edge should remain invariant
 }
 
-// EXAMPLE:
-//		create a function that accepts a Section as an argument
-//		and uses InvariantNode() and InvariantEdge() on all objects in the section
-//		then returns a list of invariant nodes and edges for an Access Procedure
-//		on a section.
-//		`InvariantSets(s Section) (NodeList, EdgeList)`
+// IDEA:
+// 	create a function that accepts a Section as an argument
+// 	and uses InvariantNode() and InvariantEdge() on all objects in the section
+// 	then returns a list of invariant nodes and edges for an Access Procedure
+// 	on a section.
+// 	`InvariantSets(s Section) (NodeList, EdgeList)`
 
 type ProcedureList []AccessType
 
 /*
 
-	Example:
+	EXAMPLE:
 
 	type Procedure func(node) error
 
@@ -49,16 +49,14 @@ type ProcedureList []AccessType
 		return nil
 	}
 
-	func (p *Procedure) InvariantNodes(s fabric.Section) fabric.NodeList{
-		// calculate invariant nodes for a section
-		var nl fabric.NodeList
-		return nl
+	func (p *Procedure) InvariantNodes(n fabric.Node) bool{
+		var b bool
+		return b
 	}
 
-	func (p *Procedure) InvariantEdges(s fabric.Section) fabric.EdgeList{
-		// calculate invariant edges for a section
-		var el fabric.NodeList
-		return el
+	func (p *Procedure) InvariantEdges(e fabric.Edge) bool{
+		var b bool
+		return b
 	}
 
 	// Now this is where we can create as many objects of Type
