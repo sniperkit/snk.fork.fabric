@@ -3,22 +3,21 @@ package ring
 // Based on: https://golang.org/src/container/list/list.go
 
 import (
+	"math/rand"
+	"time"
+
 	"github.com/JKhawaja/fabric"
 )
 
-// FIXME: get rid of this Element struct, and ONLY have node and edge definitions
-type Element struct {
-	next, prev *Element
-	list       *Ring
-	Value      interface{}
-}
-
 // ElementNode satisfies fabric.Node interface
 type ElementNode struct {
-	Element
-	Edges []*ElementEdge
 	Id    int
-	Imm   bool
+	Value interface{}
+	List  *Ring
+	// `Next` is the edge that the element is the source for
+	// `Prev` is the edge that the element is the destination for
+	Next, Prev *ElementEdge
+	Imm        bool
 }
 
 func (e *ElementNode) ID() int {
@@ -62,15 +61,51 @@ type Ring struct {
 }
 
 func NewRing() *Ring {
+	// Create fabric.Node interface
 	var e ElementNode
-	// TODO: return a Ring with:
-	//			single-element set as Root Node
-	//			Length = 1
-	//			NodeList containing only reference to Root node
-	//			empty Edgelist
+	var ei interface{} = e
+	ein := ei.(fabric.Node)
+
+	var nl fabric.NodeList
+	nl[0] = &ein
+
+	var el fabric.EdgeList
+
 	return &Ring{
-		Root: &e,
+		Root:  &e,
+		Len:   1,
+		Nodes: nl,
+		Edges: el,
 	}
+}
+
+// Generate an ID for a CDS Node
+func (r *Ring) GenNodeID() int {
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Int()
+	for _, np := range r.Nodes {
+		n := *np
+		if n.ID() == id {
+			id = r.GenNodeID()
+		}
+	}
+
+	return id
+}
+
+// Generate an ID for a CDS Edge
+func (r *Ring) GenEdgeID() int {
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Int()
+	for _, ep := range r.Edges {
+		e := *ep
+		if e.ID() == id {
+			id = r.GenEdgeID()
+		}
+	}
+
+	return id
+
 }
 
 func (r *Ring) ListNodes() fabric.NodeList {

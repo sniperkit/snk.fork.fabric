@@ -21,10 +21,10 @@ type Edge interface {
 // A list of references to each edge in the CDS
 type EdgeList []*Edge
 
-// add these methods to data structure objects to use as CDS
+// Add these methods to data structure objects to use as CDS
 type CDS interface {
-	GenNodeID(*Node) int
-	GenEdgeID(*Edge) int
+	GenNodeID() int
+	GenEdgeID() int
 	ListNodes() NodeList // a simple `return MyCDS.Nodes` will suffice here; once a NodeList has been created
 	ListEdges() EdgeList // a simple `return MyCDS.Edges` will suffice here; once an EdgesList has been created
 }

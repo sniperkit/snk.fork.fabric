@@ -1,9 +1,5 @@
 package ring
 
-import (
-	"github.com/JKhawaja/fabric"
-)
-
 /* Access Types */
 
 // NOTE: we are treating access types almost like classes of functions.
@@ -19,7 +15,7 @@ import (
 //	Next(); READ
 //	Previous(); READ
 
-type ElementRead func(*Element) *Element
+type ElementRead func(*ElementNode) *ElementNode
 
 func (r *ElementRead) Name() string {
 	var n string
@@ -39,23 +35,21 @@ func (r *ElementRead) Rollback() error {
 	return nil
 }
 
-func (r *ElementRead) InvariantNodes(s fabric.Section) fabric.NodeList {
-	var nl fabric.NodeList
-
-	return nl
+func (e *ElementRead) InvariantNode(node *ElementNode) bool {
+	var b bool
+	return b
 }
 
-func (r *ElementRead) InvariantEdges(s fabric.Section) fabric.EdgeList {
-	var el fabric.EdgeList
-
-	return el
+func (e *ElementRead) InvariantEdge(edge *ElementEdge) bool {
+	var b bool
+	return b
 }
 
 // Total-Invariance
 //	Front(); READ
 //	Back(); READ
 
-type RingRead func(*Ring) *Element
+type RingRead func(*Ring) *ElementNode
 
 func (r *RingRead) Name() string {
 	var n string
@@ -75,20 +69,20 @@ func (r *RingRead) Rollback() error {
 	return nil
 }
 
-func (r *RingRead) InvariantNodes(s fabric.Section) fabric.NodeList {
-	var nl fabric.NodeList
-	return nl
+func (r *RingRead) InvariantNode(n *ElementNode) bool {
+	var b bool
+	return b
 }
 
-func (r *RingRead) InvariantEdges(s fabric.Section) fabric.EdgeList {
-	var el fabric.EdgeList
-	return el
+func (r *RingRead) InvariantEdge(e *ElementEdge) bool {
+	var b bool
+	return b
 }
 
 // Delete an element
 // Remove(); MANIP
 
-type ElementDelete func(*Element) interface{}
+type ElementDelete func(*ElementNode) interface{}
 
 func (e *ElementDelete) Name() string {
 	var n string
@@ -108,21 +102,21 @@ func (e *ElementDelete) Rollback() error {
 	return nil
 }
 
-func (e *ElementDelete) InvariantNodes(s fabric.Section) fabric.NodeList {
-	var nl fabric.NodeList
-	return nl
+func (e *ElementDelete) InvariantNode(node *ElementNode) bool {
+	var b bool
+	return b
 }
 
-func (e *ElementDelete) InvariantEdges(s fabric.Section) fabric.EdgeList {
-	var el fabric.EdgeList
-	return el
+func (e *ElementDelete) InvariantEdge(edge *ElementEdge) bool {
+	var b bool
+	return b
 }
 
 // Create (default position)
 //	PushFront(); MANIP -- creates new node (w/ value) and puts in front
 //	PushBack(); MANIP -- creates new node (w/ value) and puts in back
 
-type CreateElement func(interface{}) *Element
+type CreateElement func(interface{}) *ElementNode
 
 func (c *CreateElement) Name() string {
 	var n string
@@ -142,21 +136,21 @@ func (c *CreateElement) Rollback() error {
 	return nil
 }
 
-func (c *CreateElement) InvariantNodes(s fabric.Section) fabric.NodeList {
-	var nl fabric.NodeList
-	return nl
+func (c *CreateElement) InvariantNode(node *ElementNode) bool {
+	var b bool
+	return b
 }
 
-func (c *CreateElement) InvariantEdges(s fabric.Section) fabric.EdgeList {
-	var el fabric.EdgeList
-	return el
+func (c *CreateElement) InvariantEdge(edge *ElementEdge) bool {
+	var b bool
+	return b
 }
 
 // Create (w/ chosen position)
 // 	InsertBefore(); MANIP -- creates new node (w/ value)
 //	InsertAfter(); MANIP -- creates new node (w/ value)
 
-type CreateInsertElement func(interface{}, *Element) *Element
+type CreateInsertElement func(interface{}, *ElementNode) *ElementNode
 
 func (c *CreateInsertElement) Name() string {
 	var n string
@@ -176,21 +170,21 @@ func (c *CreateInsertElement) Rollback() error {
 	return nil
 }
 
-func (c *CreateInsertElement) InvariantNodes(s fabric.Section) fabric.NodeList {
-	var nl fabric.NodeList
-	return nl
+func (c *CreateInsertElement) InvariantNode(node *ElementNode) bool {
+	var b bool
+	return b
 }
 
-func (c *CreateInsertElement) InvariantEdges(s fabric.Section) fabric.EdgeList {
-	var el fabric.EdgeList
-	return el
+func (c *CreateInsertElement) InvariantEdge(edge *ElementEdge) bool {
+	var b bool
+	return b
 }
 
 // Value-Invariance
 //		MoveToFront();MANIP
 //		MoveToBack(); MANIP
 
-type ValueInvariant func(*Element)
+type ValueInvariant func(*ElementNode)
 
 func (v *ValueInvariant) Name() string {
 	var n string
@@ -210,20 +204,20 @@ func (v *ValueInvariant) Rollback() error {
 	return nil
 }
 
-func (v *ValueInvariant) InvariantNodes(s fabric.Section) fabric.NodeList {
-	var nl fabric.NodeList
-	return nl
+func (v *ValueInvariant) InvariantNode(node *ElementNode) bool {
+	var b bool
+	return b
 }
 
-func (v *ValueInvariant) InvariantEdges(s fabric.Section) fabric.EdgeList {
-	var el fabric.EdgeList
-	return el
+func (v *ValueInvariant) InvariantEdge(edge *ElementEdge) bool {
+	var b bool
+	return b
 }
 
 // MoveBefore(); MANIP
 // MoveAfter(); MANIP
 
-type MarkValueInvariant func(*Element, *Element)
+type MarkValueInvariant func(*ElementNode, *ElementNode)
 
 func (m *MarkValueInvariant) Name() string {
 	var n string
@@ -243,14 +237,14 @@ func (m *MarkValueInvariant) Rollback() error {
 	return nil
 }
 
-func (m *MarkValueInvariant) InvariantNodes(s fabric.Section) fabric.NodeList {
-	var nl fabric.NodeList
-	return nl
+func (m *MarkValueInvariant) InvariantNode(node *ElementNode) bool {
+	var b bool
+	return b
 }
 
-func (m *MarkValueInvariant) InvariantEdges(s fabric.Section) fabric.EdgeList {
-	var el fabric.EdgeList
-	return el
+func (m *MarkValueInvariant) InvariantEdge(edge *ElementEdge) bool {
+	var b bool
+	return b
 }
 
 // Adds multiple nodes and edges (inserts a ring)
@@ -277,12 +271,12 @@ func (r *RingInsert) Rollback() error {
 	return nil
 }
 
-func (r *RingInsert) InvariantNodes(s fabric.Section) fabric.NodeList {
-	var nl fabric.NodeList
-	return nl
+func (r *RingInsert) InvariantNode(node *ElementNode) bool {
+	var b bool
+	return b
 }
 
-func (r *RingInsert) InvariantEdges(s fabric.Section) fabric.EdgeList {
-	var el fabric.EdgeList
-	return el
+func (r *RingInsert) InvariantEdge(edge *ElementEdge) bool {
+	var b bool
+	return b
 }

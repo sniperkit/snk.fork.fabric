@@ -8,13 +8,20 @@ package fabric
 //		will allow you to properly utilize the Commit() and Rollback()
 //		methods.
 type AccessType interface {
-	Name() string                      // the "class" of action (e.g. "read")
-	Priority() int                     // priorities are not a necessity but can be helpful
-	Commit() error                     // acidic transaction primitive, define how
-	Rollback() error                   // acidic transaction primitive
-	InvariantNodes(s Section) NodeList // used to calculate which nodes will be invariant
-	InvariantEdges(s Section) EdgeList // used to calculate which edges will be invariant
+	Name() string             // the "class" of action (e.g. "read")
+	Priority() int            // priorities are not a necessity but can be helpful
+	Commit() error            // acidic transaction primitive, define how
+	Rollback() error          // acidic transaction primitive
+	InvariantNode(*Node) bool // used to calculate if a CDS node should remain invariant
+	InvariantEdge(*Edge) bool // used to calculate if a CDS edge should remain invariant
 }
+
+// EXAMPLE:
+//		create a function that accepts a Section as an argument
+//		and uses InvariantNode() and InvariantEdge() on all objects in the section
+//		then returns a list of invariant nodes and edges for an Access Procedure
+//		on a section.
+//		`InvariantSets(s Section) (NodeList, EdgeList)`
 
 type ProcedureList []AccessType
 
