@@ -62,7 +62,7 @@ type ProcedureList []AccessType
 	// Now this is where we can create as many objects of Type
 	// procedure as we want, and those objects will satisfy both
 	// the procedure type we want and the AccessType Interface.
-	// So we can use two different instantions of a procedure in
+	// So we can use two different instantiations of a procedure in
 	// two different DG nodes.
 
 */
