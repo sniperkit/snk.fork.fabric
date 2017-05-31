@@ -96,10 +96,19 @@ func (e *ElementDelete) Priority() int {
 }
 
 func (e *ElementDelete) Commit(np *fabric.DGNode) error {
+	// TODO: how to perform a degree of "snapshot isolation"
+	// 	for nodes and edges that are going to be modified by
+	// 	an access procedure of this type.
+
+	// 	We will need to know which CDS nodes and edges were modified
+	//	when we call either Commit() or Rollback()
 	return nil
 }
 
 func (e *ElementDelete) Rollback(np *fabric.DGNode) error {
+	// TODO: how to perform a degree of "snapshot isolation"
+	// 	for nodes and edges that are going to be modified by
+	// 	an access procedure of this type.
 	return nil
 }
 

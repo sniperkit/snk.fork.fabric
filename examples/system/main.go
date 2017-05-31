@@ -18,6 +18,22 @@ import (
 //		certain access types within certain UIs. For example, we could assign the root of
 //		the ring to its own UI...
 
+/*
+	The Assignment function needs to also be aware of which unique independents have a thread
+	or a virtual DDAG (Dependency-DAG) already assigned to them. It needs to be able to (re-)assign
+	threads to available unique independents. This will be useful for when a thread is e.g. a processing
+	request on a server, and will have a finite lifespan. (In other words, since virtual nodes are
+	basically just threads, the assignment function will need to keep track of thread orderings per
+	real node.)
+
+    Can we run into an issue with the Assignment Function being blocked from updating its assignment
+    list for a unique independent (??)
+
+    Assignments can also be classified: e.g. a thread can be assigned to a unique independent but it
+    is only allowed to read from the data structure, whereas another thread can be assigned that is
+    allowed to modify the data, etc.
+*/
+
 func main() {
 	log.Println("Fabric Example ...")
 }

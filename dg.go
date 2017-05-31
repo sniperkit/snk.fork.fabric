@@ -12,9 +12,9 @@ type Signal int
 const (
 	Waiting Signal = iota
 	Started
-	Complete
-	Abort
-	AbortRetry
+	Completed
+	Aborted
+	AbortRetry   // EXAMPLE: could use exponential backoff checks on retries for AbortRetry signals from dependencies ...
 	PartialAbort // (used to sepcify if an operation partially-completed before aborting)
 )
 
@@ -387,15 +387,4 @@ func (g *Graph) Type(n DGNode) NodeType {
 	}
 
 	return Unknown
-}
-
-// FIXME: Do we need this global VUI dependents check ??
-// TODO: Check that all VUIs dependents lists do not get shorter
-//		over the course of their lifespan. If a dependent has ended
-//		its lifecycle before a VUI finishes it's own lifespan then the
-//		VUI needs to abort its operation.
-func (g *Graph) CheckVUIDependents() bool {
-	// TODO: check the dependents of a VUI node to be sure
-	//		that they are all still in existence
-	return false
 }

@@ -9,6 +9,7 @@ package fabric
 
 	This interface definition satisfies both UI and VUI objects.
 */
+
 type UI interface {
 	DGNode
 	GetSection() *Section
