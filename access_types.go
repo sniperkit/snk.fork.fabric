@@ -8,13 +8,21 @@ package fabric
 // 	will allow you to properly utilize the Commit() and Rollback()
 // 	methods.
 type AccessType interface {
-	Class() string                     // the "class" of action (e.g. "read")
-	Priority() int                     // priorities are not a necessity but can be helpful
-	Commit(NodeList, EdgeList) error   // takes a list of all CDS nodes and edges that have been operated on
-	Rollback(NodeList, EdgeList) error // takes a list of all CDS nodes and edges that have been operated on
-	InvariantNode(*Node) bool          // used to calculate if a CDS node should remain invariant
-	InvariantEdge(*Edge) bool          // used to calculate if a CDS edge should remain invariant
+	Class() string                             // the "class" of action (e.g. "read")
+	Priority() int                             // priorities are not a necessity but can be helpful
+	Commit(*DGNode) error                      // takes a DGNode to signal for ...
+	Rollback(RestoreNodes, RestoreEdges) error // takes a list of all CDS nodes and edges that have been operated on
+	InvariantNode(*Node) bool                  // used to calculate if a CDS node should remain invariant
+	InvariantEdge(*Edge) bool                  // used to calculate if a CDS edge should remain invariant
 }
+
+// RestoreNodes is a list of Node values that can be used to overwrite existing
+// Node values after an operation failure.
+type RestoreNodes []Node
+
+// RestoreEdges is a list of Edge values that can be used to overwrite existing
+// Edge values after an operation failure.
+type RestoreEdges []Edge
 
 // IDEA:
 // 	create a function that accepts a Section as an argument
@@ -97,9 +105,9 @@ type ProcedureList []AccessType
 		p := ProcedureType(MyProcedure)
 		// convert to fiber interface object
 		i := fiber.AcccessType(p)
+
 		// call access type method
 		i.Commit()
-		commi
 		i.Rollback()
 	}()
 */

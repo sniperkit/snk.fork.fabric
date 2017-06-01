@@ -18,6 +18,8 @@ const (
 	PartialAbort // (used to sepcify if an operation partially-completed before aborting)
 )
 
+// ProcedureSignals can be used to map a signal to the access procedure that caused the signal
+// TODO: will need a ProcedureSignals channel for DGNodes
 type ProcedureSignals map[AccessType]Signal
 
 type NodeType int

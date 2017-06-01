@@ -34,7 +34,7 @@ func (r *ElementRead) Commit(np *fabric.DGNode) error {
 	return nil
 }
 
-func (r *ElementRead) Rollback(np *fabric.DGNode) error {
+func (r *ElementRead) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
 	return nil
 }
 
@@ -95,20 +95,15 @@ func (e *ElementDelete) Priority() int {
 	return p
 }
 
-func (e *ElementDelete) Commit(np *fabric.DGNode) error {
-	// TODO: how to perform a degree of "snapshot isolation"
-	// 	for nodes and edges that are going to be modified by
-	// 	an access procedure of this type.
-
-	// 	We will need to know which CDS nodes and edges were modified
-	//	when we call either Commit() or Rollback()
+func (e *ElementDelete) Commit(n *fabric.DGNode) error {
 	return nil
 }
 
-func (e *ElementDelete) Rollback(np *fabric.DGNode) error {
-	// TODO: how to perform a degree of "snapshot isolation"
-	// 	for nodes and edges that are going to be modified by
-	// 	an access procedure of this type.
+func (e *ElementDelete) Rollback(nl fabric.RestoreNodes, el fabric.RestoreEdges) error {
+
+	// TODO: Rollbacks should work based on a snapshot i.e.
+	//	a rollback should do nothing more than a restoration overwrite
+	//  the beginning of a procedure takes the value of a node
 	return nil
 }
 
