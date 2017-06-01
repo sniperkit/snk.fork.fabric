@@ -10,6 +10,7 @@ func contains(s []DGNode, i DGNode) bool {
 	return false
 }
 
+// containsNode checks if a CDS node (reference) is in a NodeList
 func containsNode(l NodeList, np *Node) bool {
 	n := *np
 	for _, vp := range l {
@@ -21,6 +22,7 @@ func containsNode(l NodeList, np *Node) bool {
 	return false
 }
 
+// containsEdge checks if a CDS edge (reference) is in an Edglist
 func containsEdge(l EdgeList, ep *Edge) bool {
 	e := *ep
 	for _, vp := range l {

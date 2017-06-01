@@ -18,6 +18,8 @@ const (
 	PartialAbort // (used to sepcify if an operation partially-completed before aborting)
 )
 
+type ProcedureSignals map[AccessType]Signal
+
 type NodeType int
 
 const (

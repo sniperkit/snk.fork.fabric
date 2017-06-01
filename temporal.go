@@ -19,12 +19,12 @@ type Temporal interface {
 	to a specific UI.
 
 	IMPORTANT: The use case/purpose of virtual spawning is to avoid the use
-			of cyclic dependencies. For example, if we want a node to run an
-			operation and then signal the completion of that operation to its
-			dependent. But, then we also want the dependent to finish its
-			operation and somehow let its dependency know that it completed its
-			operation. INSTEAD, we spawn a virtual node that makes our current
-			nodes dependent it's dependency, and thus is allowed to be signaled
-			to by our dependent node.
+		of cyclic dependencies. For example, if we want a node to run an
+		operation and then signal the completion of that operation to its
+		dependent. But, then we also want the dependent to finish its
+		operation and somehow let its dependency know that it completed its
+		operation. INSTEAD, we spawn a virtual node that makes our current
+		nodes dependent it's dependency, and thus is allowed to be signaled
+		to by our dependent node.
 
 */

@@ -8,12 +8,12 @@ package fabric
 // 	will allow you to properly utilize the Commit() and Rollback()
 // 	methods.
 type AccessType interface {
-	Class() string            // the "class" of action (e.g. "read")
-	Priority() int            // priorities are not a necessity but can be helpful
-	Commit(*DGNode) error     // acidic transaction primitive, define how
-	Rollback(*DGNode) error   // acidic transaction primitive
-	InvariantNode(*Node) bool // used to calculate if a CDS node should remain invariant
-	InvariantEdge(*Edge) bool // used to calculate if a CDS edge should remain invariant
+	Class() string                     // the "class" of action (e.g. "read")
+	Priority() int                     // priorities are not a necessity but can be helpful
+	Commit(NodeList, EdgeList) error   // takes a list of all CDS nodes and edges that have been operated on
+	Rollback(NodeList, EdgeList) error // takes a list of all CDS nodes and edges that have been operated on
+	InvariantNode(*Node) bool          // used to calculate if a CDS node should remain invariant
+	InvariantEdge(*Edge) bool          // used to calculate if a CDS edge should remain invariant
 }
 
 // IDEA:
@@ -70,7 +70,7 @@ type ProcedureList []AccessType
 */
 
 /*
-	EXAMPLE:
+	EXAMPLE: FIXME
 
 	Inside a Thread:
 

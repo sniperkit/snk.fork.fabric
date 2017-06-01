@@ -18,8 +18,8 @@ type UI interface {
 }
 
 // NOTE: VUIs can be part of VUI Dependency Graphs
-//		but each VUI *must* have a lifespan shorter than its dependents.
-//		A VUI can have both real and virtual dependents and it can
-// 		have both real and virtual dependencies. The key is that all
-//		of its virtual dependencies must have lifespans shorter than
-//		it's lifespan.
+//	but each VUI *must* have a lifespan shorter than its dependents.
+//	A VUI can have both real and virtual dependents and it can
+// 	have both real and virtual dependencies. The key is that all
+//	of its virtual dependencies must have lifespans shorter than
+//	it's lifespan.
