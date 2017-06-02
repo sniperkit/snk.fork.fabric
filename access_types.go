@@ -78,7 +78,7 @@ type ProcedureList []AccessType
 */
 
 /*
-	EXAMPLE: FIXME
+	EXAMPLE:
 
 	Inside a Thread:
 

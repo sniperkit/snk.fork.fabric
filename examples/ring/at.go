@@ -12,7 +12,7 @@ import (
 
 // 	For example: we could have a function type for removing multiple
 // 	elements from the ring. Or, we could have function types for
-// 	updating a value in an element e.g. if the value type is integer,
+// 	updating a value in an element e.g. if the value type is 'integer',
 // 	the functions could be 'add' and 'subtract', etc.
 
 // Total-Invariance
@@ -96,6 +96,9 @@ func (e *ElementDelete) Priority() int {
 }
 
 func (e *ElementDelete) Commit(n *fabric.DGNode) error {
+	// TODO: Commit can be used to Signal when an operation is complete
+	// to the dependent nodes for the current DG Node (which is passed
+	// as a reference argument to this method).
 	return nil
 }
 
@@ -109,11 +112,17 @@ func (e *ElementDelete) Rollback(nl fabric.RestoreNodes, el fabric.RestoreEdges)
 
 func (e *ElementDelete) InvariantNode(node *ElementNode) bool {
 	var b bool
+	// TODO: pass a CDS node into this method to check if it is invariant
+	// 	to procedures of the function type that this method is defined for.
+	// EXAMPLE: In this case, the ElementDelete function type may not be
+	//	effective on "root" or "leaf" nodes, etc.
 	return b
 }
 
 func (e *ElementDelete) InvariantEdge(edge *ElementEdge) bool {
 	var b bool
+	// TODO: pass a CDS edge into this method to check if it is invariant
+	// 	to procedures of the function type that this method is defined for.
 	return b
 }
 

@@ -7,6 +7,11 @@ import (
 	"time"
 )
 
+// RECOMMENDATION: every thread should have a proper reaction (which may be a non-reaction) to each signal value for each access
+// 	procedure in each dependency node.
+// EXAMPLE: an example reaction to an abort signal could be "Abort Chain/Tree" where the dependents
+// 	and their dependents, etc. all abort their operations if a signal value from a dependency node
+// 	is an 'Abort' signal.
 type Signal int
 
 const (
@@ -15,12 +20,14 @@ const (
 	Completed
 	Aborted
 	AbortRetry   // EXAMPLE: could use exponential backoff checks on retries for AbortRetry signals from dependencies ...
-	PartialAbort // (used to sepcify if an operation partially-completed before aborting)
+	PartialAbort // (used to specify if an operation partially-completed before aborting)
 )
 
-// ProcedureSignals can be used to map a signal to the access procedure that caused the signal
-// TODO: will need a ProcedureSignals channel for DGNodes
-type ProcedureSignals map[AccessType]Signal
+// ProcedureSignals is used to map a signal to the access type that caused the signal
+// NOTE: the string key should be equivalent to the Class() method return value for that AccessType
+// EXAMPLE: a system design calls for a single thread having multiple access procedures,
+// 	only some of which induce a dependent to invoke a responsive operation
+type ProcedureSignals map[string]Signal
 
 type NodeType int
 
@@ -33,9 +40,10 @@ const (
 	Unknown
 )
 
-type SignalingMap map[int]chan Signal
+// FIXME: may need to use ProcedureSignals instead of Signals here
+type SignalingMap map[int]chan ProcedureSignals
 
-type SignalsMap map[int]<-chan Signal
+type SignalsMap map[int]<-chan ProcedureSignals
 
 // Dependency Graph Node
 // every DGNode has an id, a Type, a state, and a set of Access Procedures
@@ -101,7 +109,7 @@ func (g *Graph) CreateSignalers(n DGNode) SignalingMap {
 
 	deps := g.Dependents(n)
 	for _, d := range deps {
-		c := make(chan Signal)
+		c := make(chan ProcedureSignals)
 		sm[d.ID()] = c
 	}
 
