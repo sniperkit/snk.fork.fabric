@@ -116,6 +116,12 @@ func (e *ElementDelete) InvariantNode(node *ElementNode) bool {
 	// 	to procedures of the function type that this method is defined for.
 	// EXAMPLE: In this case, the ElementDelete function type may not be
 	//	effective on "root" or "leaf" nodes, etc.
+	// NOTE: that all invariant node and edge methods should check for if
+	//	the entity is marked as Immutable or not.
+	if node.Immutable() {
+		b = true
+	}
+
 	return b
 }
 
@@ -123,6 +129,9 @@ func (e *ElementDelete) InvariantEdge(edge *ElementEdge) bool {
 	var b bool
 	// TODO: pass a CDS edge into this method to check if it is invariant
 	// 	to procedures of the function type that this method is defined for.
+	if edge.Immutable() {
+		b = true
+	}
 	return b
 }
 

@@ -1,5 +1,19 @@
 package fabric
 
+/*
+	Extensional Lists vs. Intensional Conditions
+
+	Intensional Conditions: would have to be part of a Breadth-First or Depth-First traversal,
+	where every node and edge in the CDS would be compared against the defined condition,
+	and if it passed, would be considered accessible by the UI.
+
+	Since these complete-traversal checks could be computationally expensive to perform every
+	time we want to execute an access procedure, we instead will prefer the creation of extensional
+	lists that are attached to a UI that can be used.
+
+	Intensional Conditions can be used if the CDS is small enough to not become a processing burden.
+*/
+
 // NOTE: a CDS satisfies the Section interface
 type Section interface {
 	ListNodes() NodeList

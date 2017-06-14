@@ -82,7 +82,7 @@ func (r RingTemporal) ListSignalers() fabric.SignalingMap {
 	return r.Signalers
 }
 
-func (r RingTemporal) Signal(s fabric.Signal) {
+func (r RingTemporal) Signal(s fabric.ProcedureSignals) {
 	for _, c := range r.Signalers {
 		c <- s
 	}

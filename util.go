@@ -10,6 +10,17 @@ func contains(s []DGNode, i DGNode) bool {
 	return false
 }
 
+func containsVirtual(s []*Virtual, ip *Virtual) bool {
+	for _, vp := range s {
+		v := *vp
+		i := *ip
+		if i.ID() == v.ID() {
+			return true
+		}
+	}
+	return false
+}
+
 // containsNode checks if a CDS node (reference) is in a NodeList
 func containsNode(l NodeList, np *Node) bool {
 	n := *np

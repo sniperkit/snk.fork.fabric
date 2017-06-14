@@ -26,7 +26,8 @@ const (
 // ProcedureSignals is used to map a signal to the access type that caused the signal
 // NOTE: the string key should be equivalent to the Class() method return value for that AccessType
 // EXAMPLE: a system design calls for a single thread having multiple access procedures,
-// 	only some of which induce a dependent to invoke a responsive operation
+// 	only some of which induce a dependent to invoke a responsive operation, then to know which
+// 	procedure a signal is from you can use this map.
 type ProcedureSignals map[string]Signal
 
 type NodeType int
@@ -40,9 +41,12 @@ const (
 	Unknown
 )
 
-// FIXME: may need to use ProcedureSignals instead of Signals here
+// SignalingMap is a map of dependent node ids to a set of
+// access procedures and their current signal states.
 type SignalingMap map[int]chan ProcedureSignals
 
+// SignalsMap is a map of dependency node ids to a set of
+// their access procedures and their current signal states.
 type SignalsMap map[int]<-chan ProcedureSignals
 
 // Dependency Graph Node
@@ -58,13 +62,14 @@ type DGNode interface {
 	ListDependencies() []DGNode
 	ListSignalers() SignalingMap // lists signaler channels for signaling dependents
 	ListSignals() SignalsMap     // lists signal channels from *dependencies*
-	Signal(Signal)               // used to send the same signal to all dependents in signalers list
+	Signal(ProcedureSignals)     // used to send the same signal to all dependents in signalers list
 }
 
 // Graph can be either UI DDAG, Temporal DAG or VDG
 type Graph struct {
-	CDS
+	DS    *CDS // reference to CDS that the dependency graph is for
 	Nodes []DGNode
+	// FIXME: Edges should be a reference to a node and a list of references to other nodes
 	Edges map[DGNode][]DGNode // each node (id) has a list of node ids that it points too
 }
 
@@ -234,8 +239,9 @@ func (g *Graph) Covered() bool {
 	}
 
 	// grab all CDS nodes and edges
-	nodes := g.ListNodes()
-	edges := g.ListEdges()
+	ds := *g.DS
+	nodes := ds.ListNodes()
+	edges := ds.ListEdges()
 
 FIRST:
 	// for every node in the CDS
@@ -302,56 +308,6 @@ func (g *Graph) RemoveVUI(node UI) error {
 		g.Nodes = newList
 	}
 
-	return nil
-}
-
-func (g *Graph) AddVirtual(node Virtual) error {
-	if !contains(g.Nodes, node) {
-		g.Nodes = append(g.Nodes, node)
-	} else {
-		return fmt.Errorf("Node already exists in Dependency Graph.")
-	}
-	return nil
-}
-
-func (g *Graph) RemoveVirtual(node Virtual) {
-	newList := make([]DGNode, 0)
-	for _, v := range g.Nodes {
-		if node.ID() != v.ID() {
-			newList = append(newList, v)
-		}
-	}
-
-	g.Nodes = newList
-}
-
-// AddVirtualEdge is the same as AddRealEdge ...
-func (g *Graph) AddVirtualEdge(source, dest DGNode) {
-	// Add edge to source node
-	if _, ok := g.Edges[source]; !ok {
-		g.Edges[source] = []DGNode{dest}
-	} else {
-		s := g.Edges[source]
-		s = append(s, dest)
-		g.Edges[source] = s
-	}
-}
-
-func (g *Graph) RemoveVirtualEdge(source, dest DGNode) error {
-	if v, ok := g.Edges[source]; !ok {
-		return fmt.Errorf("Source node not found.")
-	} else {
-		if !contains(v, dest) {
-			return fmt.Errorf("Edge not found.")
-		}
-		newList := make([]DGNode, 0)
-		for _, v := range g.Edges[source] {
-			if v.ID() != dest.ID() {
-				newList = append(newList, v)
-			}
-		}
-		g.Edges[source] = newList
-	}
 	return nil
 }
 

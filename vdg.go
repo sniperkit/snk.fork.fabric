@@ -1,5 +1,13 @@
 package fabric
 
+import (
+	"fmt"
+	"math/rand"
+	"time"
+)
+
+// Virtual is the interface definition that virtual nodes in a VDG graph
+// need to satsify.
 // NOTE: Virtual Dependency Graph Nodes can only have other
 //		VDG nodes as dependents or dependencies
 type Virtual interface {
@@ -9,7 +17,6 @@ type Virtual interface {
 }
 
 // NOTE: Virtual Dependency Graphs are always trees with a root node
-//		which is associated with multiple (V)UIs.
 
 //		The set of (V)UIs that are associated with the VDG are the
 //		set of (V)UIs that at least one node in the VDG accesses.
@@ -19,13 +26,8 @@ type Virtual interface {
 
 //		A VDG that affects more than one (V)UI represents a virtual
 //		*spatial* dependency graph.
-type VDG interface {
-	ID() int
-	Root() Virtual
-	ListNodes() []Virtual
-	ListEdges() map[Virtual][]Virtual
-	Space() []UI // Space() lists all (V)UIs that the VDG is associated to
-}
+
+// NOTE: all VDG nodes should be passed by reference, including the VDG itself
 
 // IMPORTANT: **VDGs will run independent** of all other dependency graphs
 //		in other words, a VDG does not have any dependents or dependencies
@@ -33,30 +35,143 @@ type VDG interface {
 // 		of a VDG is to order temporary threads (even if they are
 //		associated with different UIs).
 
-/*
-	// Example:
+type VDG struct {
+	Global *Graph // a reference to the real global graph of the system
+	Root   *Virtual
+	Top    map[Virtual][]*Virtual
+	Space  []int // the set of all (V)UI ids that at least one node in the VDG has access too
+}
 
-	// IMPORTANT: VDG definitions should ALWAYS encapsulate a graph!!!
-	type MyVDG struct{
-		*fabric.Graph
-		Id int
-		root fabric.Virtual
-		Dependents []fabric.UI
+// NewVDG will return an empty VDG graph
+func NewVDG(g *Graph) *VDG {
+	return &VDG{
+		Global: g,
+		Top:    make(map[Virtual][]*Virtual),
 	}
 
-	func NewVDG() *MyVDG {
-		return &MyVDG{}
+}
+
+// GenID can generate a unique integer id for a VDG node
+func (g *VDG) GenID() int {
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Int()
+	for n, _ := range g.Top {
+		if n.ID() == id {
+			id = g.GenID()
+		}
+	}
+	return id
+}
+
+// TODO: finish
+func (g *VDG) CreateSignalers(n Virtual) SignalingMap {
+	sm := make(SignalingMap)
+
+	deps := g.Dependents(n)
+	for _, d := range deps {
+		c := make(chan ProcedureSignals)
+		sm[d.ID()] = c
 	}
 
-	func(m *MyVDG) ID() int{
-		return m.Id
+	return sm
+}
+
+// TODO: finish
+func (g *VDG) Signals(n Virtual) SignalsMap {
+	sm := make(SignalsMap)
+
+	deps := g.Dependencies(n)
+	for _, d := range deps {
+		channels := d.ListSignalers()
+		ch := channels[n.ID()]
+		sm[n.ID()] = ch
 	}
 
-	func (m *MyVDG) Root() fabric.Virtual {
-		return m.root
+	return sm
+}
+
+func (g *VDG) Dependents(n Virtual) []Virtual {
+	list := make([]Virtual, 0)
+	for i, v := range g.Top {
+		if i.ID() != n.ID() {
+			if containsVirtual(v, &n) {
+				list = append(list, i)
+			}
+		}
 	}
 
-	func (m *MyVDG) Space() []fabric.UI{
-		return m.Dependents
+	return list
+}
+
+func (g *VDG) Dependencies(n Virtual) []Virtual {
+	list := make([]Virtual, 0)
+	if v, ok := g.Top[n]; !ok {
+		return list
+	} else {
+		for _, p := range v {
+			pp := *p
+			list = append(list, pp)
+		}
+		return list
 	}
-*/
+}
+
+// AddVirtual adds a node to a VDG
+func (g *VDG) AddVirtual(node Virtual) error {
+	if _, ok := g.Top[node]; !ok {
+		g.Top[node] = []*Virtual{}
+	} else {
+		return fmt.Errorf("Node already exists in Dependency Graph.")
+	}
+	// Add node's subspace to graph
+	g.Space = append(g.Space, node.Subspace().ID())
+	return nil
+}
+
+// RemoveVirtual is for removing nodes from a VDG
+func (g *VDG) RemoveVirtual(n Virtual) {
+	delete(g.Top, n)
+
+	// Remove VUI subspace from VDG (if not subspace for another Virtual node)
+	id := n.Subspace().ID()
+	remove := true
+	for i, _ := range g.Top {
+		if i.Subspace().ID() == id {
+			remove = false
+		}
+	}
+	if remove == true {
+		for i, k := range g.Space {
+			if k == id {
+				g.Space = append(g.Space[:i], g.Space[i+1:]...)
+				break
+			}
+		}
+	}
+}
+
+// AddVirtualEdge adds an edge to a VDG
+func (g *VDG) AddVirtualEdge(source int, dest *Virtual) {
+	for i, k := range g.Top {
+		if i.ID() == source {
+			if !containsVirtual(k, dest) {
+				k = append(k, dest)
+			}
+		}
+	}
+}
+
+// RemoveVirtualEdge removes an edge from a VDG
+func (g *VDG) RemoveVirtualEdge(source int, dest *Virtual) {
+	for i, k := range g.Top {
+		if i.ID() == source {
+			dp := *dest
+			for j, vp := range k {
+				v := *vp
+				if v.ID() == dp.ID() {
+					k = append(k[:j], k[j+1:]...)
+				}
+			}
+		}
+	}
+}
