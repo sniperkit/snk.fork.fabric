@@ -63,7 +63,6 @@ func (g *VDG) GenID() int {
 	return id
 }
 
-// TODO: finish
 func (g *VDG) CreateSignalers(n Virtual) SignalingMap {
 	sm := make(SignalingMap)
 
@@ -76,7 +75,6 @@ func (g *VDG) CreateSignalers(n Virtual) SignalingMap {
 	return sm
 }
 
-// TODO: finish
 func (g *VDG) Signals(n Virtual) SignalsMap {
 	sm := make(SignalsMap)
 
@@ -117,7 +115,7 @@ func (g *VDG) Dependencies(n Virtual) []Virtual {
 }
 
 // AddVirtual adds a node to a VDG
-func (g *VDG) AddVirtual(node Virtual) error {
+func (g *VDG) AddVirtualNode(node Virtual) error {
 	if _, ok := g.Top[node]; !ok {
 		g.Top[node] = []*Virtual{}
 	} else {
@@ -129,8 +127,21 @@ func (g *VDG) AddVirtual(node Virtual) error {
 }
 
 // RemoveVirtual is for removing nodes from a VDG
-func (g *VDG) RemoveVirtual(n Virtual) {
+func (g *VDG) RemoveVirtualNode(np *Virtual) {
+	n := *np
 	delete(g.Top, n)
+
+	// remove all references (edges) to node in other nodes edge slices
+	for _, l := range g.Top {
+		if containsVirtual(l, np) {
+			for j, p := range l {
+				k := *p
+				if k.ID() == n.ID() {
+					l = append(l[:j], l[j+1:]...)
+				}
+			}
+		}
+	}
 
 	// Remove VUI subspace from VDG (if not subspace for another Virtual node)
 	id := n.Subspace().ID()

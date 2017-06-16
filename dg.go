@@ -69,7 +69,6 @@ type DGNode interface {
 type Graph struct {
 	DS    *CDS // reference to CDS that the dependency graph is for
 	Nodes []DGNode
-	// FIXME: Edges should be a reference to a node and a list of references to other nodes
 	Edges map[DGNode][]DGNode // each node (id) has a list of node ids that it points too
 }
 
