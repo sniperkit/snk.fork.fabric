@@ -7,8 +7,8 @@ import (
 	"time"
 )
 
-// RECOMMENDATION: every thread should have a proper reaction (which may be a non-reaction) to each signal value for each access
-// 	procedure in each dependency node.
+// RECOMMENDATION: every thread should have a proper reaction (which may be a non-reaction)
+//  to each signal value for each access procedure in each dependency node.
 // EXAMPLE: an example reaction to an abort signal could be "Abort Chain/Tree" where the dependents
 // 	and their dependents, etc. all abort their operations if a signal value from a dependency node
 // 	is an 'Abort' signal.
@@ -37,7 +37,7 @@ const (
 	TemporalNode
 	VirtualTemporalNode
 	VUINode
-	VirtualNode
+	VDGNode
 	Unknown
 )
 
@@ -70,6 +70,7 @@ type Graph struct {
 	DS    *CDS // reference to CDS that the dependency graph is for
 	Nodes []DGNode
 	Edges map[DGNode][]DGNode // each node (id) has a list of node ids that it points too
+	// FIXME: Change to Top map[DGNode][]*DGNode
 }
 
 // NewGraph creates a new empty graph
@@ -152,6 +153,15 @@ func (g *Graph) AddRealEdge(source, dest DGNode) {
 		s = append(s, dest)
 		g.Edges[source] = s
 	}
+}
+
+// TODO: Implement
+func (g *Graph) AddTemporalNode(node DGNode, root int) {
+	// check if UI id (root) exists in Node list
+	// add edge from UI node to temporal node
+	// FIXME: the problem here is that adding more temporal nodes
+	//	will not necessarily make them dependencies of the UI node if
+	//	they are only going to be a dependency of another temporal node
 }
 
 // CycleDetect will check whether a graph has cycles or not
@@ -350,7 +360,7 @@ func (g *Graph) Type(n DGNode) NodeType {
 	}
 	_, ok = n.(Virtual)
 	if ok {
-		return VirtualNode
+		return VDGNode
 	}
 
 	return Unknown

@@ -1,15 +1,10 @@
-package fabric
+package fabric_test
 
 import (
 	"testing"
-)
 
-// TODO: NewVDG()
-// 	GenID()
-// 	AddVirtualNode()
-//	RemoveVirtualNode()
-//	AddVirtualEdge()
-//	RemoveVirtualEdge()
+	"github.com/JKhawaja/fabric"
+)
 
 func TestVDG(t *testing.T) {
 	// Create VDG graph
