@@ -74,9 +74,10 @@ type DGNode interface {
 	ListProcedures() ProcedureList
 	ListDependents() []DGNode
 	ListDependencies() []DGNode
-	ListSignalers() SignalingMap // lists signaler channels for signaling dependents
-	ListSignals() SignalsMap     // lists signal channels from *dependencies*
-	Signal(ProcedureSignals)     // used to send the same signal to all dependents in signalers list
+	UpdateSignaling(SignalingMap, SignalsMap) // makes it possible to update the SignalingMap and SignalsMap for a DGNode
+	ListSignalers() SignalingMap
+	ListSignals() SignalsMap
+	Signal(ProcedureSignals) // used to send the same signal to all dependents in signalers list
 }
 
 // Graph can be either UI DDAG, Temporal DAG or VDG
@@ -122,32 +123,30 @@ func (g *Graph) IsRootBoundary(n *DGNode) bool {
 	return false
 }
 
-// CreateSignalers ...
-func (g *Graph) CreateSignalers(np *DGNode) SignalingMap {
-	sm := make(SignalingMap)
+// SignalsAndSignalers will udpate the SignalingMaps and SignalsMaps for all DGNodes in the graph
+func (g *Graph) SignalsAndSignalers() {
 
-	deps := g.Dependents(np)
-	for _, d := range deps {
-		c := make(chan ProcedureSignals)
-		sm[d.ID()] = c
+	// for all nodes in the graph
+	for n, l := range g.Top {
+		// create its SignalersMap
+		sm := make(SignalingMap)
+		deps := g.Dependents(&n)
+		for _, d := range deps {
+			c := make(chan ProcedureSignals)
+			sm[d.ID()] = c
+		}
+
+		// create its SignalsMap
+		s := make(SignalsMap)
+		for _, np := range l {
+			dep := *np
+			channels := dep.ListSignalers()
+			ch := channels[dep.ID()]
+			s[dep.ID()] = ch
+		}
+
+		n.UpdateSignaling(sm, s)
 	}
-
-	return sm
-}
-
-// Signals ...
-func (g *Graph) Signals(np *DGNode) SignalsMap {
-	sm := make(SignalsMap)
-	n := *np
-
-	deps := g.Dependencies(np)
-	for _, d := range deps {
-		channels := d.ListSignalers()
-		ch := channels[n.ID()]
-		sm[n.ID()] = ch
-	}
-
-	return sm
 }
 
 // AddRealNode ...
@@ -171,6 +170,8 @@ func (g *Graph) AddRealEdge(source int, dest *DGNode) {
 			}
 		}
 	}
+
+	// TODO: update Signaling for both nodes in the edge
 }
 
 // CycleDetect will check whether a graph has cycles or not

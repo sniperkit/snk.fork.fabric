@@ -113,7 +113,8 @@ func (g *VDG) Dependencies(np *Virtual) []Virtual {
 	var list []Virtual
 	n := *np
 
-	if v, ok := g.Top[n]; !ok {
+	v, ok := g.Top[n]
+	if !ok {
 		return list
 	}
 
