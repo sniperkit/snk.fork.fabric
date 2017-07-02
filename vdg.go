@@ -35,6 +35,7 @@ type Virtual interface {
 // 		of a VDG is to order temporary threads (even if they are
 //		associated with different UIs).
 
+// VDG ...
 type VDG struct {
 	Global *Graph // a reference to the real global graph of the system
 	Root   *Virtual
@@ -55,7 +56,7 @@ func NewVDG(g *Graph) *VDG {
 func (g *VDG) GenID() int {
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Int()
-	for n, _ := range g.Top {
+	for n := range g.Top {
 		if n.ID() == id {
 			id = g.GenID()
 		}
@@ -63,10 +64,11 @@ func (g *VDG) GenID() int {
 	return id
 }
 
-func (g *VDG) CreateSignalers(n Virtual) SignalingMap {
+// CreateSignalers ...
+func (g *VDG) CreateSignalers(np *Virtual) SignalingMap {
 	sm := make(SignalingMap)
 
-	deps := g.Dependents(n)
+	deps := g.Dependents(np)
 	for _, d := range deps {
 		c := make(chan ProcedureSignals)
 		sm[d.ID()] = c
@@ -75,10 +77,12 @@ func (g *VDG) CreateSignalers(n Virtual) SignalingMap {
 	return sm
 }
 
-func (g *VDG) Signals(n Virtual) SignalsMap {
+// Signals ...
+func (g *VDG) Signals(np *Virtual) SignalsMap {
+	n := *np
 	sm := make(SignalsMap)
 
-	deps := g.Dependencies(n)
+	deps := g.Dependencies(np)
 	for _, d := range deps {
 		channels := d.ListSignalers()
 		ch := channels[n.ID()]
@@ -88,11 +92,14 @@ func (g *VDG) Signals(n Virtual) SignalsMap {
 	return sm
 }
 
-func (g *VDG) Dependents(n Virtual) []Virtual {
-	list := make([]Virtual, 0)
+// Dependents ...
+func (g *VDG) Dependents(np *Virtual) []Virtual {
+	var list []Virtual
+	n := *np
+
 	for i, v := range g.Top {
 		if i.ID() != n.ID() {
-			if containsVirtual(v, &n) {
+			if containsVirtual(v, np) {
 				list = append(list, i)
 			}
 		}
@@ -101,20 +108,23 @@ func (g *VDG) Dependents(n Virtual) []Virtual {
 	return list
 }
 
-func (g *VDG) Dependencies(n Virtual) []Virtual {
-	list := make([]Virtual, 0)
+// Dependencies ...
+func (g *VDG) Dependencies(np *Virtual) []Virtual {
+	var list []Virtual
+	n := *np
+
 	if v, ok := g.Top[n]; !ok {
 		return list
-	} else {
-		for _, p := range v {
-			pp := *p
-			list = append(list, pp)
-		}
-		return list
 	}
+
+	for _, p := range v {
+		pp := *p
+		list = append(list, pp)
+	}
+	return list
 }
 
-// AddVirtual adds a node to a VDG
+// AddVirtualNode adds a node to a VDG
 func (g *VDG) AddVirtualNode(node Virtual) error {
 	if _, ok := g.Top[node]; !ok {
 		g.Top[node] = []*Virtual{}
@@ -126,7 +136,7 @@ func (g *VDG) AddVirtualNode(node Virtual) error {
 	return nil
 }
 
-// RemoveVirtual is for removing nodes from a VDG
+// RemoveVirtualNode is for removing nodes from a VDG
 func (g *VDG) RemoveVirtualNode(np *Virtual) {
 	n := *np
 	delete(g.Top, n)
@@ -146,7 +156,7 @@ func (g *VDG) RemoveVirtualNode(np *Virtual) {
 	// Remove VUI subspace from VDG (if not subspace for another Virtual node)
 	id := n.Subspace().ID()
 	remove := true
-	for i, _ := range g.Top {
+	for i := range g.Top {
 		if i.Subspace().ID() == id {
 			remove = false
 		}

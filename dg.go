@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// Signal defines the possible signal values one dependency graph node can send to another
 // RECOMMENDATION: every thread should have a proper reaction (which may be a non-reaction)
 //  to each signal value for each access procedure in each dependency node.
 // EXAMPLE: an example reaction to an abort signal could be "Abort Chain/Tree" where the dependents
@@ -15,12 +16,18 @@ import (
 type Signal int
 
 const (
+	// Waiting can be used for an access procedure that has not begun but is in line too
 	Waiting Signal = iota
+	// Started can be used for an access procedure that is no longer waiting and has begun execution
 	Started
+	// Completed can be used for an access procedure that has finished execution successfully
 	Completed
+	// Aborted can be used for an access procedure that failed to finish execution
 	Aborted
-	AbortRetry   // EXAMPLE: could use exponential backoff checks on retries for AbortRetry signals from dependencies ...
-	PartialAbort // (used to specify if an operation partially-completed before aborting)
+	// AbortRetry EXAMPLE: could use exponential backoff checks on retries for AbortRetry signals from dependencies ...
+	AbortRetry
+	// PartialAbort can be used to specify if an operation partially-completed before aborting)
+	PartialAbort
 )
 
 // ProcedureSignals is used to map a signal to the access type that caused the signal
@@ -30,14 +37,21 @@ const (
 // 	procedure a signal is from you can use this map.
 type ProcedureSignals map[string]Signal
 
+// NodeType defines the possible values for types of dependency graph nodes
 type NodeType int
 
 const (
+	// UINode are the spatial definitions usually assigned to a single thread
 	UINode NodeType = iota
+	// TemporalNode are assigned to threads which address the same UI as the temporals UI dependent
 	TemporalNode
+	// VirtualTemporalNode is a spawned temporary temporal node
 	VirtualTemporalNode
+	// VUINode is a temporary UI node
 	VUINode
+	// VDGNode is a node in a virtual dependency graph
 	VDGNode
+	// Unknown is a catch-all for an improperly constructed dependency graph node
 	Unknown
 )
 
@@ -49,7 +63,7 @@ type SignalingMap map[int]chan ProcedureSignals
 // their access procedures and their current signal states.
 type SignalsMap map[int]<-chan ProcedureSignals
 
-// Dependency Graph Node
+// DGNode (Dependency Graph Node) ...
 // every DGNode has an id, a Type, a state, and a set of Access Procedures
 // NOTE: This will require assigning signals to their appropriate nodes
 //		when setting up a dependency graph.
@@ -67,25 +81,22 @@ type DGNode interface {
 
 // Graph can be either UI DDAG, Temporal DAG or VDG
 type Graph struct {
-	DS    *CDS // reference to CDS that the dependency graph is for
-	Nodes []DGNode
-	Edges map[DGNode][]DGNode // each node (id) has a list of node ids that it points too
-	// FIXME: Change to Top map[DGNode][]*DGNode
+	DS  *CDS // reference to data structure that the dependency graph is for
+	Top map[DGNode][]*DGNode
 }
 
 // NewGraph creates a new empty graph
 func NewGraph() *Graph {
-	var nodes []DGNode
 	return &Graph{
-		Nodes: nodes,
-		Edges: make(map[DGNode][]DGNode),
+		Top: make(map[DGNode][]*DGNode),
 	}
 }
 
+// GenID ...
 func (g *Graph) GenID() int {
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Int()
-	for _, n := range g.Nodes {
+	for n := range g.Top {
 		if n.ID() == id {
 			id = g.GenID()
 		}
@@ -93,7 +104,8 @@ func (g *Graph) GenID() int {
 	return id
 }
 
-func (g *Graph) IsLeafBoundary(n DGNode) bool {
+// IsLeafBoundary ...
+func (g *Graph) IsLeafBoundary(n *DGNode) bool {
 	if len(g.Dependents(n)) == 0 {
 		return true
 	}
@@ -101,7 +113,8 @@ func (g *Graph) IsLeafBoundary(n DGNode) bool {
 	return false
 }
 
-func (g *Graph) IsRootBoundary(n DGNode) bool {
+// IsRootBoundary ...
+func (g *Graph) IsRootBoundary(n *DGNode) bool {
 	if len(g.Dependencies(n)) == 0 {
 		return true
 	}
@@ -109,10 +122,11 @@ func (g *Graph) IsRootBoundary(n DGNode) bool {
 	return false
 }
 
-func (g *Graph) CreateSignalers(n DGNode) SignalingMap {
+// CreateSignalers ...
+func (g *Graph) CreateSignalers(np *DGNode) SignalingMap {
 	sm := make(SignalingMap)
 
-	deps := g.Dependents(n)
+	deps := g.Dependents(np)
 	for _, d := range deps {
 		c := make(chan ProcedureSignals)
 		sm[d.ID()] = c
@@ -121,10 +135,12 @@ func (g *Graph) CreateSignalers(n DGNode) SignalingMap {
 	return sm
 }
 
-func (g *Graph) Signals(n DGNode) SignalsMap {
+// Signals ...
+func (g *Graph) Signals(np *DGNode) SignalsMap {
 	sm := make(SignalsMap)
+	n := *np
 
-	deps := g.Dependencies(n)
+	deps := g.Dependencies(np)
 	for _, d := range deps {
 		channels := d.ListSignalers()
 		ch := channels[n.ID()]
@@ -134,34 +150,27 @@ func (g *Graph) Signals(n DGNode) SignalsMap {
 	return sm
 }
 
+// AddRealNode ...
 // This should only be used for adding nodes to a graph
 // to intialize the graph.
 func (g *Graph) AddRealNode(node DGNode) error {
-	if !contains(g.Nodes, node) {
-		g.Nodes = append(g.Nodes, node)
+	if _, ok := g.Top[node]; !ok {
+		g.Top[node] = []*DGNode{}
 	} else {
 		return fmt.Errorf("Node already exists in Dependency Graph.")
 	}
 	return nil
 }
 
-func (g *Graph) AddRealEdge(source, dest DGNode) {
-	if _, ok := g.Edges[source]; !ok {
-		g.Edges[source] = []DGNode{dest}
-	} else {
-		s := g.Edges[source]
-		s = append(s, dest)
-		g.Edges[source] = s
+// AddRealEdge ...
+func (g *Graph) AddRealEdge(source int, dest *DGNode) {
+	for i, k := range g.Top {
+		if i.ID() == source {
+			if !containsDGNode(k, dest) {
+				k = append(k, dest)
+			}
+		}
 	}
-}
-
-// TODO: Implement
-func (g *Graph) AddTemporalNode(node DGNode, root int) {
-	// check if UI id (root) exists in Node list
-	// add edge from UI node to temporal node
-	// FIXME: the problem here is that adding more temporal nodes
-	//	will not necessarily make them dependencies of the UI node if
-	//	they are only going to be a dependency of another temporal node
 }
 
 // CycleDetect will check whether a graph has cycles or not
@@ -169,9 +178,9 @@ func (g *Graph) CycleDetect() bool {
 	var seen []DGNode
 	var done []DGNode
 
-	for _, v := range g.Nodes {
-		if !contains(done, v) {
-			result, d := g.cycleDfs(v, seen, done)
+	for i := range g.Top {
+		if !contains(done, i) {
+			result, d := g.cycleDfs(i, seen, done)
 			done = d
 			if result {
 				return true
@@ -181,16 +190,12 @@ func (g *Graph) CycleDetect() bool {
 	return false
 }
 
-// GetAdjacents will return the list of nodes a supplied node points too
-func (g *Graph) GetAdjacents(node DGNode) []DGNode {
-	return g.Edges[node]
-}
-
 // Recursive Depth-First-Search; used for Cycle Detection
 func (g *Graph) cycleDfs(start DGNode, seen, done []DGNode) (bool, []DGNode) {
 	seen = append(seen, start)
-	adj := g.Edges[start]
-	for _, v := range adj {
+	adj := g.Top[start]
+	for _, vp := range adj {
+		v := *vp
 		if contains(done, v) {
 			continue
 		}
@@ -208,30 +213,56 @@ func (g *Graph) cycleDfs(start DGNode, seen, done []DGNode) (bool, []DGNode) {
 	return false, done
 }
 
-// Totality-Uniqueness check for the UI nodes of a graph...
+// GetAdjacents will return the list of nodes a supplied node points too
+func (g *Graph) GetAdjacents(node DGNode) []DGNode {
+	var list []DGNode
+
+	for n, l := range g.Top {
+		if n.ID() == node.ID() {
+			// Add all dependents to list
+			for n2, l2 := range g.Top {
+				if containsDGNode(l2, &n) {
+					list = append(list, n2)
+				}
+			}
+			// Add all dependencies to list
+			for _, np := range l {
+				list = append(list, *np)
+			}
+		}
+	}
+
+	return list
+}
+
+// TotalityUnique is a Totality-Uniqueness check for the UI nodes of a graph...
 // should only be called once when creating the UI dependency graph;
 // can be called with the creation of each UI if needed for
 // more "real-time" verification.
 func (g *Graph) TotalityUnique() bool {
 	// grab all UI nodes
-	uiSlice := make([]DGNode, 0)
-	for _, v := range g.Nodes {
-		if v.GetType() == UINode {
-			uiSlice = append(uiSlice, v)
+	var uiSlice []DGNode
+	for i := range g.Top {
+		if i.GetType() == UINode {
+			uiSlice = append(uiSlice, i)
 		}
 	}
 
+	var done []DGNode
+
+	// for every UI Node
 	for i, n := range uiSlice {
-		// compare the UI to all other UIs
-		for i2, n2 := range g.Nodes {
-			if i != i2 {
-				// if UI is same as other UI return false
-				// i.e. graph is not totality-unique
-				if reflect.DeepEqual(n, n2) {
-					return false
+		// compare it against every other UI node
+		for j, n2 := range uiSlice {
+			if !contains(done, n2) {
+				if j != i {
+					if reflect.DeepEqual(n, n2) {
+						return false
+					}
 				}
 			}
 		}
+		done = append(done, n)
 	}
 
 	return true
@@ -240,8 +271,8 @@ func (g *Graph) TotalityUnique() bool {
 // Covered returns true if all CDS nodes and edges are covered
 func (g *Graph) Covered() bool {
 	// grab all UI nodes
-	uiSlice := make([]UI, 0)
-	for _, v := range g.Nodes {
+	var uiSlice []UI
+	for v := range g.Top {
 		if v.GetType() == UINode {
 			uiSlice = append(uiSlice, v.(UI))
 		}
@@ -265,6 +296,7 @@ FIRST:
 				continue FIRST
 			}
 		}
+
 		// if CDS node is checked in every UI and does not show up
 		return false
 	}
@@ -290,41 +322,45 @@ SECOND:
 	return true
 }
 
+// AddVUI requires that the node return a true value for its IsVirtual method
 func (g *Graph) AddVUI(node UI) error {
 	if !node.IsVirtual() {
 		return fmt.Errorf("Not a virtual node.")
-	} else {
-		if !contains(g.Nodes, node) {
-			g.Nodes = append(g.Nodes, node)
-		} else {
-			return fmt.Errorf("Node already exists in Dependency Graph.")
-		}
 	}
+
+	var nodeSlice []DGNode
+	for n := range g.Top {
+		nodeSlice = append(nodeSlice, n)
+	}
+
+	if !contains(nodeSlice, node) {
+		g.Top[node.(DGNode)] = []*DGNode{}
+	} else {
+		return fmt.Errorf("Node already exists in Dependency Graph.")
+	}
+
 	return nil
 }
 
+// RemoveVUI ...
 func (g *Graph) RemoveVUI(node UI) error {
-	newList := make([]DGNode, 0)
 	if !node.IsVirtual() {
 		return fmt.Errorf("Not a virtual node.")
-	} else {
-		for _, v := range g.Nodes {
-			if node.ID() != v.ID() {
-				newList = append(newList, v)
-			}
-		}
-
-		g.Nodes = newList
 	}
+
+	delete(g.Top, node.(DGNode))
 
 	return nil
 }
 
-func (g *Graph) Dependents(n DGNode) []DGNode {
-	list := make([]DGNode, 0)
-	for i, v := range g.Edges {
+// Dependents ...
+func (g *Graph) Dependents(np *DGNode) []DGNode {
+	var list []DGNode
+	n := *np
+
+	for i, v := range g.Top {
 		if i.ID() != n.ID() {
-			if contains(v, n) {
+			if containsDGNode(v, np) {
 				list = append(list, i)
 			}
 		}
@@ -333,33 +369,38 @@ func (g *Graph) Dependents(n DGNode) []DGNode {
 	return list
 }
 
-func (g *Graph) Dependencies(n DGNode) []DGNode {
-	emptyList := make([]DGNode, 0)
-	if v, ok := g.Edges[n]; !ok {
-		return emptyList
-	} else {
-		return v
+// Dependencies ...
+func (g *Graph) Dependencies(np *DGNode) []DGNode {
+	var list []DGNode
+
+	n := *np
+	v, ok := g.Top[n]
+	if !ok {
+		return list
 	}
+
+	for _, p := range v {
+		pp := *p
+		list = append(list, pp)
+	}
+	return list
 }
 
+// Type will return the proper NodeType value for a given DGNode argument
 func (g *Graph) Type(n DGNode) NodeType {
-
-	j, ok := n.(UI)
-	if ok {
+	if j, ok := n.(UI); ok {
 		if j.IsVirtual() {
 			return VUINode
 		}
 		return UINode
 	}
-	k, ok := n.(Temporal)
-	if ok {
+	if k, ok := n.(Temporal); ok {
 		if k.IsVirtual() {
 			return VirtualTemporalNode
 		}
 		return TemporalNode
 	}
-	_, ok = n.(Virtual)
-	if ok {
+	if _, ok := n.(Virtual); ok {
 		return VDGNode
 	}
 
