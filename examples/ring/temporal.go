@@ -82,6 +82,11 @@ func (r RingTemporal) ListSignalers() fabric.SignalingMap {
 	return r.Signalers
 }
 
+func (r RingTemporal) UpdateSignaling(sm fabric.SignalingMap, s fabric.SignalsMap) {
+	r.Signalers = sm
+	r.Signals = s
+}
+
 func (r RingTemporal) Signal(s fabric.ProcedureSignals) {
 	for _, c := range r.Signalers {
 		c <- s

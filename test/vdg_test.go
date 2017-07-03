@@ -2,8 +2,7 @@ package fabric_test
 
 import (
 	"testing"
-
-	"github.com/JKhawaja/fabric"
+	// "github.com/JKhawaja/fabric"
 )
 
 func TestVDG(t *testing.T) {

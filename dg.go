@@ -153,6 +153,10 @@ func (g *Graph) SignalsAndSignalers() {
 // This should only be used for adding nodes to a graph
 // to intialize the graph.
 func (g *Graph) AddRealNode(node DGNode) error {
+	if !reflect.ValueOf(node).Type().Comparable() {
+		return fmt.Errorf("Node type is not comparable and cannot be used in the graph topology")
+	}
+
 	if _, ok := g.Top[node]; !ok {
 		g.Top[node] = []*DGNode{}
 	} else {
@@ -355,7 +359,7 @@ func (g *Graph) AddVUI(node UI) error {
 	if !contains(nodeSlice, node) {
 		g.Top[node.(DGNode)] = []*DGNode{}
 	} else {
-		return fmt.Errorf("Node already exists in Dependency Graph.")
+		return fmt.Errorf("Node already exists in Dependency Graph")
 	}
 
 	return nil
@@ -366,15 +370,15 @@ func (g *Graph) RemoveVUI(np *DGNode) error {
 	n := *np
 	node, ok := n.(UI)
 	if !ok {
-		return fmt.Errorf("Not a UI node.")
+		return fmt.Errorf("Not a UI node")
 	}
 
 	if !node.IsVirtual() {
-		return fmt.Errorf("Not a virtual node.")
+		return fmt.Errorf("Not a virtual node")
 	}
 
 	if len(node.ListDependencies()) != 0 {
-		return fmt.Errorf("VUI node still has dependencies.")
+		return fmt.Errorf("VUI node still has dependencies")
 	}
 
 	// Remove VUI from Signals maps in depedent nodes
