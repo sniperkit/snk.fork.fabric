@@ -6,19 +6,16 @@ import (
 	"github.com/JKhawaja/fabric"
 )
 
-// FIXME: Need to design an example for how to store dependents and dependencies
-// 	as well as Signalers and Signals, and the list of access procedures outside
-// 	of the struct definition.
 type Node struct {
-	Id   int
-	Type fabric.NodeType
-	// Signalers        fabric.SignalingMap
-	// AccessProcedures fabric.ProcedureList
-	// Dependents   []fabric.DGNode
-	// Dependencies []fabric.DGNode
-	// Signals          fabric.SignalsMap
-	IsRoot bool
-	IsLeaf bool
+	Id               int
+	Type             fabric.NodeType
+	Signalers        *fabric.SignalingMap
+	AccessProcedures *fabric.ProcedureList
+	Dependents       *[]fabric.DGNode
+	Dependencies     *[]fabric.DGNode
+	Signals          *fabric.SignalsMap
+	IsRoot           bool
+	IsLeaf           bool
 }
 
 type UI struct {
@@ -47,41 +44,38 @@ func (u UI) GetPriority() int {
 }
 
 func (u UI) ListProcedures() fabric.ProcedureList {
-	var p fabric.ProcedureList
+	p := *u.AccessProcedures
 	return p
 }
 
 func (u UI) ListDependents() []fabric.DGNode {
-	var d []fabric.DGNode
-	return d
+	return *u.Dependents
 }
 
 func (u UI) ListDependencies() []fabric.DGNode {
-	var d []fabric.DGNode
-	return d
+	return *u.Dependencies
 }
 
 func (u UI) ListSignals() fabric.SignalsMap {
-	s := make(fabric.SignalsMap)
-	return s
+	return *u.Signals
 }
 
 func (u UI) ListSignalers() fabric.SignalingMap {
-	s := make(fabric.SignalingMap)
-	return s
+	return *u.Signalers
 }
 
 func (u UI) UpdateSignaling(sm fabric.SignalingMap, s fabric.SignalsMap) {
-	//u.Signalers = sm
-	//u.Signals = s
+	*u.Signalers = sm
+	*u.Signals = s
 }
 
 func (u UI) Signal(s fabric.ProcedureSignals) {
-	/*
-		for _, c := range u.Signalers {
-			c <- s
-		}
-	*/
+	sm := *u.Signalers
+
+	for _, c := range sm {
+		c <- s
+	}
+
 }
 
 func (u UI) GetSection() *fabric.Section {
@@ -111,41 +105,41 @@ func (t Temporal) GetPriority() int {
 }
 
 func (t Temporal) ListProcedures() fabric.ProcedureList {
-	var p fabric.ProcedureList
+	p := *t.AccessProcedures
 	return p
 }
 
 func (t Temporal) ListDependents() []fabric.DGNode {
-	var d []fabric.DGNode
+	d := *t.Dependents
 	return d
 }
 
 func (t Temporal) ListDependencies() []fabric.DGNode {
-	var d []fabric.DGNode
+	d := *t.Dependencies
 	return d
 }
 
 func (t Temporal) ListSignals() fabric.SignalsMap {
-	s := make(fabric.SignalsMap)
+	s := *t.Signals
 	return s
 }
 
 func (t Temporal) ListSignalers() fabric.SignalingMap {
-	s := make(fabric.SignalingMap)
+	s := *t.Signalers
 	return s
 }
 
 func (t Temporal) UpdateSignaling(sm fabric.SignalingMap, s fabric.SignalsMap) {
-	//t.Signalers = sm
-	//t.Signals = s
+	*t.Signalers = sm
+	*t.Signals = s
 }
 
 func (t Temporal) Signal(s fabric.ProcedureSignals) {
-	/*
-		for _, c := range t.Signalers {
-			c <- s
-		}
-	*/
+	sm := *t.Signalers
+
+	for _, c := range sm {
+		c <- s
+	}
 }
 
 func (t Temporal) IsVirtual() bool {
@@ -157,14 +151,20 @@ func (t Temporal) IsVirtual() bool {
 func TestDG(t *testing.T) {
 	// Create New DG Graph (check)
 	graph := fabric.NewGraph()
+	sm1 := make(fabric.SignalingMap)
+	s1 := make(fabric.SignalsMap)
+	var d11 []fabric.DGNode
+	var d12 []fabric.DGNode
 
 	// Create UI node
 	u := UI{
 		Node: Node{
-			Id:   graph.GenID(),
-			Type: fabric.UINode,
-			//Signalers: make(fabric.SignalingMap),
-			//Signals:   make(fabric.SignalsMap),
+			Id:           graph.GenID(),
+			Type:         fabric.UINode,
+			Signalers:    &sm1,
+			Signals:      &s1,
+			Dependents:   &d11,
+			Dependencies: &d12,
 		},
 		Virtual: false,
 	}
@@ -188,11 +188,17 @@ func TestDG(t *testing.T) {
 	}
 
 	// Create Temporal node (for first UI) and add to graph (check)
+	sm2 := make(fabric.SignalingMap)
+	s2 := make(fabric.SignalsMap)
+	var d21 []fabric.DGNode
+	var d22 []fabric.DGNode
 	temp := Temporal{
 		Node: Node{Id: graph.GenID(),
-			Type: fabric.TemporalNode,
-			//Signalers: make(fabric.SignalingMap),
-			//Signals:   make(fabric.SignalsMap),
+			Type:         fabric.TemporalNode,
+			Signalers:    &sm2,
+			Signals:      &s2,
+			Dependents:   &d21,
+			Dependencies: &d22,
 		},
 		UIRoot: u,
 	}
@@ -212,11 +218,17 @@ func TestDG(t *testing.T) {
 
 	// Create second UI node, and add to graph
 	// Add Edge from first UI node to second UInode
+	sm3 := make(fabric.SignalingMap)
+	s3 := make(fabric.SignalsMap)
+	var d31 []fabric.DGNode
+	var d32 []fabric.DGNode
 	u2 := UI{
 		Node: Node{Id: graph.GenID(),
-			Type: fabric.UINode,
-			//Signalers: make(fabric.SignalingMap),
-			//Signals:   make(fabric.SignalsMap),
+			Type:         fabric.UINode,
+			Signalers:    &sm3,
+			Signals:      &s3,
+			Dependents:   &d31,
+			Dependencies: &d32,
 		},
 	}
 
@@ -244,16 +256,21 @@ func TestDG(t *testing.T) {
 			if graph.IsLeafBoundary(&n) != true {
 				t.Fatal("Incorrectly classified a leaf boundary node.")
 			}
-
 		}
 	}
 
 	// Create VUI
+	sm4 := make(fabric.SignalingMap)
+	s4 := make(fabric.SignalsMap)
+	var d41 []fabric.DGNode
+	var d42 []fabric.DGNode
 	vu := UI{
 		Node: Node{Id: graph.GenID(),
-			Type: fabric.VUINode,
-			//Signalers: make(fabric.SignalingMap),
-			//Signals:   make(fabric.SignalsMap),
+			Type:         fabric.VUINode,
+			Signalers:    &sm4,
+			Signals:      &s4,
+			Dependents:   &d41,
+			Dependencies: &d42,
 		},
 		Virtual: true,
 	}
@@ -269,7 +286,8 @@ func TestDG(t *testing.T) {
 	// Remove VUI from graph (check)
 	for n := range graph.Top {
 		if n.ID() == vu.Id {
-			graph.RemoveVUI(&n)
+			graph.RemoveVUI(n)
+			break
 		}
 	}
 
