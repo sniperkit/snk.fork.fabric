@@ -161,17 +161,35 @@ func (g *Graph) AddRealNode(node DGNode) error {
 	return nil
 }
 
-// AddRealEdge ...
+// AddRealEdge will create an edge and an appropriate signaling channel between nodes
 func (g *Graph) AddRealEdge(source int, dest *DGNode) {
+	d := *dest
+
 	for i, k := range g.Top {
 		if i.ID() == source {
 			if !containsDGNode(k, dest) {
 				k = append(k, dest)
+
+				// update SignalingMap for destination
+				depSig := d.ListSignalers()
+				depS := d.ListSignals()
+				depSig[i.ID()] = make(chan ProcedureSignals)
+				d.UpdateSignaling(depSig, depS)
+
+				// update SignalsMap for source
+				signals := i.ListSignals()
+				signalers := i.ListSignalers()
+				for j, v := range d.ListSignalers() {
+					if j == i.ID() {
+						signals[d.ID()] = v
+						break
+					}
+				}
+				i.UpdateSignaling(signalers, signals)
 			}
 		}
 	}
 
-	// TODO: update Signaling for both nodes in the edge
 }
 
 // CycleDetect will check whether a graph has cycles or not
@@ -344,11 +362,31 @@ func (g *Graph) AddVUI(node UI) error {
 }
 
 // RemoveVUI ...
-func (g *Graph) RemoveVUI(node UI) error {
+func (g *Graph) RemoveVUI(np *DGNode) error {
+	n := *np
+	node, ok := n.(UI)
+	if !ok {
+		return fmt.Errorf("Not a UI node.")
+	}
+
 	if !node.IsVirtual() {
 		return fmt.Errorf("Not a virtual node.")
 	}
 
+	if len(node.ListDependencies()) != 0 {
+		return fmt.Errorf("VUI node still has dependencies.")
+	}
+
+	// Remove VUI from Signals maps in depedent nodes
+	for n, l := range g.Top {
+		if containsDGNode(l, np) {
+			signals := n.ListSignals()
+			delete(signals, node.ID())
+			n.UpdateSignaling(n.ListSignalers(), signals)
+		}
+	}
+
+	// remove node from graph
 	delete(g.Top, node.(DGNode))
 
 	return nil
