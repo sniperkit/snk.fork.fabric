@@ -48,14 +48,6 @@ func (u UI) ListProcedures() fabric.ProcedureList {
 	return p
 }
 
-func (u UI) ListDependents() []fabric.DGNode {
-	return *u.Dependents
-}
-
-func (u UI) ListDependencies() []fabric.DGNode {
-	return *u.Dependencies
-}
-
 func (u UI) ListSignals() fabric.SignalsMap {
 	return *u.Signals
 }
@@ -107,16 +99,6 @@ func (t Temporal) GetPriority() int {
 func (t Temporal) ListProcedures() fabric.ProcedureList {
 	p := *t.AccessProcedures
 	return p
-}
-
-func (t Temporal) ListDependents() []fabric.DGNode {
-	d := *t.Dependents
-	return d
-}
-
-func (t Temporal) ListDependencies() []fabric.DGNode {
-	d := *t.Dependencies
-	return d
 }
 
 func (t Temporal) ListSignals() fabric.SignalsMap {
@@ -247,13 +229,13 @@ func TestDG(t *testing.T) {
 	// Do Leaf and Root Boundary checks again
 	for n := range graph.Top {
 		if n.ID() == u.Id {
-			if graph.IsRootBoundary(&n) != true {
+			if !graph.IsRootBoundary(&n) {
 				t.Fatal("Incorrectly classified a root boundary node.")
 			}
 		}
 
 		if n.ID() == u2.Id {
-			if graph.IsLeafBoundary(&n) != true {
+			if !graph.IsLeafBoundary(&n) {
 				t.Fatal("Incorrectly classified a leaf boundary node.")
 			}
 		}
@@ -298,10 +280,100 @@ func TestDG(t *testing.T) {
 	}
 }
 
-// TODO: Type() Test
+func TestCycleDetect(t *testing.T) {
+	// Create New DG Graph (check)
+	graph := fabric.NewGraph()
 
-// TODO: CycleDetect() Test
+	// Create first UI node
+	sm1 := make(fabric.SignalingMap)
+	s1 := make(fabric.SignalsMap)
+	var d11 []fabric.DGNode
+	var d12 []fabric.DGNode
+	u1 := UI{
+		Node: Node{
+			Id:           graph.GenID(),
+			Type:         fabric.UINode,
+			Signalers:    &sm1,
+			Signals:      &s1,
+			Dependents:   &d11,
+			Dependencies: &d12,
+		},
+		Virtual: false,
+	}
 
+	err := graph.AddRealNode(u1)
+	if err != nil {
+		t.Fatalf("Could not add UI node to graph: %v", err)
+	}
+
+	// Create second UI node
+	sm2 := make(fabric.SignalingMap)
+	s2 := make(fabric.SignalsMap)
+	var d21 []fabric.DGNode
+	var d22 []fabric.DGNode
+	u2 := UI{
+		Node: Node{
+			Id:           graph.GenID(),
+			Type:         fabric.UINode,
+			Signalers:    &sm2,
+			Signals:      &s2,
+			Dependents:   &d21,
+			Dependencies: &d22,
+		},
+		Virtual: false,
+	}
+
+	err = graph.AddRealNode(u2)
+	if err != nil {
+		t.Fatalf("Could not add UI node to graph: %v", err)
+	}
+
+	// Create third UI node
+	sm3 := make(fabric.SignalingMap)
+	s3 := make(fabric.SignalsMap)
+	var d31 []fabric.DGNode
+	var d32 []fabric.DGNode
+	u3 := UI{
+		Node: Node{
+			Id:           graph.GenID(),
+			Type:         fabric.UINode,
+			Signalers:    &sm3,
+			Signals:      &s3,
+			Dependents:   &d31,
+			Dependencies: &d32,
+		},
+		Virtual: false,
+	}
+
+	// Add UI node to graph (check)
+	err = graph.AddRealNode(u3)
+	if err != nil {
+		t.Fatalf("Could not add UI node to graph: %v", err)
+	}
+
+	// Add Edges (creates a cycle)
+	for n := range graph.Top {
+		// from node 1 to node 2
+		if n.ID() == u2.Id {
+			graph.AddRealEdge(u1.ID(), &n)
+		}
+
+		// from node 2 to node 3
+		if n.ID() == u3.Id {
+			graph.AddRealEdge(u2.ID(), &n)
+		}
+
+		// from node 3 to node 1
+		if n.ID() == u1.Id {
+			graph.AddRealEdge(u3.ID(), &n)
+		}
+	}
+
+	if !graph.CycleDetect() {
+		t.Fatalf("Did not detect cycle in the graph")
+	}
+}
+
+// TODO: create CDS
 // TODO: TotalityUnique() Test
-
 // TODO: Covered() Test

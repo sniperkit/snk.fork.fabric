@@ -11,9 +11,9 @@ func contains(s []DGNode, i DGNode) bool {
 }
 
 func containsDGNode(s []*DGNode, ip *DGNode) bool {
+	i := *ip
 	for _, vp := range s {
 		v := *vp
-		i := *ip
 		if i.ID() == v.ID() {
 			return true
 		}

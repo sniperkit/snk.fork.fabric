@@ -72,8 +72,6 @@ type DGNode interface {
 	GetType() NodeType // specifies whether node is UI, VUI, etc.
 	GetPriority() int  // not necessary, but can be useful
 	ListProcedures() ProcedureList
-	ListDependents() []DGNode
-	ListDependencies() []DGNode
 	UpdateSignaling(SignalingMap, SignalsMap) // makes it possible to update the SignalingMap and SignalsMap for a DGNode
 	ListSignalers() SignalingMap
 	ListSignals() SignalsMap
@@ -107,7 +105,7 @@ func (g *Graph) GenID() int {
 
 // IsLeafBoundary ...
 func (g *Graph) IsLeafBoundary(n *DGNode) bool {
-	if len(g.Dependents(n)) == 0 {
+	if len(g.Dependencies(n)) == 0 {
 		return true
 	}
 
@@ -116,7 +114,7 @@ func (g *Graph) IsLeafBoundary(n *DGNode) bool {
 
 // IsRootBoundary ...
 func (g *Graph) IsRootBoundary(n *DGNode) bool {
-	if len(g.Dependencies(n)) == 0 {
+	if len(g.Dependents(n)) == 0 {
 		return true
 	}
 
@@ -154,7 +152,7 @@ func (g *Graph) SignalsAndSignalers() {
 // to intialize the graph.
 func (g *Graph) AddRealNode(node DGNode) error {
 	if !reflect.ValueOf(node).Type().Comparable() {
-		return fmt.Errorf("Node type is not comparable and cannot be used in the graph topology")
+		return fmt.Errorf("Node type is not comparable and cannot be used in the graph topology. \n Try removing any slices, maps, and functions from struct definition.")
 	}
 
 	if _, ok := g.Top[node]; !ok {
@@ -168,11 +166,17 @@ func (g *Graph) AddRealNode(node DGNode) error {
 // AddRealEdge will create an edge and an appropriate signaling channel between nodes
 func (g *Graph) AddRealEdge(source int, dest *DGNode) {
 	d := *dest
+	var newList []*DGNode
+	var a DGNode
+	added := false
 
 	for i, k := range g.Top {
 		if i.ID() == source {
 			if !containsDGNode(k, dest) {
+				added = true
+				a = i
 				k = append(k, dest)
+				newList = append(newList, k...)
 
 				// update SignalingMap for destination
 				depSig := d.ListSignalers()
@@ -193,7 +197,10 @@ func (g *Graph) AddRealEdge(source int, dest *DGNode) {
 			}
 		}
 	}
-
+	// add dependency to source node's dependency list
+	if added {
+		g.Top[a] = newList
+	}
 }
 
 // CycleDetect will check whether a graph has cycles or not
@@ -236,7 +243,7 @@ func (g *Graph) cycleDfs(start DGNode, seen, done []DGNode) (bool, []DGNode) {
 	return false, done
 }
 
-// GetAdjacents will return the list of nodes a supplied node points too
+// GetAdjacents will return the list of nodes that a node is connected too
 func (g *Graph) GetAdjacents(node DGNode) []DGNode {
 	var list []DGNode
 
@@ -366,8 +373,7 @@ func (g *Graph) AddVUI(node UI) error {
 }
 
 // RemoveVUI ...
-func (g *Graph) RemoveVUI(np *DGNode) error {
-	n := *np
+func (g *Graph) RemoveVUI(n DGNode) error {
 	node, ok := n.(UI)
 	if !ok {
 		return fmt.Errorf("Not a UI node")
@@ -377,21 +383,29 @@ func (g *Graph) RemoveVUI(np *DGNode) error {
 		return fmt.Errorf("Not a virtual node")
 	}
 
-	if len(node.ListDependencies()) != 0 {
-		return fmt.Errorf("VUI node still has dependencies")
+	for n1 := range g.Top {
+		if n1.ID() == n.ID() {
+			if len(g.Dependencies(&n1)) != 0 {
+				return fmt.Errorf("VUI node still has dependencies")
+			}
+		}
 	}
 
 	// Remove VUI from Signals maps in depedent nodes
-	for n, l := range g.Top {
-		if containsDGNode(l, np) {
-			signals := n.ListSignals()
-			delete(signals, node.ID())
-			n.UpdateSignaling(n.ListSignalers(), signals)
+	for n1 := range g.Top {
+		if n1.ID() == n.ID() {
+			for n2, l := range g.Top {
+				if containsDGNode(l, &n1) {
+					signals := n2.ListSignals()
+					delete(signals, n1.ID())
+					n2.UpdateSignaling(n2.ListSignalers(), signals)
+				}
+			}
 		}
 	}
 
 	// remove node from graph
-	delete(g.Top, node.(DGNode))
+	delete(g.Top, n)
 
 	return nil
 }

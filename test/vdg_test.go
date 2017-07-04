@@ -5,6 +5,7 @@ import (
 	// "github.com/JKhawaja/fabric"
 )
 
+// TODO: finish writing test
 func TestVDG(t *testing.T) {
 	// Create VDG graph
 	// Create Virtual Node
