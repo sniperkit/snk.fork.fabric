@@ -18,7 +18,6 @@ import (
 // Total-Invariance
 //	Next(); READ
 //	Previous(); READ
-
 type ElementRead func(*ElementNode) (*ElementNode, error)
 
 func (r *ElementRead) Class() string {
@@ -51,7 +50,6 @@ func (e *ElementRead) InvariantEdge(edge *ElementEdge) bool {
 // Total-Invariance
 //	Front(); READ
 //	Back(); READ
-
 type RingRead func(*Ring) (*ElementNode, error)
 
 func (r *RingRead) Class() string {
@@ -83,7 +81,6 @@ func (r *RingRead) InvariantEdge(e *ElementEdge) bool {
 
 // Delete an element
 // Remove(); MANIP
-
 type ElementDelete func(*ElementNode) (interface{}, error)
 
 func (e *ElementDelete) Class() string {
@@ -138,7 +135,6 @@ func (e *ElementDelete) InvariantEdge(edge *ElementEdge) bool {
 // Create (default position)
 // 	PushFront(); MANIP -- creates new node (w/ value) and puts in front
 // 	PushBack(); MANIP -- creates new node (w/ value) and puts in back
-
 type CreateElement func(interface{}) (*ElementNode, error)
 
 func (c *CreateElement) Class() string {
@@ -171,7 +167,6 @@ func (c *CreateElement) InvariantEdge(edge *ElementEdge) bool {
 // Create (w/ chosen position)
 // 	InsertBefore(); MANIP -- creates new node (w/ value)
 //	InsertAfter(); MANIP -- creates new node (w/ value)
-
 type CreateInsertElement func(interface{}, *ElementNode) (*ElementNode, error)
 
 func (c *CreateInsertElement) Class() string {
@@ -204,7 +199,6 @@ func (c *CreateInsertElement) InvariantEdge(edge *ElementEdge) bool {
 // Value-Invariance
 // 	MoveToFront();MANIP
 // 	MoveToBack(); MANIP
-
 type ValueInvariant func(*ElementNode) error
 
 func (v *ValueInvariant) Class() string {
@@ -236,7 +230,6 @@ func (v *ValueInvariant) InvariantEdge(edge *ElementEdge) bool {
 
 // MoveBefore(); MANIP
 // MoveAfter(); MANIP
-
 type MarkValueInvariant func(*ElementNode, *ElementNode) error
 
 func (m *MarkValueInvariant) Class() string {

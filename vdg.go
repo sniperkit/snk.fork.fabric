@@ -174,12 +174,22 @@ func (g *VDG) RemoveVirtualNode(np *Virtual) {
 
 // AddVirtualEdge adds an edge to a VDG
 func (g *VDG) AddVirtualEdge(source int, dest *Virtual) {
+	var newList []*Virtual
+	var a Virtual
+	added := false
+
 	for i, k := range g.Top {
 		if i.ID() == source {
 			if !containsVirtual(k, dest) {
+				added = true
+				a = i
 				k = append(k, dest)
+				newList = append(newList, k...)
 			}
 		}
+	}
+	if added {
+		g.Top[a] = newList
 	}
 }
 
@@ -196,4 +206,44 @@ func (g *VDG) RemoveVirtualEdge(source int, dest *Virtual) {
 			}
 		}
 	}
+}
+
+// CycleDetect will check whether a graph has cycles or not
+func (g *VDG) CycleDetect() bool {
+	var seen []Virtual
+	var done []Virtual
+
+	for i := range g.Top {
+		if !containsV(done, i) {
+			result, d := g.cycleDfs(i, seen, done)
+			done = d
+			if result {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// Recursive Depth-First-Search; used for Cycle Detection
+func (g *VDG) cycleDfs(start Virtual, seen, done []Virtual) (bool, []Virtual) {
+	seen = append(seen, start)
+	adj := g.Top[start]
+	for _, vp := range adj {
+		v := *vp
+		if containsV(done, v) {
+			continue
+		}
+
+		if containsV(seen, v) {
+			return true, done
+		}
+
+		if result, done := g.cycleDfs(v, seen, done); result {
+			return true, done
+		}
+	}
+	seen = seen[:len(seen)-1]
+	done = append(done, start)
+	return false, done
 }
