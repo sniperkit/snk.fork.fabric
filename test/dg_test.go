@@ -1,7 +1,9 @@
 package fabric_test
 
 import (
+	"math/rand"
 	"testing"
+	"time"
 
 	"github.com/JKhawaja/fabric"
 )
@@ -11,8 +13,6 @@ type Node struct {
 	Type             fabric.NodeType
 	Signalers        *fabric.SignalingMap
 	AccessProcedures *fabric.ProcedureList
-	Dependents       *[]fabric.DGNode
-	Dependencies     *[]fabric.DGNode
 	Signals          *fabric.SignalsMap
 	IsRoot           bool
 	IsLeaf           bool
@@ -67,7 +67,6 @@ func (u UI) Signal(s fabric.ProcedureSignals) {
 	for _, c := range sm {
 		c <- s
 	}
-
 }
 
 func (u UI) GetSection() *fabric.Section {
@@ -133,25 +132,21 @@ func (t Temporal) IsVirtual() bool {
 func TestDG(t *testing.T) {
 	// Create New DG Graph (check)
 	graph := fabric.NewGraph()
-	sm1 := make(fabric.SignalingMap)
-	s1 := make(fabric.SignalsMap)
-	var d11 []fabric.DGNode
-	var d12 []fabric.DGNode
 
 	// Create UI node
+	sm1 := make(fabric.SignalingMap)
+	s1 := make(fabric.SignalsMap)
 	u := UI{
 		Node: Node{
-			Id:           graph.GenID(),
-			Type:         fabric.UINode,
-			Signalers:    &sm1,
-			Signals:      &s1,
-			Dependents:   &d11,
-			Dependencies: &d12,
+			Id:        graph.GenID(),
+			Type:      fabric.UINode,
+			Signalers: &sm1,
+			Signals:   &s1,
 		},
 		Virtual: false,
 	}
 
-	// Add UI node to graph (check)
+	// Add UI node to graph
 	err := graph.AddRealNode(u)
 	if err != nil {
 		t.Fatalf("Could not add UI node to graph: %v", err)
@@ -172,15 +167,11 @@ func TestDG(t *testing.T) {
 	// Create Temporal node (for first UI) and add to graph (check)
 	sm2 := make(fabric.SignalingMap)
 	s2 := make(fabric.SignalsMap)
-	var d21 []fabric.DGNode
-	var d22 []fabric.DGNode
 	temp := Temporal{
 		Node: Node{Id: graph.GenID(),
-			Type:         fabric.TemporalNode,
-			Signalers:    &sm2,
-			Signals:      &s2,
-			Dependents:   &d21,
-			Dependencies: &d22,
+			Type:      fabric.TemporalNode,
+			Signalers: &sm2,
+			Signals:   &s2,
 		},
 		UIRoot: u,
 	}
@@ -199,18 +190,13 @@ func TestDG(t *testing.T) {
 	}
 
 	// Create second UI node, and add to graph
-	// Add Edge from first UI node to second UInode
 	sm3 := make(fabric.SignalingMap)
 	s3 := make(fabric.SignalsMap)
-	var d31 []fabric.DGNode
-	var d32 []fabric.DGNode
 	u2 := UI{
 		Node: Node{Id: graph.GenID(),
-			Type:         fabric.UINode,
-			Signalers:    &sm3,
-			Signals:      &s3,
-			Dependents:   &d31,
-			Dependencies: &d32,
+			Type:      fabric.UINode,
+			Signalers: &sm3,
+			Signals:   &s3,
 		},
 	}
 
@@ -226,7 +212,7 @@ func TestDG(t *testing.T) {
 		}
 	}
 
-	// Do Leaf and Root Boundary checks again
+	// Do some Leaf and Root Boundary checks again
 	for n := range graph.Top {
 		if n.ID() == u.Id {
 			if !graph.IsRootBoundary(&n) {
@@ -244,15 +230,11 @@ func TestDG(t *testing.T) {
 	// Create VUI
 	sm4 := make(fabric.SignalingMap)
 	s4 := make(fabric.SignalsMap)
-	var d41 []fabric.DGNode
-	var d42 []fabric.DGNode
 	vu := UI{
 		Node: Node{Id: graph.GenID(),
-			Type:         fabric.VUINode,
-			Signalers:    &sm4,
-			Signals:      &s4,
-			Dependents:   &d41,
-			Dependencies: &d42,
+			Type:      fabric.VUINode,
+			Signalers: &sm4,
+			Signals:   &s4,
 		},
 		Virtual: true,
 	}
@@ -263,7 +245,22 @@ func TestDG(t *testing.T) {
 		t.Fatalf("Could not add VUI node to graph: %v", err)
 	}
 
-	// TODO: Check Signalers and Signals for all Nodes
+	// Quick Signalers and Signals check (verbose test logs)
+	for n := range graph.Top {
+		if n.ID() == u.Id {
+			signals := n.ListSignals()
+			t.Logf("UI-1 Signals: %v", signals)
+			signalers := n.ListSignalers()
+			t.Logf("UI-1 Signalers: %v", signalers)
+		}
+
+		if n.ID() == temp.Id {
+			signals := n.ListSignals()
+			t.Logf("Temporal Signals: %v", signals)
+			signalers := n.ListSignalers()
+			t.Logf("Temporal Signalers: %v", signalers)
+		}
+	}
 
 	// Remove VUI from graph (check)
 	for n := range graph.Top {
@@ -287,16 +284,12 @@ func TestCycleDetect(t *testing.T) {
 	// Create first UI node
 	sm1 := make(fabric.SignalingMap)
 	s1 := make(fabric.SignalsMap)
-	var d11 []fabric.DGNode
-	var d12 []fabric.DGNode
 	u1 := UI{
 		Node: Node{
-			Id:           graph.GenID(),
-			Type:         fabric.UINode,
-			Signalers:    &sm1,
-			Signals:      &s1,
-			Dependents:   &d11,
-			Dependencies: &d12,
+			Id:        graph.GenID(),
+			Type:      fabric.UINode,
+			Signalers: &sm1,
+			Signals:   &s1,
 		},
 		Virtual: false,
 	}
@@ -309,16 +302,12 @@ func TestCycleDetect(t *testing.T) {
 	// Create second UI node
 	sm2 := make(fabric.SignalingMap)
 	s2 := make(fabric.SignalsMap)
-	var d21 []fabric.DGNode
-	var d22 []fabric.DGNode
 	u2 := UI{
 		Node: Node{
-			Id:           graph.GenID(),
-			Type:         fabric.UINode,
-			Signalers:    &sm2,
-			Signals:      &s2,
-			Dependents:   &d21,
-			Dependencies: &d22,
+			Id:        graph.GenID(),
+			Type:      fabric.UINode,
+			Signalers: &sm2,
+			Signals:   &s2,
 		},
 		Virtual: false,
 	}
@@ -331,16 +320,12 @@ func TestCycleDetect(t *testing.T) {
 	// Create third UI node
 	sm3 := make(fabric.SignalingMap)
 	s3 := make(fabric.SignalsMap)
-	var d31 []fabric.DGNode
-	var d32 []fabric.DGNode
 	u3 := UI{
 		Node: Node{
-			Id:           graph.GenID(),
-			Type:         fabric.UINode,
-			Signalers:    &sm3,
-			Signals:      &s3,
-			Dependents:   &d31,
-			Dependencies: &d32,
+			Id:        graph.GenID(),
+			Type:      fabric.UINode,
+			Signalers: &sm3,
+			Signals:   &s3,
 		},
 		Virtual: false,
 	}
@@ -374,6 +359,265 @@ func TestCycleDetect(t *testing.T) {
 	}
 }
 
-// TODO: create CDS
-// TODO: TotalityUnique() Test
-// TODO: Covered() Test
+/* CDS Testing */
+
+// ElementNode satisfies fabric.Node interface
+type ElementNode struct {
+	Id    int
+	Value interface{}
+	L     *List
+	Imm   bool
+}
+
+func (e ElementNode) ID() int {
+	return e.Id
+}
+
+func (e ElementNode) Immutable() bool {
+	return e.Imm
+}
+
+// ElementEdge satisfies the fabric.Edge interface
+type ElementEdge struct {
+	Id          int
+	L           *List
+	Source      *ElementNode
+	Destination *ElementNode
+	Imm         bool
+}
+
+func (e ElementEdge) ID() int {
+	return e.Id
+}
+
+func (e ElementEdge) GetSource() *fabric.Node {
+	var i interface{} = *e.Source
+	in := i.(fabric.Node)
+	return &in
+}
+
+func (e ElementEdge) GetDestination() *fabric.Node {
+	var i interface{} = *e.Destination
+	in := i.(fabric.Node)
+	return &in
+}
+
+func (e ElementEdge) Immutable() bool {
+	return e.Imm
+}
+
+// List satisfies the fabric.CDS interface
+type List struct {
+	Root  *ElementNode
+	Len   int
+	Nodes fabric.NodeList
+	Edges fabric.EdgeList
+}
+
+func NewList() *List {
+	l := List{}
+	n := &ElementNode{
+		Id: l.GenNodeID(),
+		L:  &l,
+	}
+	l.Root = n
+	l.Len = 1
+
+	var i interface{} = n
+	in := i.(fabric.Node)
+	var nl fabric.NodeList
+	nl = append(nl, &in)
+	l.Nodes = nl
+
+	el := make(fabric.EdgeList, 0)
+	l.Edges = el
+
+	return &l
+}
+
+// NewElementNode will create a new List element node
+func (l *List) NewElementNode() *ElementNode {
+	n := ElementNode{
+		Id: l.GenNodeID(),
+		L:  l,
+	}
+
+	var i interface{} = n
+	in := i.(fabric.Node)
+
+	l.Nodes = append(l.Nodes, &in)
+	l.Len += 1
+
+	return &n
+}
+
+// NewElementEdge will create a new List edge
+func (l *List) NewElementEdge(s, d *ElementNode) {
+	e := ElementEdge{
+		Id:          l.GenEdgeID(),
+		L:           l,
+		Source:      s,
+		Destination: d,
+	}
+
+	var i interface{} = e
+	ie := i.(fabric.Edge)
+
+	l.Edges = append(l.Edges, &ie)
+}
+
+// Generate an ID for a CDS Node
+func (l List) GenNodeID() int {
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Int()
+	for _, np := range l.Nodes {
+		n := *np
+		if n.ID() == id {
+			id = l.GenNodeID()
+		}
+	}
+
+	return id
+}
+
+// Generate an ID for a CDS Edge
+func (l List) GenEdgeID() int {
+	rand.Seed(time.Now().UnixNano())
+	id := rand.Int()
+	for _, ep := range l.Edges {
+		e := *ep
+		if e.ID() == id {
+			id = l.GenEdgeID()
+		}
+	}
+
+	return id
+
+}
+
+func (l List) ListNodes() fabric.NodeList {
+	return l.Nodes
+}
+
+func (l List) ListEdges() fabric.EdgeList {
+	return l.Edges
+}
+
+func TestTotalityUnique(t *testing.T) {
+	// create CDS
+	list := NewList()
+	n1 := list.Root
+	n2 := list.NewElementNode()
+	n3 := list.NewElementNode()
+	n4 := list.NewElementNode()
+	list.NewElementEdge(n1, n2)
+	list.NewElementEdge(n2, n3)
+	list.NewElementEdge(n3, n4)
+	l := *list
+	var il interface{} = l
+	li := il.(fabric.CDS)
+
+	// Create graph (and add CDS to graph)
+	graph := fabric.NewGraph()
+	graph.DS = &li
+
+	// create section
+	branch := fabric.NewBranch(list.Nodes[0], &li)
+	var ib interface{} = branch
+	b := ib.(fabric.Section)
+
+	// Create UI nodes
+	sm1 := make(fabric.SignalingMap)
+	s1 := make(fabric.SignalsMap)
+	u := UI{
+		Node: Node{
+			Id:        graph.GenID(),
+			Type:      fabric.UINode,
+			Signalers: &sm1,
+			Signals:   &s1,
+		},
+		Virtual: false,
+		CDS:     &b, // both UI nodes will address the same CDS section
+	}
+
+	sm2 := make(fabric.SignalingMap)
+	s2 := make(fabric.SignalsMap)
+	u2 := UI{
+		Node: Node{
+			Id:        graph.GenID(),
+			Type:      fabric.UINode,
+			Signalers: &sm2,
+			Signals:   &s2,
+		},
+		Virtual: false,
+		CDS:     &b, // both UI nodes will address the same CDS section
+	}
+
+	// Add UI nodes to graph
+	err := graph.AddRealNode(u)
+	if err != nil {
+		t.Fatalf("Could not add UI node to graph: %v", err)
+	}
+
+	err = graph.AddRealNode(u2)
+	if err != nil {
+		t.Fatalf("Could not add UI node to graph: %v", err)
+	}
+
+	// check that a TotalityUnique verification fails
+	if graph.TotalityUnique() {
+		t.Fatal("Incorrectly classified graph has totality unique.")
+	}
+}
+
+func TestCovered(t *testing.T) {
+	// Create CDS
+	list := NewList()
+	n1 := list.Root
+	n2 := list.NewElementNode()
+	n3 := list.NewElementNode()
+	n4 := list.NewElementNode()
+	n5 := list.NewElementNode()
+	n6 := list.NewElementNode()
+	list.NewElementEdge(n1, n2)
+	list.NewElementEdge(n2, n3)
+	list.NewElementEdge(n3, n4)
+	list.NewElementEdge(n5, n6)
+	l := *list
+	var il interface{} = l
+	li := il.(fabric.CDS)
+
+	// Create graph (and add CDS reference to graph)
+	graph := fabric.NewGraph()
+	graph.DS = &li
+
+	// Create a section
+	branch := fabric.NewBranch(list.Nodes[0], &li)
+	var ib interface{} = branch
+	b := ib.(fabric.Section)
+
+	// Create UI node
+	sm1 := make(fabric.SignalingMap)
+	s1 := make(fabric.SignalsMap)
+	u := UI{
+		Node: Node{
+			Id:        graph.GenID(),
+			Type:      fabric.UINode,
+			Signalers: &sm1,
+			Signals:   &s1,
+		},
+		Virtual: false,
+		CDS:     &b,
+	}
+
+	// Add UI node to graph
+	err := graph.AddRealNode(u)
+	if err != nil {
+		t.Fatalf("Could not add UI node to graph: %v", err)
+	}
+
+	// check that a CDS covered verification fails
+	if graph.Covered() {
+		t.Fatal("Incorrectly classified graph as covering entire CDS")
+	}
+}
