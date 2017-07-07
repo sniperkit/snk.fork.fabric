@@ -150,33 +150,35 @@ func (g *Graph) SignalsAndSignalers() {
 // AddRealNode ...
 // This should only be used for adding nodes to a graph
 // to intialize the graph.
-func (g *Graph) AddRealNode(node DGNode) error {
+func (g *Graph) AddRealNode(node DGNode) (*DGNode, error) {
+	var pointer *DGNode
 	if !reflect.ValueOf(node).Type().Comparable() {
-		return fmt.Errorf("Node type is not comparable and cannot be used in the graph topology. \n Try removing any slices, maps, and functions from struct definition.")
+		return pointer, fmt.Errorf("Node type is not comparable and cannot be used in the graph topology. \n Try removing any slices, maps, and functions from struct definition.")
 	}
 
 	if _, ok := g.Top[node]; !ok {
 		g.Top[node] = []*DGNode{}
 	} else {
-		return fmt.Errorf("Node already exists in Dependency Graph.")
+		return pointer, fmt.Errorf("Node already exists in Dependency Graph.")
 	}
-	return nil
+
+	for n := range g.Top {
+		if n.ID() == node.ID() {
+			pointer = &n
+		}
+	}
+	return pointer, nil
 }
 
 // AddRealEdge will create an edge and an appropriate signaling channel between nodes
 func (g *Graph) AddRealEdge(source int, dest *DGNode) {
 	d := *dest
-	var newList []*DGNode
-	var a DGNode
-	added := false
 
 	for i, k := range g.Top {
 		if i.ID() == source {
 			if !containsDGNode(k, dest) {
-				added = true
-				a = i
 				k = append(k, dest)
-				newList = append(newList, k...)
+				g.Top[i] = k
 
 				// update SignalingMap for destination
 				depSig := d.ListSignalers()
@@ -196,10 +198,6 @@ func (g *Graph) AddRealEdge(source int, dest *DGNode) {
 				i.UpdateSignaling(signalers, signals)
 			}
 		}
-	}
-	// add dependency to source node's dependency list
-	if added {
-		g.Top[a] = newList
 	}
 }
 
@@ -353,9 +351,11 @@ SECOND:
 }
 
 // AddVUI requires that the node return a true value for its IsVirtual method
-func (g *Graph) AddVUI(node UI) error {
+func (g *Graph) AddVUI(node UI) (*DGNode, error) {
+	var pointer *DGNode
+
 	if !node.IsVirtual() {
-		return fmt.Errorf("Not a virtual node.")
+		return pointer, fmt.Errorf("Not a virtual node.")
 	}
 
 	var nodeSlice []DGNode
@@ -366,10 +366,16 @@ func (g *Graph) AddVUI(node UI) error {
 	if !contains(nodeSlice, node) {
 		g.Top[node.(DGNode)] = []*DGNode{}
 	} else {
-		return fmt.Errorf("Node already exists in Dependency Graph")
+		return pointer, fmt.Errorf("Node already exists in Dependency Graph")
 	}
 
-	return nil
+	for n := range g.Top {
+		if n.ID() == node.ID() {
+			pointer = &n
+		}
+	}
+
+	return pointer, nil
 }
 
 // RemoveVUI ...

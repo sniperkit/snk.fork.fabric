@@ -126,29 +126,45 @@ func (g *VDG) Dependencies(np *Virtual) []Virtual {
 }
 
 // AddVirtualNode adds a node to a VDG
-func (g *VDG) AddVirtualNode(node Virtual) error {
+func (g *VDG) AddVirtualNode(node Virtual) (*Virtual, error) {
+	var pointer *Virtual
 	if _, ok := g.Top[node]; !ok {
 		g.Top[node] = []*Virtual{}
 	} else {
-		return fmt.Errorf("Node already exists in Dependency Graph.")
+		return pointer, fmt.Errorf("Node already exists in Dependency Graph.")
 	}
 	// Add node's subspace to graph
 	g.Space = append(g.Space, node.Subspace().ID())
-	return nil
+	for n := range g.Top {
+		if n.ID() == node.ID() {
+			pointer = &n
+		}
+	}
+	return pointer, nil
 }
 
 // RemoveVirtualNode is for removing nodes from a VDG
-func (g *VDG) RemoveVirtualNode(np *Virtual) {
+func (g *VDG) RemoveVirtualNode(np *Virtual) error {
 	n := *np
+
+	for node, list := range g.Top {
+		if node.ID() == n.ID() {
+			if len(list) > 0 {
+				return fmt.Errorf("Virtual node still has dependencies. Cannot be deleted.")
+			}
+		}
+	}
+
 	delete(g.Top, n)
 
 	// remove all references (edges) to node in other nodes edge slices
-	for _, l := range g.Top {
+	for n1, l := range g.Top {
 		if containsVirtual(l, np) {
 			for j, p := range l {
 				k := *p
 				if k.ID() == n.ID() {
 					l = append(l[:j], l[j+1:]...)
+					g.Top[n1] = l
 				}
 			}
 		}
@@ -170,26 +186,19 @@ func (g *VDG) RemoveVirtualNode(np *Virtual) {
 			}
 		}
 	}
+
+	return nil
 }
 
 // AddVirtualEdge adds an edge to a VDG
 func (g *VDG) AddVirtualEdge(source int, dest *Virtual) {
-	var newList []*Virtual
-	var a Virtual
-	added := false
-
 	for i, k := range g.Top {
 		if i.ID() == source {
 			if !containsVirtual(k, dest) {
-				added = true
-				a = i
 				k = append(k, dest)
-				newList = append(newList, k...)
+				g.Top[i] = k
 			}
 		}
-	}
-	if added {
-		g.Top[a] = newList
 	}
 }
 

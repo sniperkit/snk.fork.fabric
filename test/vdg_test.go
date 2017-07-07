@@ -74,7 +74,7 @@ func TestVDG(t *testing.T) {
 		Virtual: false,
 	}
 
-	err := graph.AddRealNode(u)
+	_, err := graph.AddRealNode(u)
 	if err != nil {
 		t.Fatalf("Could not add Temporal node to graph: %v", err)
 	}
@@ -101,7 +101,11 @@ func TestVDG(t *testing.T) {
 		Space: space,
 		Root:  true,
 	}
-	vdg.AddVirtualNode(v)
+	vp, err := vdg.AddVirtualNode(v)
+	if err != nil {
+		t.Fatalf("Could not first add Virtual node to VDG: %v", err)
+	}
+
 	for n := range vdg.Top {
 		if n.ID() == v.Id {
 			t.Logf("First virtual node is created")
@@ -119,7 +123,11 @@ func TestVDG(t *testing.T) {
 		Space: space,
 		Root:  false,
 	}
-	vdg.AddVirtualNode(v2)
+	vp2, err := vdg.AddVirtualNode(v2)
+	if err != nil {
+		t.Fatalf("Could not add second Virtual node to VDG: %v", err)
+	}
+
 	for n := range vdg.Top {
 		if n.ID() == v2.Id {
 			t.Logf("Second virtual node is created")
@@ -148,10 +156,9 @@ func TestVDG(t *testing.T) {
 	}
 
 	// Remove the second virtual node
-	for n := range vdg.Top {
-		if n.ID() == v2.Id {
-			vdg.RemoveVirtualNode(&n)
-		}
+	err = vdg.RemoveVirtualNode(vp2)
+	if err != nil {
+		t.Fatalf("Could not remove second Virtual node from VDG: %v", err)
 	}
 
 	for n := range vdg.Top {
@@ -167,10 +174,9 @@ func TestVDG(t *testing.T) {
 	}
 
 	// Remove the first virtual node
-	for n := range vdg.Top {
-		if n.ID() == v2.Id {
-			vdg.RemoveVirtualNode(&n)
-		}
+	err = vdg.RemoveVirtualNode(vp)
+	if err != nil {
+		t.Fatalf("Could not remove first Virtual node from VDG: %v", err)
 	}
 
 	for n := range vdg.Top {

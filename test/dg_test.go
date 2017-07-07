@@ -147,7 +147,7 @@ func TestDG(t *testing.T) {
 	}
 
 	// Add UI node to graph
-	err := graph.AddRealNode(u)
+	_, err := graph.AddRealNode(u)
 	if err != nil {
 		t.Fatalf("Could not add UI node to graph: %v", err)
 	}
@@ -176,18 +176,13 @@ func TestDG(t *testing.T) {
 		UIRoot: u,
 	}
 
-	var t1 interface{} = temp
-	err = graph.AddRealNode(t1.(fabric.DGNode))
+	tempp, err := graph.AddRealNode(temp)
 	if err != nil {
 		t.Fatalf("Could not add Temporal node to graph: %v", err)
 	}
 
 	// Add edge
-	for n := range graph.Top {
-		if n.ID() == temp.Id {
-			graph.AddRealEdge(u.ID(), &n)
-		}
-	}
+	graph.AddRealEdge(u.ID(), tempp)
 
 	// Create second UI node, and add to graph
 	sm3 := make(fabric.SignalingMap)
@@ -200,17 +195,13 @@ func TestDG(t *testing.T) {
 		},
 	}
 
-	err = graph.AddRealNode(u2)
+	up2, err := graph.AddRealNode(u2)
 	if err != nil {
 		t.Fatalf("Could not add UI node to graph: %v", err)
 	}
 
 	// Add edge from first UI node to second UI node
-	for n := range graph.Top {
-		if n.ID() == u2.Id {
-			graph.AddRealEdge(u.ID(), &n)
-		}
-	}
+	graph.AddRealEdge(u.ID(), up2)
 
 	// Do some Leaf and Root Boundary checks again
 	for n := range graph.Top {
@@ -240,7 +231,7 @@ func TestDG(t *testing.T) {
 	}
 
 	// Add VUI to graph
-	err = graph.AddVUI(vu)
+	vup, err := graph.AddVUI(vu)
 	if err != nil {
 		t.Fatalf("Could not add VUI node to graph: %v", err)
 	}
@@ -263,11 +254,9 @@ func TestDG(t *testing.T) {
 	}
 
 	// Remove VUI from graph (check)
-	for n := range graph.Top {
-		if n.ID() == vu.Id {
-			graph.RemoveVUI(n)
-			break
-		}
+	err = graph.RemoveVUI(*vup)
+	if err != nil {
+		t.Fatalf("Could not remove VUI node from graph: %v", err)
 	}
 
 	for c := range graph.Top {
@@ -294,7 +283,7 @@ func TestCycleDetect(t *testing.T) {
 		Virtual: false,
 	}
 
-	err := graph.AddRealNode(u1)
+	u1p, err := graph.AddRealNode(u1)
 	if err != nil {
 		t.Fatalf("Could not add UI node to graph: %v", err)
 	}
@@ -312,7 +301,7 @@ func TestCycleDetect(t *testing.T) {
 		Virtual: false,
 	}
 
-	err = graph.AddRealNode(u2)
+	u2p, err := graph.AddRealNode(u2)
 	if err != nil {
 		t.Fatalf("Could not add UI node to graph: %v", err)
 	}
@@ -331,28 +320,15 @@ func TestCycleDetect(t *testing.T) {
 	}
 
 	// Add UI node to graph (check)
-	err = graph.AddRealNode(u3)
+	u3p, err := graph.AddRealNode(u3)
 	if err != nil {
 		t.Fatalf("Could not add UI node to graph: %v", err)
 	}
 
 	// Add Edges (creates a cycle)
-	for n := range graph.Top {
-		// from node 1 to node 2
-		if n.ID() == u2.Id {
-			graph.AddRealEdge(u1.ID(), &n)
-		}
-
-		// from node 2 to node 3
-		if n.ID() == u3.Id {
-			graph.AddRealEdge(u2.ID(), &n)
-		}
-
-		// from node 3 to node 1
-		if n.ID() == u1.Id {
-			graph.AddRealEdge(u3.ID(), &n)
-		}
-	}
+	graph.AddRealEdge(u1.ID(), u2p)
+	graph.AddRealEdge(u2.ID(), u3p)
+	graph.AddRealEdge(u3.ID(), u1p)
 
 	if !graph.CycleDetect() {
 		t.Fatalf("Did not detect cycle in the graph")
@@ -436,6 +412,7 @@ func NewList() *List {
 }
 
 // NewElementNode will create a new List element node
+// NOTE: this should be defined as an access procedure of some access type
 func (l *List) NewElementNode() *ElementNode {
 	n := ElementNode{
 		Id: l.GenNodeID(),
@@ -452,6 +429,7 @@ func (l *List) NewElementNode() *ElementNode {
 }
 
 // NewElementEdge will create a new List edge
+// NOTE: this should be defined as an access procedure of some access type
 func (l *List) NewElementEdge(s, d *ElementNode) {
 	e := ElementEdge{
 		Id:          l.GenEdgeID(),
@@ -554,12 +532,12 @@ func TestTotalityUnique(t *testing.T) {
 	}
 
 	// Add UI nodes to graph
-	err := graph.AddRealNode(u)
+	_, err := graph.AddRealNode(u)
 	if err != nil {
 		t.Fatalf("Could not add UI node to graph: %v", err)
 	}
 
-	err = graph.AddRealNode(u2)
+	_, err = graph.AddRealNode(u2)
 	if err != nil {
 		t.Fatalf("Could not add UI node to graph: %v", err)
 	}
@@ -611,7 +589,7 @@ func TestCovered(t *testing.T) {
 	}
 
 	// Add UI node to graph
-	err := graph.AddRealNode(u)
+	_, err := graph.AddRealNode(u)
 	if err != nil {
 		t.Fatalf("Could not add UI node to graph: %v", err)
 	}
