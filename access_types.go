@@ -8,9 +8,8 @@ package fabric
 // 	will allow you to properly utilize the Commit() and Rollback()
 // 	methods.
 type AccessType interface {
-	// FIXME: remove Class method ... possibly add a CDS() method that returns pointer to CDS
 	// Class() string                             // the "class" of action (e.g. "read")
-	// Priority() int                             // priorities are not a necessity but can be helpful
+	Priority() int // priorities are not a necessity but can be helpful for ordering algorithms for posets
 	CDS() *CDS
 	Commit(*DGNode) error                      // takes a DGNode to signal for ...
 	Rollback(RestoreNodes, RestoreEdges) error // takes a list of all CDS nodes and edges that have been operated on
