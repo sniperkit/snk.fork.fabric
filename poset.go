@@ -13,7 +13,7 @@ type Poset interface {
 	// dependencies to assign a node in a specified graph. It will also
 	// add the node to its dependencies dependents list, and the same for
 	// its dependents dependencies lists.
-	Order(*Graph, DGNode) *Graph
+	Order(*Graph, DGNode)
 }
 
 // EXAMPLE: Access Type Priority Ordering
