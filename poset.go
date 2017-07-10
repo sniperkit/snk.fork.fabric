@@ -10,9 +10,8 @@ type Poset interface {
 	ListNodes() []DGNode
 	GenerateGraph([]DGNode) *Graph
 	// Order should be a method that determines what dependents and what
-	// dependencies to assign a node in a specified graph. It will also
-	// add the node to its dependencies dependents list, and the same for
-	// its dependents dependencies lists.
+	// dependencies to assign a node in a specified graph i.e. it determines
+	// what edges to make in the graph.
 	Order(*Graph, DGNode)
 }
 

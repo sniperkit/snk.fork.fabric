@@ -218,6 +218,18 @@ func (g *Graph) CycleDetect() bool {
 	return false
 }
 
+// Allowed checks whether or not an access procedure is allowed to act on a node ...
+func (g *Graph) Allowed(node DGNode, procedure AccessType) bool {
+	allowed := false
+	for _, p := range node.ListProcedures() {
+		if p.ID() == procedure.ID() {
+			allowed = true
+		}
+	}
+
+	return allowed
+}
+
 // Recursive Depth-First-Search; used for Cycle Detection
 func (g *Graph) cycleDfs(start DGNode, seen, done []DGNode) (bool, []DGNode) {
 	seen = append(seen, start)
