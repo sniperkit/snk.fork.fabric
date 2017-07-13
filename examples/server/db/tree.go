@@ -9,31 +9,29 @@ import (
 
 // Tree ...
 type Tree struct {
-	Root  *ElementNode
+	Root  *TreeNode
 	Nodes fabric.NodeList
 	Edges fabric.EdgeList
 }
 
 // NewTree ...
 func NewTree() *Tree {
-	l := List{}
-	n := &ElementNode{
-		Id: l.GenNodeID(),
-		L:  &l,
+	t := Tree{}
+	n := &TreeNode{
+		Id: t.GenNodeID(),
 	}
-	l.Root = n
-	l.Len = 1
+	t.Root = n
 
 	var i interface{} = n
 	in := i.(fabric.Node)
 	var nl fabric.NodeList
 	nl = append(nl, &in)
-	l.Nodes = nl
+	t.Nodes = nl
 
 	el := make(fabric.EdgeList, 0)
-	l.Edges = el
+	t.Edges = el
 
-	return &l
+	return &t
 }
 
 // GenNodeID ...
@@ -41,10 +39,10 @@ func NewTree() *Tree {
 func (t Tree) GenNodeID() int {
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Int()
-	for _, np := range l.Nodes {
+	for _, np := range t.Nodes {
 		n := *np
 		if n.ID() == id {
-			id = l.GenNodeID()
+			id = t.GenNodeID()
 		}
 	}
 
@@ -97,8 +95,8 @@ func (t TreeNode) Immutable() bool {
 // TreeEdge satisfies the fabric.Edge interface
 type TreeEdge struct {
 	Id          int
-	Source      *ElementNode
-	Destination *ElementNode
+	Source      *TreeNode
+	Destination *TreeNode
 	Imm         bool
 }
 

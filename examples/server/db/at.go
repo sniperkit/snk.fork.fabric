@@ -4,76 +4,119 @@ import (
 	"github.com/JKhawaja/fabric"
 )
 
-// ElementRead ...
-type ElementRead func(*ElementNode) (*ElementNode, error)
+// AddTreeNode ...
+type AddTreeNode func(*Tree, interface{}) *TreeNode
 
 // ID ...
-func (r *ElementRead) ID() int {
+func (a *AddTreeNode) ID() int {
 	return 0
 }
 
 // Priority ...
-func (r *ElementRead) Priority() int {
+func (a *AddTreeNode) Priority() int {
 	return 0
 }
 
 // Commit ...
-func (r *ElementRead) Commit(np *fabric.DGNode) error {
+func (a *AddTreeNode) Commit(np *fabric.DGNode) error {
+	n := *np
+	n.Signal()
 	return nil
 }
 
 // Rollback ...
-func (r *ElementRead) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
+func (a *AddTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
 	return nil
 }
 
-// AddNode will create a new Tree node
-func (t *Tree) AddNode() *TreeNode {
-	n := TreeNode{
-		Id: t.GenNodeID(),
-	}
+// AddTreeEdge ...
+type AddTreeEdge func(*Tree, *TreeNode, *TreeNode) *TreeEdge
 
-	var i interface{} = n
-	in := i.(fabric.Node)
-
-	t.Nodes = append(l.Nodes, &in)
-
-	return &n
+// ID ...
+func (a *AddTreeEdge) ID() int {
+	return 0
 }
 
-// AddEdge ...
-func (t *Tree) AddEdge(s, d *TreeNode) {
-	e := TreeEdge{
-		Id:          t.GenEdgeID(),
-		Source:      s,
-		Destination: d,
-	}
-
-	var i interface{} = e
-	ie := i.(fabric.Edge)
-
-	t.Edges = append(t.Edges, &ie)
+// Priority ...
+func (a *AddTreeEdge) Priority() int {
+	return 0
 }
 
-// DeleteNode ...
-func (t *Tree) DeleteNode(n *TreeNode) {
-
-	// TODO: remove node from node list
-	// remove all edges that have node as destination
-
+// Commit ...
+func (a *AddTreeEdge) Commit(np *fabric.DGNode) error {
+	return nil
 }
 
-// DeleteEdge ...
-func (t *Tree) DeleteEdge(e *TreeEdge) {
-	// TODO: remove edge from edge list
+// Rollback ...
+func (a *AddTreeEdge) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
+	return nil
 }
 
-// ReadNode ...
-func (t *Tree) ReadNode(n *TreeNode) interface{} {
-	// TODO: return value stored at node
+// DeleteTreeEntity ...
+type DeleteTreeEntity func(*Tree, int)
+
+// ID ...
+func (d *DeleteTreeEntity) ID() int {
+	return 0
 }
 
-// UpdateNode ...
-func (t *Tree) UpdateNode(n *TreeNode, v interface{}) {
-	// TODO: update node with supplied value
+// Priority ...
+func (d *DeleteTreeEntity) Priority() int {
+	return 0
+}
+
+// Commit ...
+func (d *DeleteTreeEntity) Commit(np *fabric.DGNode) error {
+	return nil
+}
+
+// Rollback ...
+func (d *DeleteTreeEntity) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
+	return nil
+}
+
+// ReadTreeNode ...
+type ReadTreeNode func(*Tree, int) interface{}
+
+// ID ...
+func (r *ReadTreeNode) ID() int {
+	return 0
+}
+
+// Priority ...
+func (r *ReadTreeNode) Priority() int {
+	return 0
+}
+
+// Commit ...
+func (r *ReadTreeNode) Commit(np *fabric.DGNode) error {
+	return nil
+}
+
+// Rollback ...
+func (r *ReadTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
+	return nil
+}
+
+// UpdateTreeNode ...
+type UpdateTreeNode func(*Tree, int, interface{})
+
+// ID ...
+func (u *UpdateTreeNode) ID() int {
+	return 0
+}
+
+// Priority ...
+func (u *UpdateTreeNode) Priority() int {
+	return 0
+}
+
+// Commit ...
+func (u *UpdateTreeNode) Commit(np *fabric.DGNode) error {
+	return nil
+}
+
+// Rollback ...
+func (u *UpdateTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
+	return nil
 }
