@@ -31,11 +31,11 @@ const (
 )
 
 // ProcedureSignals is used to map a signal to the access type that caused the signal
-// NOTE: the string key should be equivalent to the Class() method return value for that AccessType
+// NOTE: the int key should be equivalent to the ID() method return value for that AccessType
 // EXAMPLE: a system design calls for a single thread having multiple access procedures,
 // 	only some of which induce a dependent to invoke a responsive operation, then to know which
 // 	procedure a signal is from you can use this map.
-type ProcedureSignals map[string]Signal
+type ProcedureSignals map[int]Signal
 
 // NodeType defines the possible values for types of dependency graph nodes
 type NodeType int
