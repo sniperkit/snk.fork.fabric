@@ -319,7 +319,6 @@ func TestCycleDetect(t *testing.T) {
 		Virtual: false,
 	}
 
-	// Add UI node to graph (check)
 	u3p, err := graph.AddRealNode(u3)
 	if err != nil {
 		t.Fatalf("Could not add UI node to graph: %v", err)

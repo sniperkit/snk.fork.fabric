@@ -262,7 +262,6 @@ func (m *MarkValueInvariant) InvariantEdge(edge *ElementEdge) bool {
 // Adds multiple nodes and edges (inserts a ring)
 // 	PushFrontList(); MANIP
 // 	PushBackList(); MANIP
-
 type RingInsert func(*Ring) error
 
 func (r *RingInsert) Class() string {
