@@ -82,12 +82,37 @@ type DGNode interface {
 type Graph struct {
 	DS  *CDS // reference to data structure that the dependency graph is for
 	Top map[DGNode][]*DGNode
+	VDG []*VDG
 }
 
 // NewGraph creates a new empty graph
 func NewGraph() *Graph {
 	return &Graph{
 		Top: make(map[DGNode][]*DGNode),
+		VDG: make([]*VDG, 0),
+	}
+}
+
+// AddVDG ...
+func (g *Graph) AddVDG(v *VDG) error {
+	// check if VDG already exists in graph
+	for _, vdg := range g.VDG {
+		if vdg == v {
+			return fmt.Errorf("VDG already exists in graph")
+		}
+	}
+
+	g.VDG = append(g.VDG, v)
+
+	return nil
+}
+
+// RemoveVDG ...
+func (g *Graph) RemoveVDG(v *VDG) {
+	for i, vdg := range g.VDG {
+		if vdg == v {
+			g.VDG = append(g.VDG[:i], g.VDG[i+1:]...)
+		}
 	}
 }
 
@@ -397,6 +422,7 @@ func (g *Graph) RemoveVUI(n DGNode) error {
 		return fmt.Errorf("Not a UI node")
 	}
 
+	// FIXME: sometimes this check fails randomly ...
 	if !node.IsVirtual() {
 		return fmt.Errorf("Not a virtual node")
 	}

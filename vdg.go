@@ -44,12 +44,21 @@ type VDG struct {
 }
 
 // NewVDG will return an empty VDG graph
-func NewVDG(g *Graph) *VDG {
-	return &VDG{
+func NewVDG(g *Graph) (*VDG, error) {
+	// create VDG
+	v := &VDG{
 		Global: g,
 		Top:    make(map[Virtual][]*Virtual),
+		Space:  make([]int, 0),
 	}
 
+	// add to graph
+	err := g.AddVDG(v)
+	if err != nil {
+		return v, err
+	}
+
+	return v, nil
 }
 
 // GenID can generate a unique integer id for a VDG node

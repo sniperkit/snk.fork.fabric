@@ -80,7 +80,10 @@ func TestVDG(t *testing.T) {
 	}
 
 	// Create VDG
-	vdg := fabric.NewVDG(graph)
+	vdg, err := fabric.NewVDG(graph)
+	if err != nil {
+		t.Fatalf("Could not create VDG and add to graph: %v", err)
+	}
 
 	// Add first Virtual node to VDG
 	sm2 := make(fabric.SignalingMap)

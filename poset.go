@@ -1,18 +1,27 @@
 package fabric
 
-// NOTE:
-//		It is best to think of Posets as objects that you use to
-//		generate graphs from. Instead of specifying every node and edge
-//		a poset has some ordering algorithm that auto-orders a list of
-//		nodes by creating a graph with the nodes and appropriate edges.
-
+// Poset is an object that wraps a dependency graph
 type Poset interface {
-	ListNodes() []DGNode
+	// Graph should return a pointer to the graph that our POSET object is "wrapping"
+	Graph() *Graph
+	// GenerateGraph should take a list of nodes and order them according to the Order() method and return a new Graph
 	GenerateGraph([]DGNode) *Graph
 	// Order should be a method that determines what dependents and what
-	// dependencies to assign a node in a specified graph i.e. it determines
-	// what edges to make in the graph.
-	Order(*Graph, DGNode)
+	// dependencies to assign a node in the wrapped Graph i.e. it determines
+	// what edges to make for the node in the Graph.
+	Order(DGNode)
+}
+
+// VPoset is an object that wraps a virtual dependency graph
+type VPoset interface {
+	// VDG should return a pointer to the VDG that our VPOSET object is "wrapping"
+	VDG() *VDG
+	// GenerateGraph should take a list of nodes and order them according to the Order() method and return a new VDG
+	GenerateGraph([]Virtual) *VDG
+	// Order should be a method that determines what dependents and what
+	// dependencies to assign a node in the wrapped VDG i.e. it determines
+	// what edges to make for the node in the VDG.
+	Order(Virtual)
 }
 
 // EXAMPLE: Access Type Priority Ordering
