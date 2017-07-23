@@ -12,8 +12,96 @@ import (
 //		VDG nodes as dependents or dependencies
 type Virtual interface {
 	DGNode
-	IsRoot() bool // specifies whether VDG node is root node or not
-	Subspace() UI // the (V)UI that the Virtual node is associated to
+	Started() bool // specifies whether a node has started execution or not
+	IsRoot() bool  // specifies whether VDG node is root node or not
+	Subspace() UI  // the (V)UI that the Virtual node is associated to
+}
+
+// Root is the object type for pre-made root nodes
+// Root is also is able to satisfy the UI interface in order to add itself as it's subspace
+type Root struct {
+	AccessProcedures *ProcedureList
+	CDS              *Section
+	Isroot           bool
+	IsLeaf           bool
+	Signalers        *SignalingMap
+	Signals          *SignalsMap
+	Start            bool
+	Type             NodeType
+}
+
+// ID ...
+func (r Root) ID() int {
+	return 0
+}
+
+// GetType ...
+func (r Root) GetType() NodeType {
+	return VDGNode
+}
+
+// GetPriority ...
+func (r Root) GetPriority() int {
+	return 0
+}
+
+// ListProcedures ...
+func (r Root) ListProcedures() ProcedureList {
+	var p ProcedureList
+	return p
+}
+
+// UpdateSignaling ...
+func (r Root) UpdateSignaling(sm SignalingMap, s SignalsMap) {
+	*r.Signalers = sm
+	*r.Signals = s
+}
+
+// ListSignalers ...
+func (r Root) ListSignalers() SignalingMap {
+	return *r.Signalers
+}
+
+// ListSignals ...
+func (r Root) ListSignals() SignalsMap {
+	return *r.Signals
+}
+
+// Signal ...
+func (r Root) Signal(p ProcedureSignals) {
+	return
+}
+
+// Started ...
+func (r Root) Started() bool {
+	return r.Start
+}
+
+// IsRoot ...
+func (r Root) IsRoot() bool {
+	return true
+}
+
+// Subspace ...
+func (r Root) Subspace() UI {
+	var i interface{} = r
+	ir := i.(UI)
+	return ir
+}
+
+// GetSection ...
+func (r Root) GetSection() *Section {
+	return r.CDS
+}
+
+// IsUnique ...
+func (r Root) IsUnique() bool {
+	return false
+}
+
+// IsVirtual ...
+func (r Root) IsVirtual() bool {
+	return true
 }
 
 // NOTE: Virtual Dependency Graphs are always trees with a root node
@@ -48,6 +136,34 @@ func NewVDG(g *Graph) (*VDG, error) {
 	// create VDG
 	v := &VDG{
 		Global: g,
+		Top:    make(map[Virtual][]*Virtual),
+		Space:  make([]int, 0),
+	}
+
+	// add to graph
+	err := g.AddVDG(v)
+	if err != nil {
+		return v, err
+	}
+
+	return v, nil
+}
+
+// NewVDGWithRoot ...
+func NewVDGWithRoot(g *Graph) (*VDG, error) {
+	// create Virtual root node
+	var r Root
+	sm1 := make(SignalingMap)
+	s1 := make(SignalsMap)
+	r.Signalers = &sm1
+	r.Signals = &s1
+	var i interface{} = r
+	ir := i.(Virtual)
+
+	// create VDG
+	v := &VDG{
+		Global: g,
+		Root:   &ir,
 		Top:    make(map[Virtual][]*Virtual),
 		Space:  make([]int, 0),
 	}
@@ -152,7 +268,33 @@ func (g *VDG) AddVirtualNode(node Virtual) (*Virtual, error) {
 	return pointer, nil
 }
 
-// RemoveVirtualNode is for removing nodes from a VDG
+// AddTopNode will add a node to the VDG and create an edge pointing from the root node to it
+func (g *VDG) AddTopNode(node Virtual) (*Virtual, error) {
+	var pointer *Virtual
+
+	if _, ok := g.Top[node]; !ok {
+		g.Top[node] = []*Virtual{}
+	} else {
+		return pointer, fmt.Errorf("Node already exists in Dependency Graph.")
+	}
+
+	// Add node's subspace to graph
+	g.Space = append(g.Space, node.Subspace().ID())
+	for n := range g.Top {
+		if n.ID() == node.ID() {
+			pointer = &n
+			// Add edge from root node to our new node
+			root := *g.Root
+			g.AddVirtualEdge(root.ID(), &n)
+		}
+	}
+	return pointer, nil
+}
+
+// RemoveVirtualNode is for removing a single node from a VDG
+// It will also remove all edges that have the node as
+// the destination node of the edge. And it will remove the (V)UI
+// subspace if not required by any other node in the VDG.
 func (g *VDG) RemoveVirtualNode(np *Virtual) error {
 	n := *np
 
@@ -185,6 +327,7 @@ func (g *VDG) RemoveVirtualNode(np *Virtual) error {
 	for i := range g.Top {
 		if i.Subspace().ID() == id {
 			remove = false
+			break
 		}
 	}
 	if remove == true {
@@ -200,18 +343,43 @@ func (g *VDG) RemoveVirtualNode(np *Virtual) error {
 }
 
 // AddVirtualEdge adds an edge to a VDG
-func (g *VDG) AddVirtualEdge(source int, dest *Virtual) {
+func (g *VDG) AddVirtualEdge(source int, dest *Virtual) error {
+	d := *dest
 	for i, k := range g.Top {
 		if i.ID() == source {
+			if i.Started() {
+				return fmt.Errorf("Node has already started. Cannot add dependencies")
+			}
 			if !containsVirtual(k, dest) {
 				k = append(k, dest)
 				g.Top[i] = k
+
+				// update SignalingMap for destination
+				depSig := d.ListSignalers()
+				depS := d.ListSignals()
+				depSig[i.ID()] = make(chan ProcedureSignals)
+				d.UpdateSignaling(depSig, depS)
+
+				// update SignalsMap for source
+				signals := i.ListSignals()
+				signalers := i.ListSignalers()
+				for j, v := range d.ListSignalers() {
+					if j == i.ID() {
+						signals[d.ID()] = v
+						break
+					}
+				}
+				i.UpdateSignaling(signalers, signals)
 			}
 		}
 	}
+
+	return nil
 }
 
-// RemoveVirtualEdge removes an edge from a VDG
+// RemoveVirtualEdge removes a single edge from the VDG
+// Useful for when a dependency node is not being removed but
+// the dependent node no longer requires it as a dependency.
 func (g *VDG) RemoveVirtualEdge(source int, dest *Virtual) {
 	for i, k := range g.Top {
 		if i.ID() == source {
@@ -220,6 +388,7 @@ func (g *VDG) RemoveVirtualEdge(source int, dest *Virtual) {
 				v := *vp
 				if v.ID() == dp.ID() {
 					k = append(k[:j], k[j+1:]...)
+					g.Top[i] = k
 				}
 			}
 		}

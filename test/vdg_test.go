@@ -8,6 +8,7 @@ import (
 
 type Virtual struct {
 	Node
+	Start bool
 	Space fabric.UI
 	Root  bool
 }
@@ -48,6 +49,10 @@ func (v Virtual) Signal(s fabric.ProcedureSignals) {
 	for _, c := range sm {
 		c <- s
 	}
+}
+
+func (v Virtual) Started() bool {
+	return v.Start
 }
 
 func (v Virtual) IsRoot() bool {
@@ -101,6 +106,7 @@ func TestVDG(t *testing.T) {
 			Signalers: &sm2,
 			Signals:   &s2,
 		},
+		Start: false,
 		Space: space,
 		Root:  true,
 	}
@@ -123,6 +129,7 @@ func TestVDG(t *testing.T) {
 			Signalers: &sm2,
 			Signals:   &s2,
 		},
+		Start: false,
 		Space: space,
 		Root:  false,
 	}
