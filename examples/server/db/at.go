@@ -8,17 +8,17 @@ import (
 type AddTreeNode func(*Tree, interface{}) *TreeNode
 
 // ID ...
-func (a *AddTreeNode) ID() int {
+func (a AddTreeNode) ID() int {
 	return 0
 }
 
 // Priority ...
-func (a *AddTreeNode) Priority() int {
-	return 0
+func (a AddTreeNode) Priority() int {
+	return 3
 }
 
 // Commit ...
-func (a *AddTreeNode) Commit(np *fabric.DGNode) error {
+func (a AddTreeNode) Commit(np *fabric.DGNode) error {
 	n := *np
 	var list fabric.ProcedureSignals
 	list[a.ID()] = fabric.Completed
@@ -27,7 +27,7 @@ func (a *AddTreeNode) Commit(np *fabric.DGNode) error {
 }
 
 // Rollback ...
-func (a *AddTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
+func (a AddTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
 	return nil
 }
 
@@ -35,17 +35,17 @@ func (a *AddTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) e
 type AddTreeEdge func(*Tree, *TreeNode, *TreeNode) *TreeEdge
 
 // ID ...
-func (a *AddTreeEdge) ID() int {
-	return 0
+func (a AddTreeEdge) ID() int {
+	return 1
 }
 
 // Priority ...
-func (a *AddTreeEdge) Priority() int {
-	return 0
+func (a AddTreeEdge) Priority() int {
+	return 2
 }
 
 // Commit ...
-func (a *AddTreeEdge) Commit(np *fabric.DGNode) error {
+func (a AddTreeEdge) Commit(np *fabric.DGNode) error {
 	n := *np
 	var list fabric.ProcedureSignals
 	list[a.ID()] = fabric.Completed
@@ -54,7 +54,7 @@ func (a *AddTreeEdge) Commit(np *fabric.DGNode) error {
 }
 
 // Rollback ...
-func (a *AddTreeEdge) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
+func (a AddTreeEdge) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
 	return nil
 }
 
@@ -62,17 +62,17 @@ func (a *AddTreeEdge) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) e
 type DeleteTreeEntity func(*Tree, int)
 
 // ID ...
-func (d *DeleteTreeEntity) ID() int {
-	return 0
+func (d DeleteTreeEntity) ID() int {
+	return 2
 }
 
 // Priority ...
-func (d *DeleteTreeEntity) Priority() int {
-	return 0
+func (d DeleteTreeEntity) Priority() int {
+	return 1
 }
 
 // Commit ...
-func (d *DeleteTreeEntity) Commit(np *fabric.DGNode) error {
+func (d DeleteTreeEntity) Commit(np *fabric.DGNode) error {
 	n := *np
 	var list fabric.ProcedureSignals
 	list[d.ID()] = fabric.Completed
@@ -81,7 +81,7 @@ func (d *DeleteTreeEntity) Commit(np *fabric.DGNode) error {
 }
 
 // Rollback ...
-func (d *DeleteTreeEntity) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
+func (d DeleteTreeEntity) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
 	return nil
 }
 
@@ -89,17 +89,17 @@ func (d *DeleteTreeEntity) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdg
 type ReadTreeNode func(*Tree, int) interface{}
 
 // ID ...
-func (r *ReadTreeNode) ID() int {
-	return 0
+func (r ReadTreeNode) ID() int {
+	return 3
 }
 
 // Priority ...
-func (r *ReadTreeNode) Priority() int {
-	return 0
+func (r ReadTreeNode) Priority() int {
+	return 4
 }
 
 // Commit ...
-func (r *ReadTreeNode) Commit(np *fabric.DGNode) error {
+func (r ReadTreeNode) Commit(np *fabric.DGNode) error {
 	n := *np
 	var list fabric.ProcedureSignals
 	list[r.ID()] = fabric.Completed
@@ -108,7 +108,7 @@ func (r *ReadTreeNode) Commit(np *fabric.DGNode) error {
 }
 
 // Rollback ...
-func (r *ReadTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
+func (r ReadTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
 	return nil
 }
 
@@ -116,17 +116,17 @@ func (r *ReadTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) 
 type UpdateTreeNode func(*Tree, int, interface{})
 
 // ID ...
-func (u *UpdateTreeNode) ID() int {
-	return 0
+func (u UpdateTreeNode) ID() int {
+	return 4
 }
 
 // Priority ...
-func (u *UpdateTreeNode) Priority() int {
-	return 0
+func (u UpdateTreeNode) Priority() int {
+	return 5
 }
 
 // Commit ...
-func (u *UpdateTreeNode) Commit(np *fabric.DGNode) error {
+func (u UpdateTreeNode) Commit(np *fabric.DGNode) error {
 	n := *np
 	var list fabric.ProcedureSignals
 	list[u.ID()] = fabric.Completed
@@ -135,6 +135,6 @@ func (u *UpdateTreeNode) Commit(np *fabric.DGNode) error {
 }
 
 // Rollback ...
-func (u *UpdateTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
+func (u UpdateTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) error {
 	return nil
 }

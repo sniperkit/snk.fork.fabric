@@ -35,9 +35,8 @@ func addNode(t *Tree, value interface{}) *TreeNode {
 }
 
 // CreateNode ...
-var CreateNode = AddTreeNode(addNode)
-
 // EXAMPLE: CreateNode(myTreepointer, myValue)
+var CreateNode = AddTreeNode(addNode)
 
 func addEdge(t *Tree, s, d *TreeNode) *TreeEdge {
 	e := TreeEdge{
@@ -55,6 +54,7 @@ func addEdge(t *Tree, s, d *TreeNode) *TreeEdge {
 }
 
 // CreateEdge ...
+// EXAMPLE: CreateTreeEdge(myTreepointer, myFirstNode, mySecondNode)
 var CreateEdge = AddTreeEdge(addEdge)
 
 func deleteNode(t *Tree, id int) {
@@ -78,6 +78,7 @@ func deleteNode(t *Tree, id int) {
 }
 
 // RemoveNode ...
+// EXAMPLE: RemoveNode(myTreepointer, myNodeID)
 var RemoveNode = DeleteTreeEntity(deleteNode)
 
 func deleteEdge(t *Tree, id int) {
@@ -91,6 +92,7 @@ func deleteEdge(t *Tree, id int) {
 }
 
 // RemoveEdge ...
+// EXAMPLE: RemoveEdge(myTreepointer, myEdgeID)
 var RemoveEdge = DeleteTreeEntity(deleteEdge)
 
 func readNode(t *Tree, id int) interface{} {
@@ -106,7 +108,8 @@ func readNode(t *Tree, id int) interface{} {
 }
 
 // ReadValue ...
-var ReadValue = ReadTreeNode(readNode)
+// EXAMPLE: ReadNodeValue(myTreepointer, myNodeID)
+var ReadNodeValue = ReadTreeNode(readNode)
 
 func updateNode(t *Tree, id int, v interface{}) {
 	for i, np := range t.Nodes {
@@ -122,4 +125,5 @@ func updateNode(t *Tree, id int, v interface{}) {
 }
 
 // UpdateValue ...
-var UpdateValue = UpdateTreeNode(updateNode)
+// EXAMPLE: UpdateNodeValue(myTreepointer, myNodeID, myValue)
+var UpdateNodeValue = UpdateTreeNode(updateNode)

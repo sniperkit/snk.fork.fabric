@@ -8,6 +8,7 @@ import (
 type Node struct {
 	Id               int
 	Type             fabric.NodeType
+	Priority         int
 	Signalers        *fabric.SignalingMap
 	AccessProcedures *fabric.ProcedureList
 	Signals          *fabric.SignalsMap
@@ -35,7 +36,7 @@ func (u UI) GetType() fabric.NodeType {
 
 // GetPriority ...
 func (u UI) GetPriority() int {
-	return 1
+	return u.Priority
 }
 
 // ListProcedures ...
