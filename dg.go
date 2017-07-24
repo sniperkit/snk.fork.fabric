@@ -357,7 +357,7 @@ FIRST:
 			sp := *s
 			uiCDSNodes := sp.ListNodes()
 			// if UI contains node; check next CDS node
-			if containsNode(uiCDSNodes, v) {
+			if ContainsNode(uiCDSNodes, v) {
 				continue FIRST
 			}
 		}
@@ -375,7 +375,7 @@ SECOND:
 			sp := *s
 			uiCDSEdges := sp.ListEdges()
 			// if UI contains edge; check next CDS edge
-			if containsEdge(uiCDSEdges, v) {
+			if ContainsEdge(uiCDSEdges, v) {
 				continue SECOND
 			}
 		}

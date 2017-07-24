@@ -14,10 +14,15 @@ package fabric
 	Intensional Conditions can be used if the CDS is small enough to not become a processing burden.
 */
 
-// NOTE: a CDS satisfies the Section interface
+// FIXME: the problem with sections in general is that we are *not* using
+// pointers to lists instead of actual lists. Which makes our complexity scale linearly.
 type Section interface {
 	ListNodes() NodeList
 	ListEdges() EdgeList
+	// NOTE: UpdateNodes and UpdateEdges can be used to add or remove nodes
+	// and edges from the Sections list and provide the section with a new list.
+	UpdateNodeList(NodeList)
+	UpdateEdgeList(EdgeList)
 }
 
 /* Sub-graphs are non-disjoint collections of nodes and edges */
@@ -40,7 +45,7 @@ func NewSubgraph(nodes NodeList, cp *CDS) *Subgraph {
 			sp := e.GetSource()
 			dp := e.GetDestination()
 			d := *dp
-			if d.ID() == n.ID() && containsNode(nodes, sp) {
+			if d.ID() == n.ID() && ContainsNode(nodes, sp) {
 				edges = append(edges, ep)
 			}
 		}
@@ -59,6 +64,14 @@ func (s *Subgraph) ListNodes() NodeList {
 
 func (s *Subgraph) ListEdges() EdgeList {
 	return s.Edges
+}
+
+func (s *Subgraph) UpdateNodeList(n NodeList) {
+	s.Nodes = n
+}
+
+func (s *Subgraph) UpdateEdgeList(e EdgeList) {
+	s.Edges = e
 }
 
 /*
@@ -86,7 +99,7 @@ func NewBranch(root *Node, cp *CDS) *Branch {
 func dfs(start *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeList) {
 	c := *cp
 	// if node is not already in branch -- add
-	if !containsNode(nodes, start) {
+	if !ContainsNode(nodes, start) {
 		nodes = append(nodes, start)
 	}
 
@@ -94,7 +107,7 @@ func dfs(start *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeLi
 		e := *ep
 		// for all edges in CDS with node as source
 		if e.GetSource() == start {
-			if !containsEdge(edges, ep) {
+			if !ContainsEdge(edges, ep) {
 				// add edge to branch
 				edges = append(edges, ep)
 				// for the destination node, add node and its edges to branch
@@ -112,6 +125,14 @@ func (b *Branch) ListNodes() NodeList {
 
 func (b *Branch) ListEdges() EdgeList {
 	return b.Edges
+}
+
+func (b *Branch) UpdateNodeList(n NodeList) {
+	b.Nodes = n
+}
+
+func (b *Branch) UpdateEdgeList(e EdgeList) {
+	b.Edges = e
 }
 
 /*
@@ -140,7 +161,7 @@ func partDFS(startp, endp *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeL
 	start := *startp
 	end := *endp
 	// add node to partition nodes
-	if !containsNode(nodes, startp) {
+	if !ContainsNode(nodes, startp) {
 		nodes = append(nodes, startp)
 		if start.ID() == end.ID() {
 			return nodes, edges
@@ -151,7 +172,7 @@ func partDFS(startp, endp *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeL
 		e := *ep
 		// for all edges in CDS with node as source
 		if e.GetSource() == startp {
-			if !containsEdge(edges, ep) {
+			if !ContainsEdge(edges, ep) {
 				// add edge to branch
 				edges = append(edges, ep)
 				// for the destination node, add node and its edge to branch
@@ -171,6 +192,14 @@ func (p *Partition) ListEdges() EdgeList {
 	return p.Edges
 }
 
+func (p *Partition) UpdateNodeList(n NodeList) {
+	p.Nodes = n
+}
+
+func (p *Partition) UpdateEdgeList(e EdgeList) {
+	p.Edges = e
+}
+
 /* Subsets are used for generic node selection (but not generic edge selection) */
 type Subset struct {
 	Nodes NodeList
@@ -187,7 +216,7 @@ func NewSubset(nodes NodeList, cp *CDS) *Subset {
 		for _, ep := range cdsEdges {
 			e := *ep
 			if e.GetSource() == n || e.GetDestination() == n {
-				if !containsEdge(edges, ep) {
+				if !ContainsEdge(edges, ep) {
 					edges = append(edges, ep)
 				}
 			}
@@ -206,6 +235,14 @@ func (s *Subset) ListNodes() NodeList {
 
 func (s *Subset) ListEdges() EdgeList {
 	return s.Edges
+}
+
+func (s *Subset) UpdateNodeList(n NodeList) {
+	s.Nodes = n
+}
+
+func (s *Subset) UpdateEdgeList(e EdgeList) {
+	s.Edges = e
 }
 
 /* Disjoints are a collection of arbitrary nodes and arbitrary edges */
@@ -233,14 +270,14 @@ func ComposeSections(graphs []*Section) *Disjoint {
 
 		// add graph nodes to Disjoint node list
 		for _, n := range gn {
-			if !containsNode(nodes, n) {
+			if !ContainsNode(nodes, n) {
 				nodes = append(nodes, n)
 			}
 		}
 
 		// add graph edges to disjoint edge list
 		for _, e := range ge {
-			if !containsEdge(edges, e) {
+			if !ContainsEdge(edges, e) {
 				edges = append(edges, e)
 			}
 		}
@@ -259,4 +296,12 @@ func (d *Disjoint) ListNodes() NodeList {
 
 func (d *Disjoint) ListEdges() EdgeList {
 	return d.Edges
+}
+
+func (d *Disjoint) UpdateNodeList(n NodeList) {
+	d.Nodes = n
+}
+
+func (d *Disjoint) UpdateEdgeList(e EdgeList) {
+	d.Edges = e
 }

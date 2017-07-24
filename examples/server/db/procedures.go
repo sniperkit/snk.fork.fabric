@@ -14,7 +14,7 @@ import (
 */
 
 /*
-	NOTE: we can also wrap all these access procedures in methods:
+	NOTE: we can (and have) also wrap all these access procedures in data structure methods:
 	func (t *Tree) AddNode(value interface{}) *TreeNode {
 		return CreateNode(t, value)
 	}
