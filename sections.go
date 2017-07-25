@@ -14,27 +14,26 @@ package fabric
 	Intensional Conditions can be used if the CDS is small enough to not become a processing burden.
 */
 
-// FIXME: the problem with sections in general is that we are *not* using
-// pointers to lists instead of actual lists. Which makes our complexity scale linearly.
 type Section interface {
-	ListNodes() NodeList
-	ListEdges() EdgeList
+	ListNodes() *NodeList
+	ListEdges() *EdgeList
 	// NOTE: UpdateNodes and UpdateEdges can be used to add or remove nodes
 	// and edges from the Sections list and provide the section with a new list.
-	UpdateNodeList(NodeList)
-	UpdateEdgeList(EdgeList)
+	UpdateNodeList(*NodeList)
+	UpdateEdgeList(*EdgeList)
 }
 
 /* Sub-graphs are non-disjoint collections of nodes and edges */
 type Subgraph struct {
-	Nodes NodeList
-	Edges EdgeList
+	Nodes *NodeList
+	Edges *EdgeList
 }
 
 // NewSubgraph will grab all edges from nodes that connect to
 // other nodes that are in our list.
-func NewSubgraph(nodes NodeList, cp *CDS) *Subgraph {
+func NewSubgraph(nlp *NodeList, cp *CDS) Section {
 	c := *cp
+	nodes := *nlp
 	edges := make(EdgeList, 0)
 
 	for _, np := range nodes {
@@ -53,25 +52,25 @@ func NewSubgraph(nodes NodeList, cp *CDS) *Subgraph {
 	}
 
 	return &Subgraph{
-		Nodes: nodes,
-		Edges: edges,
+		Nodes: nlp,
+		Edges: &edges,
 	}
 }
 
-func (s *Subgraph) ListNodes() NodeList {
+func (s *Subgraph) ListNodes() *NodeList {
 	return s.Nodes
 }
 
-func (s *Subgraph) ListEdges() EdgeList {
+func (s *Subgraph) ListEdges() *EdgeList {
 	return s.Edges
 }
 
-func (s *Subgraph) UpdateNodeList(n NodeList) {
-	s.Nodes = n
+func (s *Subgraph) UpdateNodeList(nlp *NodeList) {
+	s.Nodes = nlp
 }
 
-func (s *Subgraph) UpdateEdgeList(e EdgeList) {
-	s.Edges = e
+func (s *Subgraph) UpdateEdgeList(elp *EdgeList) {
+	s.Edges = elp
 }
 
 /*
@@ -80,19 +79,19 @@ func (s *Subgraph) UpdateEdgeList(e EdgeList) {
 	A branch is technically a sub-graph as well.
 */
 type Branch struct {
-	Nodes NodeList
-	Edges EdgeList
+	Nodes *NodeList
+	Edges *EdgeList
 }
 
-func NewBranch(root *Node, cp *CDS) *Branch {
+func NewBranch(root *Node, cp *CDS) Section {
 	edges := make(EdgeList, 0)
 	nodes := make(NodeList, 0)
 
 	nodes, edges = dfs(root, nodes, edges, cp)
 
 	return &Branch{
-		Nodes: nodes,
-		Edges: edges,
+		Nodes: &nodes,
+		Edges: &edges,
 	}
 }
 
@@ -119,20 +118,20 @@ func dfs(start *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeLi
 	return nodes, edges
 }
 
-func (b *Branch) ListNodes() NodeList {
+func (b *Branch) ListNodes() *NodeList {
 	return b.Nodes
 }
 
-func (b *Branch) ListEdges() EdgeList {
+func (b *Branch) ListEdges() *EdgeList {
 	return b.Edges
 }
 
-func (b *Branch) UpdateNodeList(n NodeList) {
-	b.Nodes = n
+func (b *Branch) UpdateNodeList(nlp *NodeList) {
+	b.Nodes = nlp
 }
 
-func (b *Branch) UpdateEdgeList(e EdgeList) {
-	b.Edges = e
+func (b *Branch) UpdateEdgeList(elp *EdgeList) {
+	b.Edges = elp
 }
 
 /*
@@ -140,19 +139,19 @@ func (b *Branch) UpdateEdgeList(e EdgeList) {
 	(i.e. each node can only have at most 2 edges)
 */
 type Partition struct {
-	Nodes NodeList
-	Edges EdgeList
+	Nodes *NodeList
+	Edges *EdgeList
 }
 
-func NewPartition(start, end *Node, cp *CDS) *Partition {
+func NewPartition(start, end *Node, cp *CDS) Section {
 	nodes := make(NodeList, 0)
 	edges := make(EdgeList, 0)
 
 	nodes, edges = partDFS(start, end, nodes, edges, cp)
 
 	return &Partition{
-		Nodes: nodes,
-		Edges: edges,
+		Nodes: &nodes,
+		Edges: &edges,
 	}
 }
 
@@ -184,32 +183,33 @@ func partDFS(startp, endp *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeL
 	return nodes, edges
 }
 
-func (p *Partition) ListNodes() NodeList {
+func (p *Partition) ListNodes() *NodeList {
 	return p.Nodes
 }
 
-func (p *Partition) ListEdges() EdgeList {
+func (p *Partition) ListEdges() *EdgeList {
 	return p.Edges
 }
 
-func (p *Partition) UpdateNodeList(n NodeList) {
-	p.Nodes = n
+func (p *Partition) UpdateNodeList(nlp *NodeList) {
+	p.Nodes = nlp
 }
 
-func (p *Partition) UpdateEdgeList(e EdgeList) {
-	p.Edges = e
+func (p *Partition) UpdateEdgeList(elp *EdgeList) {
+	p.Edges = elp
 }
 
 /* Subsets are used for generic node selection (but not generic edge selection) */
 type Subset struct {
-	Nodes NodeList
-	Edges EdgeList
+	Nodes *NodeList
+	Edges *EdgeList
 }
 
 // NewSubset grabs all (and only all) edges that are connected
 // to a node in the list of nodes supplied.
-func NewSubset(nodes NodeList, cp *CDS) *Subset {
+func NewSubset(nlp *NodeList, cp *CDS) Section {
 	c := *cp
+	nodes := *nlp
 	cdsEdges := c.ListEdges()
 	edges := make(EdgeList, 0)
 	for _, n := range nodes {
@@ -224,49 +224,51 @@ func NewSubset(nodes NodeList, cp *CDS) *Subset {
 	}
 
 	return &Subset{
-		Nodes: nodes,
-		Edges: edges,
+		Nodes: nlp,
+		Edges: &edges,
 	}
 }
 
-func (s *Subset) ListNodes() NodeList {
+func (s *Subset) ListNodes() *NodeList {
 	return s.Nodes
 }
 
-func (s *Subset) ListEdges() EdgeList {
+func (s *Subset) ListEdges() *EdgeList {
 	return s.Edges
 }
 
-func (s *Subset) UpdateNodeList(n NodeList) {
-	s.Nodes = n
+func (s *Subset) UpdateNodeList(nlp *NodeList) {
+	s.Nodes = nlp
 }
 
-func (s *Subset) UpdateEdgeList(e EdgeList) {
-	s.Edges = e
+func (s *Subset) UpdateEdgeList(elp *EdgeList) {
+	s.Edges = elp
 }
 
 /* Disjoints are a collection of arbitrary nodes and arbitrary edges */
 type Disjoint struct {
-	Nodes NodeList
-	Edges EdgeList
+	Nodes *NodeList
+	Edges *EdgeList
 }
 
-func NewDisjoint(nodes NodeList, edges EdgeList) *Disjoint {
+func NewDisjoint(nlp *NodeList, elp *EdgeList) *Disjoint {
 	return &Disjoint{
-		Nodes: nodes,
-		Edges: edges,
+		Nodes: nlp,
+		Edges: elp,
 	}
 }
 
 // ComposeSections takes a list of CDS graphs (sections) and composes them into a new single disjoint
-func ComposeSections(graphs []*Section) *Disjoint {
+func ComposeSections(graphs []*Section) Section {
 	nodes := make(NodeList, 0)
 	edges := make(EdgeList, 0)
 
 	for _, gp := range graphs {
 		g := *gp
-		gn := g.ListNodes()
-		ge := g.ListEdges()
+		gnp := g.ListNodes()
+		gn := *gnp
+		gep := g.ListEdges()
+		ge := *gep
 
 		// add graph nodes to Disjoint node list
 		for _, n := range gn {
@@ -285,23 +287,23 @@ func ComposeSections(graphs []*Section) *Disjoint {
 	}
 
 	return &Disjoint{
-		Nodes: nodes,
-		Edges: edges,
+		Nodes: &nodes,
+		Edges: &edges,
 	}
 }
 
-func (d *Disjoint) ListNodes() NodeList {
+func (d *Disjoint) ListNodes() *NodeList {
 	return d.Nodes
 }
 
-func (d *Disjoint) ListEdges() EdgeList {
+func (d *Disjoint) ListEdges() *EdgeList {
 	return d.Edges
 }
 
-func (d *Disjoint) UpdateNodeList(n NodeList) {
-	d.Nodes = n
+func (d *Disjoint) UpdateNodeList(nlp *NodeList) {
+	d.Nodes = nlp
 }
 
-func (d *Disjoint) UpdateEdgeList(e EdgeList) {
-	d.Edges = e
+func (d *Disjoint) UpdateEdgeList(elp *EdgeList) {
+	d.Edges = elp
 }

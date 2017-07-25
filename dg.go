@@ -355,7 +355,8 @@ FIRST:
 		for _, u := range uiSlice {
 			s := u.GetSection()
 			sp := *s
-			uiCDSNodes := sp.ListNodes()
+			uiCDSNodesPointer := sp.ListNodes()
+			uiCDSNodes := *uiCDSNodesPointer
 			// if UI contains node; check next CDS node
 			if ContainsNode(uiCDSNodes, v) {
 				continue FIRST
@@ -373,7 +374,8 @@ SECOND:
 		for _, u := range uiSlice {
 			s := u.GetSection()
 			sp := *s
-			uiCDSEdges := sp.ListEdges()
+			uiCDSEdgesPointer := sp.ListEdges()
+			uiCDSEdges := *uiCDSEdgesPointer
 			// if UI contains edge; check next CDS edge
 			if ContainsEdge(uiCDSEdges, v) {
 				continue SECOND
