@@ -9,7 +9,7 @@ type Virtual struct {
 	Node
 	Start bool
 	Root  bool
-	Space *fabric.DGNode
+	Space *fabric.UI
 }
 
 // ID ...

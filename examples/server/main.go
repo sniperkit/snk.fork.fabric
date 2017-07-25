@@ -21,15 +21,14 @@ var sessions []Session
 type Session struct {
 	ID     int
 	VPoset *dg.VDGPoset
-	VUI    *fabric.DGNode
+	VUI    *fabric.UI
 }
 
 // NewSession ...
-func NewSession(v *dg.VDGPoset, vui *fabric.DGNode) Session {
+func NewSession(v *dg.VDGPoset) Session {
 	return Session{
 		ID:     GenSessionID(),
 		VPoset: v,
-		VUI:    vui,
 	}
 }
 
@@ -128,29 +127,8 @@ func signalHandler(c <-chan fabric.ProcedureSignals, wg sync.WaitGroup) {
 	}
 }
 
-func createSession(g *fabric.Graph) http.HandlerFunc {
+func createSession(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// create VUI
-		// NOTE: in a real application, this VUI could be constructed to only allow
-		// access procedures to access a CDS section.
-		sm1 := make(fabric.SignalingMap)
-		s1 := make(fabric.SignalsMap)
-		vu := dg.UI{
-			Node: dg.Node{
-				Id:        g.GenID(),
-				Type:      fabric.UINode,
-				Signalers: &sm1,
-				Signals:   &s1,
-			},
-			Virtual: true,
-		}
-
-		// add vui to graph
-		vui, err := g.AddVUI(vu)
-		if err != nil {
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte("500 - Could not create VUI!"))
-		}
 
 		// create VDG
 		vdg, err := fabric.NewVDGWithRoot(g)
@@ -163,7 +141,41 @@ func createSession(g *fabric.Graph) http.HandlerFunc {
 		vposet := dg.NewVDGPoset(vdg)
 
 		// create a Session
-		session := NewSession(vposet, vui)
+		session := NewSession(vposet)
+
+		// create a section node in the tree using session id
+		sn := t.NewSection(session.ID)
+
+		// create a branch section using section node as root
+		var i interface{} = *t
+		it := i.(fabric.CDS)
+		branch := fabric.NewBranch(sn, &it)
+
+		// create VUI
+		sm1 := make(fabric.SignalingMap)
+		s1 := make(fabric.SignalsMap)
+		vu := dg.UI{
+			Node: dg.Node{
+				Id:        g.GenID(),
+				Type:      fabric.UINode,
+				Signalers: &sm1,
+				Signals:   &s1,
+			},
+			CDS:     &branch,
+			Virtual: true,
+		}
+
+		// add vui to graph
+		vp, err := g.AddVUI(vu)
+		if err != nil {
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write([]byte("500 - Could not create VUI!"))
+		}
+
+		// set VUI for session
+		dgn := *vp
+		vui := dgn.(fabric.UI)
+		session.VUI = &vui
 
 		// add session to global sessions store
 		sessions = append(sessions, session)
@@ -244,8 +256,18 @@ func createNode(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 		// SignalCheck and then run logic
 		if signalCheck(vn) {
 			val := r.URL.Query()
-			value := val["value"]
-			newNode := db.CreateNode(t, value[0])
+			value, ok := val["value"]
+			if !ok {
+				w.Write([]byte("Please provide a value for the node."))
+				return
+			}
+			//newNode := db.CreateNode(t, value[0])
+			vui := *sess.VUI
+			newNode, err := t.CreateNode(vui.GetSection(), value[0])
+			if err != nil {
+				w.Write([]byte(err.Error()))
+				return
+			}
 			w.Write([]byte(strconv.Itoa(newNode.ID())))
 		}
 
@@ -308,7 +330,13 @@ func createEdge(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 					second = &kn
 				}
 			}
-			newEdge := db.CreateEdge(t, first, second)
+			// newEdge := db.CreateEdge(t, first, second)
+			vui := *sess.VUI
+			newEdge, err := t.CreateEdge(vui.GetSection(), first, second)
+			if err != nil {
+				w.Write([]byte(err.Error()))
+				return
+			}
 			w.Write([]byte(strconv.Itoa(newEdge.ID())))
 		}
 
@@ -355,7 +383,13 @@ func removeNode(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 			val := r.URL.Query()
 			node := val["node"]
 			nodeID, _ := strconv.Atoi(node[0])
-			db.RemoveNode(t, nodeID)
+			// db.RemoveNode(t, nodeID)
+			vui := *sess.VUI
+			err := t.RemoveNode(vui.GetSection(), nodeID)
+			if err != nil {
+				w.Write([]byte(err.Error()))
+				return
+			}
 			w.Write([]byte("Node Removed successfully."))
 		}
 
@@ -402,7 +436,13 @@ func removeEdge(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 			val := r.URL.Query()
 			edge := val["edge"]
 			edgeID, _ := strconv.Atoi(edge[0])
-			db.RemoveEdge(t, edgeID)
+			// db.RemoveEdge(t, edgeID)
+			vui := *sess.VUI
+			err := t.RemoveEdge(vui.GetSection(), edgeID)
+			if err != nil {
+				w.Write([]byte(err.Error()))
+				return
+			}
 			w.Write([]byte("Edge removed successfully."))
 		}
 
@@ -450,7 +490,12 @@ func readNodeValue(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 			val := r.URL.Query()
 			node := val["node"]
 			nodeID, _ := strconv.Atoi(node[0])
-			value := db.ReadNodeValue(t, nodeID)
+			vui := *sess.VUI
+			value, err := t.ReadNodeValue(vui.GetSection(), nodeID)
+			if err != nil {
+				w.Write([]byte(err.Error()))
+				return
+			}
 			w.Write([]byte(value.(string)))
 		}
 
@@ -499,7 +544,13 @@ func updateNodeValue(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 			node := val["node"]
 			value := val["value"]
 			nodeID, _ := strconv.Atoi(node[0])
-			db.UpdateNodeValue(t, nodeID, value[0])
+			// db.UpdateNodeValue(t, nodeID, value[0])
+			vui := *sess.VUI
+			err := t.UpdateNodeValue(vui.GetSection(), nodeID, value[0])
+			if err != nil {
+				w.Write([]byte(err.Error()))
+				return
+			}
 			w.Write([]byte("Node updated successfully."))
 		}
 
@@ -509,7 +560,15 @@ func updateNodeValue(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 }
 
 func main() {
-	log.Println("Server Example has started ...")
+	log.Println("Fabric server example has started ...")
+	log.Println("/createsession")
+	log.Println("/deletesession?id=<session_id>")
+	log.Println("/createnode?id=<session_id>&value=<my_value>")
+	log.Println("/createedge?id=<session_id>&n1=<node_id>&n2=<node_id>")
+	log.Println("/removenode?id=<session_id>&node=<node_id>")
+	log.Println("/removeedge?id=<session_id>&edge=<edge_id>")
+	log.Println("/readnodevalue?id=<session_id>&node=<node_id>")
+	log.Println("/updatenodevalue?id=<session_id>&node=<node_id>&value=<my_value>")
 
 	// create a Tree CDS
 	tree := db.NewTree()
@@ -519,7 +578,7 @@ func main() {
 
 	// TODO: have a single UI that covers the entire tree
 
-	http.HandleFunc("/createsession", createSession(graph))
+	http.HandleFunc("/createsession", createSession(tree, graph))
 	http.HandleFunc("/deletesession", deleteSession(graph))
 	http.HandleFunc("/createnode", createNode(tree, graph))
 	http.HandleFunc("/createedge", createEdge(tree, graph))

@@ -10,13 +10,40 @@ import (
 
 // Tree ...
 type Tree struct {
-	Root  *TreeNode
-	Nodes fabric.NodeList
-	Edges fabric.EdgeList
+	Root     *TreeNode
+	Sections fabric.NodeList
+	Nodes    fabric.NodeList
+	Edges    fabric.EdgeList
 }
 
-func containsNode(l NodeList, id int) bool {
-	n := *np
+// NewSection takes a session id and creates a root node for a branch section
+// that will be dedicated to that session (here session ids are behaving like user ids)
+func (t *Tree) NewSection(id int) *fabric.Node {
+	// create section node (the value will be the session id)
+	n := TreeNode{
+		Id:    t.GenNodeID(),
+		Value: id,
+	}
+
+	var i interface{} = n
+	in := i.(fabric.Node)
+
+	t.Sections = append(t.Sections, &in)
+
+	// create edge from root to section node
+	e := TreeEdge{
+		Id:          t.GenEdgeID(),
+		Source:      t.Root,
+		Destination: &n,
+	}
+	var inf interface{} = e
+	ie := inf.(fabric.Edge)
+	t.Edges = append(t.Edges, &ie)
+
+	return &in
+}
+
+func containsNode(l fabric.NodeList, id int) bool {
 	for _, vp := range l {
 		v := *vp
 		if v.ID() == id {
@@ -26,8 +53,7 @@ func containsNode(l NodeList, id int) bool {
 	return false
 }
 
-func containsEdge(l EdgeList, id int) bool {
-	e := *ep
+func containsEdge(l fabric.EdgeList, id int) bool {
 	for _, vp := range l {
 		v := *vp
 		if v.ID() == id {
@@ -37,18 +63,19 @@ func containsEdge(l EdgeList, id int) bool {
 	return false
 }
 
+// CreateNode will create a node and add it to the section and tree data store
 func (t *Tree) CreateNode(sp *fabric.Section, value interface{}) (*TreeNode, error) {
 
 	np := CreateNode(t, value)
+	n := *np
 
 	// update section with new node
 	s := *sp
-	nodes := s.ListNodes()
-	n := *np
+	nodes := *s.ListNodes()
 	var i interface{} = n
 	in := i.(fabric.Node)
 	nodes = append(nodes, &in)
-	s.UpdateNodeList(nodes)
+	s.UpdateNodeList(&nodes)
 
 	return np, nil
 }
@@ -57,17 +84,17 @@ func (t *Tree) CreateNode(sp *fabric.Section, value interface{}) (*TreeNode, err
 // rewrite function so it does everything it needs to on a single iteration of
 // the sections nodelist.
 func (t *Tree) RemoveNode(sp *fabric.Section, id int) error {
-	s := *sp
 	// verify that node is in section before being removed
-	if containsNode(s.ListNodes(), id) {
+	s := *sp
+	nlp := s.ListNodes()
+	nodes := *nlp
+	if containsNode(nodes, id) {
 		RemoveNode(t, id)
 	} else {
 		return fmt.Errorf("Node is not in section. Cannot remove.")
 	}
 
 	// remove node from section list and update section with new list
-	nodes := s.ListNodes()
-
 	for i, np := range nodes {
 		n := *np
 		if n.ID() == id {
@@ -76,22 +103,24 @@ func (t *Tree) RemoveNode(sp *fabric.Section, id int) error {
 		}
 	}
 
-	s.UpdateNodeList(nodes)
+	s.UpdateNodeList(&nodes)
 
 	return nil
 }
 
+// CreateEdge ...
 func (t *Tree) CreateEdge(sp *fabric.Section, n1, n2 *TreeNode) (*TreeEdge, error) {
 	ep := CreateEdge(t, n1, n2)
 
 	// update section with new edge
 	s := *sp
-	edges := s.ListEdges()
+	elp := s.ListEdges()
+	edges := *elp
 	e := *ep
 	var i interface{} = e
 	ie := i.(fabric.Edge)
 	edges = append(edges, &ie)
-	s.UpdateEdgeList(edges)
+	s.UpdateEdgeList(&edges)
 
 	return ep, nil
 }
@@ -100,17 +129,17 @@ func (t *Tree) CreateEdge(sp *fabric.Section, n1, n2 *TreeNode) (*TreeEdge, erro
 // rewrite function so it does everything it needs to on a single iteration of
 // the sections edgelist.
 func (t *Tree) RemoveEdge(sp *fabric.Section, id int) error {
-	s := *sp
 	// verify that edge is in section before being removed
-	if containsEdge(s.ListEdges(), id) {
+	s := *sp
+	elp := s.ListEdges()
+	edges := *elp
+	if containsEdge(edges, id) {
 		RemoveEdge(t, id)
 	} else {
 		return fmt.Errorf("Edge is not in section. Cannot remove.")
 	}
 
 	// remove edge from section list and update section with new list
-	edges := s.ListEdges()
-
 	for i, ep := range edges {
 		e := *ep
 		if e.ID() == id {
@@ -119,35 +148,37 @@ func (t *Tree) RemoveEdge(sp *fabric.Section, id int) error {
 		}
 	}
 
-	s.UpdateEdgeList(edges)
+	s.UpdateEdgeList(&edges)
 
 	return nil
 }
 
-func (t *Tree) ReadNodeValue(s *fabric.Section, id int) (interface{}, error) {
+// ReadNodeValue ...
+func (t *Tree) ReadNodeValue(sp *fabric.Section, id int) (interface{}, error) {
 	// verify that node is in section before being read
-	var i interface{}
-	if containsNode(s.ListNodes(), id) {
-		RemoveNode(t, id)
+	s := *sp
+	var value interface{}
+	nlp := s.ListNodes()
+	nodes := *nlp
+	if containsNode(nodes, id) {
+		value = ReadNodeValue(t, id)
 	} else {
-		return i, fmt.Errorf("Node is not in section. Cannot remove.")
+		return value, fmt.Errorf("Node is not in section. Cannot read value.")
 	}
-
-	value := ReadNodeValuet(t, id)
 
 	return value, nil
 }
 
-func (t *Tree) UpdateNodeValue(s *fabric.Section, id int, value interface{}) error {
+func (t *Tree) UpdateNodeValue(sp *fabric.Section, id int, value interface{}) error {
 	// verify that node is in section before being updated
-	if containsNode(s.ListNodes(), id) {
-		RemoveNode(t, id)
+	s := *sp
+	nlp := s.ListNodes()
+	nodes := *nlp
+	if containsNode(nodes, id) {
+		UpdateNodeValue(t, id, value)
 	} else {
-		return fmt.Errorf("Node is not in section. Cannot remove.")
+		return fmt.Errorf("Node is not in section. Cannot update value.")
 	}
-
-	// udpate node value
-	UpdateNodeValue(t, id, value)
 
 	return nil
 }
@@ -215,23 +246,14 @@ func (t Tree) ListEdges() fabric.EdgeList {
 
 // TreeNode satisfies fabric.Node interface
 type TreeNode struct {
-	Id  int
-	Val interface{}
-	Imm bool
+	Id    int
+	Value interface{}
+	Imm   bool
 }
 
 // ID ...
 func (t TreeNode) ID() int {
 	return t.Id
-}
-
-// Value ...
-func (t TreeNode) Value() interface{} {
-	return t.Val
-}
-
-func (t TreeNode) Update(v interface{}) {
-	t.Val = v
 }
 
 // Immutable ...
