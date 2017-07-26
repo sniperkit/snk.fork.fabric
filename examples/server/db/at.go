@@ -18,8 +18,7 @@ func (a AddTreeNode) Priority() int {
 }
 
 // Commit ...
-func (a AddTreeNode) Commit(np *fabric.DGNode) error {
-	n := *np
+func (a AddTreeNode) Commit(n fabric.DGNode) error {
 	var list fabric.ProcedureSignals
 	list[a.ID()] = fabric.Completed
 	n.Signal(list)
@@ -45,8 +44,7 @@ func (a AddTreeEdge) Priority() int {
 }
 
 // Commit ...
-func (a AddTreeEdge) Commit(np *fabric.DGNode) error {
-	n := *np
+func (a AddTreeEdge) Commit(n fabric.DGNode) error {
 	var list fabric.ProcedureSignals
 	list[a.ID()] = fabric.Completed
 	n.Signal(list)
@@ -72,8 +70,7 @@ func (d DeleteTreeEntity) Priority() int {
 }
 
 // Commit ...
-func (d DeleteTreeEntity) Commit(np *fabric.DGNode) error {
-	n := *np
+func (d DeleteTreeEntity) Commit(n fabric.DGNode) error {
 	var list fabric.ProcedureSignals
 	list[d.ID()] = fabric.Completed
 	n.Signal(list)
@@ -99,8 +96,7 @@ func (r ReadTreeNode) Priority() int {
 }
 
 // Commit ...
-func (r ReadTreeNode) Commit(np *fabric.DGNode) error {
-	n := *np
+func (r ReadTreeNode) Commit(n fabric.DGNode) error {
 	var list fabric.ProcedureSignals
 	list[r.ID()] = fabric.Completed
 	n.Signal(list)
@@ -126,8 +122,7 @@ func (u UpdateTreeNode) Priority() int {
 }
 
 // Commit ...
-func (u UpdateTreeNode) Commit(np *fabric.DGNode) error {
-	n := *np
+func (u UpdateTreeNode) Commit(n fabric.DGNode) error {
 	var list fabric.ProcedureSignals
 	list[u.ID()] = fabric.Completed
 	n.Signal(list)

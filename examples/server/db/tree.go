@@ -153,7 +153,7 @@ func (t *Tree) UpdateNodeValue(s fabric.Section, id int, value interface{}) erro
 }
 
 // NewTree ...
-func NewTree() *Tree {
+func NewTree() fabric.CDS {
 	t := &Tree{}
 	var i interface{}
 	n := NewTreeNode(t, i)
@@ -216,9 +216,9 @@ type TreeNode struct {
 }
 
 // NewTreeNode ...
-func NewTreeNode(t *Tree, value interface{}) fabric.Node {
+func NewTreeNode(c fabric.CDS, value interface{}) fabric.Node {
 	return &TreeNode{
-		Id:    t.GenNodeID(),
+		Id:    c.GenNodeID(),
 		Value: value,
 	}
 }
@@ -242,9 +242,9 @@ type TreeEdge struct {
 }
 
 // NewTreeEdge ...
-func NewTreeEdge(t *Tree, s, d fabric.Node) fabric.Edge {
+func NewTreeEdge(c fabric.CDS, s, d fabric.Node) fabric.Edge {
 	return &TreeEdge{
-		Id:          t.GenEdgeID(),
+		Id:          c.GenEdgeID(),
 		Source:      s,
 		Destination: d,
 	}

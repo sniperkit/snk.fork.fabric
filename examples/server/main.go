@@ -126,9 +126,9 @@ func signalHandler(c <-chan fabric.ProcedureSignals, wg sync.WaitGroup) {
 	}
 }
 
-func createSession(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
+func createSession(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-
+		t := c.(*db.Tree)
 		// create VDG
 		vdg, err := fabric.NewVDGWithRoot(g)
 		if err != nil {
@@ -146,9 +146,7 @@ func createSession(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 		sn := t.NewSection(session.ID)
 
 		// create a branch section using section node as root
-		var i interface{} = *t
-		it := i.(fabric.CDS)
-		branch := fabric.NewBranch(sn, &it)
+		branch := fabric.NewBranch(sn, c)
 
 		// create VUI
 		vu := dg.NewVUI(g, branch)
@@ -203,8 +201,9 @@ func deleteSession(g *fabric.Graph) http.HandlerFunc {
 	}
 }
 
-func createNode(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
+func createNode(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		t := c.(*db.Tree)
 		// grab session
 		sess, err := getSession(r)
 		if err != nil {
@@ -245,8 +244,9 @@ func createNode(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 	}
 }
 
-func createEdge(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
+func createEdge(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		t := c.(*db.Tree)
 		// get session
 		sess, err := getSession(r)
 		if err != nil {
@@ -274,7 +274,7 @@ func createEdge(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 			node2id, _ := strconv.Atoi(node2[0])
 			var first fabric.Node
 			var second fabric.Node
-			for _, k := range t.Nodes {
+			for _, k := range c.ListNodes() {
 				if k.ID() == node1id {
 					first = k
 				}
@@ -296,8 +296,9 @@ func createEdge(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 	}
 }
 
-func removeNode(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
+func removeNode(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		t := c.(*db.Tree)
 		// session and signal checks
 		sess, err := getSession(r)
 		if err != nil {
@@ -333,8 +334,9 @@ func removeNode(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 	}
 }
 
-func removeEdge(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
+func removeEdge(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		t := c.(*db.Tree)
 		// session and signal checks
 		sess, err := getSession(r)
 		if err != nil {
@@ -370,8 +372,9 @@ func removeEdge(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 	}
 }
 
-func readNodeValue(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
+func readNodeValue(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		t := c.(*db.Tree)
 		// session and signal checks
 		sess, err := getSession(r)
 		if err != nil {
@@ -408,8 +411,9 @@ func readNodeValue(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 	}
 }
 
-func updateNodeValue(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
+func updateNodeValue(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		t := c.(*db.Tree)
 		// session and signal checks
 		sess, err := getSession(r)
 		if err != nil {
