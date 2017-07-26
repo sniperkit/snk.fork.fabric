@@ -498,7 +498,7 @@ func TestTotalityUnique(t *testing.T) {
 	graph.DS = &li
 
 	// create section
-	branch := fabric.NewBranch(list.Nodes[0], &li)
+	branch := fabric.NewBranch(list.Nodes[0], li)
 	var ib interface{} = branch
 	b := ib.(fabric.Section)
 
@@ -568,7 +568,7 @@ func TestCovered(t *testing.T) {
 	graph.DS = &li
 
 	// Create a section
-	branch := fabric.NewBranch(list.Nodes[0], &li)
+	branch := fabric.NewBranch(list.Nodes[0], li)
 	var ib interface{} = branch
 	b := ib.(fabric.Section)
 
