@@ -273,25 +273,23 @@ func (g *VDG) AddVirtualNode(node Virtual) (Virtual, error) {
 }
 
 // AddTopNode will add a node to the VDG and create an edge pointing from the root node to it
-func (g *VDG) AddTopNode(node Virtual) (Virtual, error) {
-	var ret Virtual
+func (g *VDG) AddTopNode(node Virtual) error {
 	if _, ok := g.Top[node]; !ok {
 		g.Top[node] = []Virtual{}
 	} else {
-		return ret, fmt.Errorf("Node already exists in Dependency Graph.")
+		return fmt.Errorf("Node already exists in Dependency Graph.")
 	}
 
 	// Add node's subspace to graph
 	g.Space = append(g.Space, node.Subspace().ID())
 	for n := range g.Top {
 		if n.ID() == node.ID() {
-			ret = n
 			// Add edge from root node to our new node
 			root := g.Root
-			g.AddVirtualEdge(root.ID(), n)
+			g.AddVirtualEdge(root.ID(), node)
 		}
 	}
-	return ret, nil
+	return nil
 }
 
 // RemoveVirtualNode is for removing a single node from a VDG
