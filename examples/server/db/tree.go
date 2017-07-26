@@ -88,8 +88,13 @@ func (t *Tree) RemoveNode(s fabric.Section, id int) error {
 
 // CreateEdge ...
 func (t *Tree) CreateEdge(s fabric.Section, n1, n2 fabric.Node) (fabric.Edge, error) {
-	// TODO: verify that both nodes are in the section ...
-	e := CreateEdge(t, n1, n2)
+	var e fabric.Edge
+	nodes := *s.ListNodes()
+	if containsNode(nodes, n1.ID()) && containsNode(nodes, n2.ID()) {
+		e = CreateEdge(t, n1, n2)
+	} else {
+		return e, fmt.Errorf("Node is not in section. Cannot remove.")
+	}
 
 	// update section with new edge
 	elp := s.ListEdges()

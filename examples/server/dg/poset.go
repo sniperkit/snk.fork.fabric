@@ -27,30 +27,33 @@ func (v *VDGPoset) GenerateGraph(nodes []fabric.Virtual) *fabric.VDG {
 }
 
 // Order ...
-func (v *VDGPoset) Order(node fabric.Virtual) fabric.Virtual {
+func (v *VDGPoset) Order(node fabric.Virtual) error {
 	// add node to VDG
-	n, _ := v.VDG().AddTopNode(node)
+	err := v.VDG().AddTopNode(node)
+	if err != nil {
+		return err
+	}
 
 	for vnode := range v.VDG().Top {
-		if vnode.GetPriority() < node.GetPriority() && !vnode.Started() {
-			// create an edge from all nodes with a larger priority integer to this node
-			err := v.VDG().AddVirtualEdge(vnode.ID(), n)
-			if err != nil {
-				continue
-			}
-		} else if vnode.GetPriority() > node.GetPriority() {
-			// create an edge from the node to all nodes that have a smaller priority integer
-			err := v.VDG().AddVirtualEdge(node.ID(), vnode)
-			if err != nil {
-				continue
+		if vnode.ID() != node.ID() {
+			if vnode.GetPriority() <= node.GetPriority() && !vnode.Started() {
+				// create an edge from all nodes with an equivalent or larger priority integer to this node
+				err := v.VDG().AddVirtualEdge(vnode.ID(), node)
+				if err != nil {
+					continue
+				}
+			} else if vnode.GetPriority() > node.GetPriority() {
+				// create an edge from the node to all nodes that have a smaller priority integer
+				err := v.VDG().AddVirtualEdge(node.ID(), vnode)
+				if err != nil {
+					continue
+				}
 			}
 		}
 
-		// TODO: order Update nodes behind other already existing update nodes;
-		// technically, the Updates only need to be ordered if they are updating the same node
-		// this is to avoid: "lost updates" (two transactions are updating the same piece of data and one update gets overwritten)
+		// TODO: currently the Order() method orders ALL Update()s in order of their creation,
+		// but the Update()s *only* need to be ordered if they are updating the *same* CDS node
 	}
 
-	// return pointer to nodes location in VDG
-	return n
+	return nil
 }

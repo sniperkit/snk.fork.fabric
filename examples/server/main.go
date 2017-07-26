@@ -217,13 +217,17 @@ func createNode(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.CreateNode.Priority())
 
 		// Order Virtual Node
-		vn := sess.VPoset.Order(v)
+		err = sess.VPoset.Order(v)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
 
 		// Start Virtual Node
-		vn.Start()
+		v.Start()
 
 		// SignalCheck and then run logic
-		if signalCheck(vn) {
+		if signalCheck(v) {
 			val := r.URL.Query()
 			value, ok := val["value"]
 			if !ok {
@@ -240,7 +244,7 @@ func createNode(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// remove virtual node
-		sess.VPoset.VDG().RemoveVirtualNode(vn)
+		sess.VPoset.VDG().RemoveVirtualNode(v)
 	}
 }
 
@@ -260,13 +264,17 @@ func createEdge(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.CreateEdge.Priority())
 
 		// Order Virtual Node
-		vn := sess.VPoset.Order(v)
+		err = sess.VPoset.Order(v)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
 
 		// Start Virtual Node
-		vn.Start()
+		v.Start()
 
 		// SignalCheck and then run logic
-		if signalCheck(vn) {
+		if signalCheck(v) {
 			val := r.URL.Query()
 			node1 := val["n1"]
 			node2 := val["n2"]
@@ -292,7 +300,7 @@ func createEdge(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// remove virtual node
-		sess.VPoset.VDG().RemoveVirtualNode(vn)
+		sess.VPoset.VDG().RemoveVirtualNode(v)
 	}
 }
 
@@ -312,12 +320,16 @@ func removeNode(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.RemoveNode.Priority())
 
 		// Order Virtual Node
-		vn := sess.VPoset.Order(v)
+		err = sess.VPoset.Order(v)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
 
 		// Start Virtual Node
-		vn.Start()
+		v.Start()
 
-		if signalCheck(vn) {
+		if signalCheck(v) {
 			val := r.URL.Query()
 			node := val["node"]
 			nodeID, _ := strconv.Atoi(node[0])
@@ -330,7 +342,7 @@ func removeNode(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// remove virtual node
-		sess.VPoset.VDG().RemoveVirtualNode(vn)
+		sess.VPoset.VDG().RemoveVirtualNode(v)
 	}
 }
 
@@ -350,12 +362,16 @@ func removeEdge(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.RemoveEdge.Priority())
 
 		// Order Virtual Node
-		vn := sess.VPoset.Order(v)
+		err = sess.VPoset.Order(v)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
 
 		// Start Virtual Node
-		vn.Start()
+		v.Start()
 
-		if signalCheck(vn) {
+		if signalCheck(v) {
 			val := r.URL.Query()
 			edge := val["edge"]
 			edgeID, _ := strconv.Atoi(edge[0])
@@ -368,7 +384,7 @@ func removeEdge(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// remove virtual node
-		sess.VPoset.VDG().RemoveVirtualNode(vn)
+		sess.VPoset.VDG().RemoveVirtualNode(v)
 	}
 }
 
@@ -388,13 +404,17 @@ func readNodeValue(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.ReadNodeValue.Priority())
 
 		// Order Virtual Node
-		vn := sess.VPoset.Order(v)
+		err = sess.VPoset.Order(v)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
 
 		// Start Virtual Node
-		vn.Start()
+		v.Start()
 
 		// Signalcheck and then run logic
-		if signalCheck(vn) {
+		if signalCheck(v) {
 			val := r.URL.Query()
 			node := val["node"]
 			nodeID, _ := strconv.Atoi(node[0])
@@ -407,7 +427,7 @@ func readNodeValue(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// remove virtual node
-		sess.VPoset.VDG().RemoveVirtualNode(vn)
+		sess.VPoset.VDG().RemoveVirtualNode(v)
 	}
 }
 
@@ -427,13 +447,17 @@ func updateNodeValue(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.UpdateNodeValue.Priority())
 
 		// Order Virtual Node
-		vn := sess.VPoset.Order(v)
+		err = sess.VPoset.Order(v)
+		if err != nil {
+			w.Write([]byte(err.Error()))
+			return
+		}
 
 		// Start Virtual Node
-		vn.Start()
+		v.Start()
 
 		// SignalCheck and then run logic
-		if signalCheck(vn) {
+		if signalCheck(v) {
 			val := r.URL.Query()
 			node := val["node"]
 			value := val["value"]
@@ -447,7 +471,7 @@ func updateNodeValue(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// remove virtual node
-		sess.VPoset.VDG().RemoveVirtualNode(vn)
+		sess.VPoset.VDG().RemoveVirtualNode(v)
 	}
 }
 
