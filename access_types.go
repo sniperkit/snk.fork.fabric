@@ -9,7 +9,7 @@ type AccessType interface {
 	// Class() string                             // the "class" of action (e.g. "read")
 	ID() int                                   // integer id assigned to Access Type
 	Priority() int                             // priorities are not a necessity but can be helpful for ordering algorithms for posets
-	Commit(*DGNode) error                      // takes a DGNode to signal for ...
+	Commit(DGNode) error                       // takes a DGNode to signal for ...
 	Rollback(RestoreNodes, RestoreEdges) error // takes a list of all CDS nodes and edges that have been operated on
 	// InvariantNode(*Node) bool                  // used to calculate if a CDS node should remain invariant
 	// InvariantEdge(*Edge) bool                  // used to calculate if a CDS edge should remain invariant

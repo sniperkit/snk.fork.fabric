@@ -34,8 +34,7 @@ type Subgraph struct {
 
 // NewSubgraph will grab all edges from nodes that connect to
 // other nodes that are in our list.
-func NewSubgraph(nlp *NodeList, cp *CDS) Section {
-	c := *cp
+func NewSubgraph(nlp *NodeList, c CDS) Section {
 	nodes := *nlp
 	edges := make(EdgeList, 0)
 
@@ -90,11 +89,11 @@ type Branch struct {
 }
 
 // NewBranch ...
-func NewBranch(root Node, cp *CDS) Section {
+func NewBranch(root Node, c CDS) Section {
 	edges := make(EdgeList, 0)
 	nodes := make(NodeList, 0)
 
-	nodes, edges = dfs(root, nodes, edges, cp)
+	nodes, edges = dfs(root, nodes, edges, c)
 
 	return &Branch{
 		Nodes: &nodes,
@@ -102,8 +101,7 @@ func NewBranch(root Node, cp *CDS) Section {
 	}
 }
 
-func dfs(start Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeList) {
-	c := *cp
+func dfs(start Node, nodes NodeList, edges EdgeList, c CDS) (NodeList, EdgeList) {
 	// if node is not already in branch -- add
 	if !ContainsNode(nodes, start) {
 		nodes = append(nodes, start)
@@ -116,7 +114,7 @@ func dfs(start Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeLis
 				// add edge to branch
 				edges = append(edges, e)
 				// for the destination node, add node and its edges to branch
-				nodes, edges = dfs(e.GetDestination(), nodes, edges, cp)
+				nodes, edges = dfs(e.GetDestination(), nodes, edges, c)
 			}
 		}
 	}
@@ -156,11 +154,11 @@ type Partition struct {
 }
 
 // NewPartition ...
-func NewPartition(start, end Node, cp *CDS) Section {
+func NewPartition(start, end Node, c CDS) Section {
 	nodes := make(NodeList, 0)
 	edges := make(EdgeList, 0)
 
-	nodes, edges = partDFS(start, end, nodes, edges, cp)
+	nodes, edges = partDFS(start, end, nodes, edges, c)
 
 	return &Partition{
 		Nodes: &nodes,
@@ -168,8 +166,7 @@ func NewPartition(start, end Node, cp *CDS) Section {
 	}
 }
 
-func partDFS(start, end Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeList) {
-	c := *cp
+func partDFS(start, end Node, nodes NodeList, edges EdgeList, c CDS) (NodeList, EdgeList) {
 	// add node to partition nodes
 	if !ContainsNode(nodes, start) {
 		nodes = append(nodes, start)
@@ -185,7 +182,7 @@ func partDFS(start, end Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList
 				// add edge to branch
 				edges = append(edges, e)
 				// for the destination node, add node and its edge to branch
-				nodes, edges = partDFS(e.GetDestination(), end, nodes, edges, cp)
+				nodes, edges = partDFS(e.GetDestination(), end, nodes, edges, c)
 			}
 		}
 	}
@@ -223,8 +220,7 @@ type Subset struct {
 
 // NewSubset grabs all (and only all) edges that are connected
 // to a node in the list of nodes supplied.
-func NewSubset(nlp *NodeList, cp *CDS) Section {
-	c := *cp
+func NewSubset(nlp *NodeList, c CDS) Section {
 	nodes := *nlp
 	cdsEdges := c.ListEdges()
 	edges := make(EdgeList, 0)
