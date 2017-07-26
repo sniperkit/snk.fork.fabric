@@ -20,7 +20,7 @@ type Node struct {
 
 type UI struct {
 	Node
-	CDS     *fabric.Section
+	CDS     fabric.Section
 	Unique  bool
 	Virtual bool
 }
@@ -69,7 +69,7 @@ func (u UI) Signal(s fabric.ProcedureSignals) {
 	}
 }
 
-func (u UI) GetSection() *fabric.Section {
+func (u UI) GetSection() fabric.Section {
 	return u.CDS
 }
 
@@ -365,16 +365,16 @@ func (e ElementEdge) ID() int {
 	return e.Id
 }
 
-func (e ElementEdge) GetSource() *fabric.Node {
+func (e ElementEdge) GetSource() fabric.Node {
 	var i interface{} = *e.Source
 	in := i.(fabric.Node)
-	return &in
+	return in
 }
 
-func (e ElementEdge) GetDestination() *fabric.Node {
+func (e ElementEdge) GetDestination() fabric.Node {
 	var i interface{} = *e.Destination
 	in := i.(fabric.Node)
-	return &in
+	return in
 }
 
 func (e ElementEdge) Immutable() bool {
@@ -400,8 +400,9 @@ func NewList() *List {
 
 	var i interface{} = n
 	in := i.(fabric.Node)
+
 	var nl fabric.NodeList
-	nl = append(nl, &in)
+	nl = append(nl, in)
 	l.Nodes = nl
 
 	el := make(fabric.EdgeList, 0)
@@ -421,7 +422,7 @@ func (l *List) NewElementNode() *ElementNode {
 	var i interface{} = n
 	in := i.(fabric.Node)
 
-	l.Nodes = append(l.Nodes, &in)
+	l.Nodes = append(l.Nodes, in)
 	l.Len += 1
 
 	return &n
@@ -440,15 +441,14 @@ func (l *List) NewElementEdge(s, d *ElementNode) {
 	var i interface{} = e
 	ie := i.(fabric.Edge)
 
-	l.Edges = append(l.Edges, &ie)
+	l.Edges = append(l.Edges, ie)
 }
 
 // Generate an ID for a CDS Node
 func (l List) GenNodeID() int {
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Int()
-	for _, np := range l.Nodes {
-		n := *np
+	for _, n := range l.Nodes {
 		if n.ID() == id {
 			id = l.GenNodeID()
 		}
@@ -461,8 +461,7 @@ func (l List) GenNodeID() int {
 func (l List) GenEdgeID() int {
 	rand.Seed(time.Now().UnixNano())
 	id := rand.Int()
-	for _, ep := range l.Edges {
-		e := *ep
+	for _, e := range l.Edges {
 		if e.ID() == id {
 			id = l.GenEdgeID()
 		}
@@ -514,7 +513,7 @@ func TestTotalityUnique(t *testing.T) {
 			Signals:   &s1,
 		},
 		Virtual: false,
-		CDS:     &b, // both UI nodes will address the same CDS section
+		CDS:     b, // both UI nodes will address the same CDS section
 	}
 
 	sm2 := make(fabric.SignalingMap)
@@ -527,7 +526,7 @@ func TestTotalityUnique(t *testing.T) {
 			Signals:   &s2,
 		},
 		Virtual: false,
-		CDS:     &b, // both UI nodes will address the same CDS section
+		CDS:     b, // both UI nodes will address the same CDS section
 	}
 
 	// Add UI nodes to graph
@@ -584,7 +583,7 @@ func TestCovered(t *testing.T) {
 			Signals:   &s1,
 		},
 		Virtual: false,
-		CDS:     &b,
+		CDS:     b,
 	}
 
 	// Add UI node to graph

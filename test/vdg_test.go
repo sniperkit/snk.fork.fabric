@@ -8,9 +8,9 @@ import (
 
 type Virtual struct {
 	Node
-	Start bool
-	Space fabric.UI
-	Root  bool
+	Executing bool
+	Space     fabric.UI
+	Root      bool
 }
 
 func (v Virtual) ID() int {
@@ -51,8 +51,12 @@ func (v Virtual) Signal(s fabric.ProcedureSignals) {
 	}
 }
 
+func (v Virtual) Start() {
+	v.Executing = true
+}
+
 func (v Virtual) Started() bool {
-	return v.Start
+	return v.Executing
 }
 
 func (v Virtual) IsRoot() bool {
@@ -106,9 +110,9 @@ func TestVDG(t *testing.T) {
 			Signalers: &sm2,
 			Signals:   &s2,
 		},
-		Start: false,
-		Space: space,
-		Root:  true,
+		Executing: false,
+		Space:     space,
+		Root:      true,
 	}
 	vp, err := vdg.AddVirtualNode(v)
 	if err != nil {
@@ -129,9 +133,9 @@ func TestVDG(t *testing.T) {
 			Signalers: &sm2,
 			Signals:   &s2,
 		},
-		Start: false,
-		Space: space,
-		Root:  false,
+		Executing: false,
+		Space:     space,
+		Root:      false,
 	}
 	vp2, err := vdg.AddVirtualNode(v2)
 	if err != nil {
@@ -147,14 +151,14 @@ func TestVDG(t *testing.T) {
 	// Create edge between two virtual nodes
 	for n := range vdg.Top {
 		if n.ID() == v2.Id {
-			vdg.AddVirtualEdge(v.Id, &n)
+			vdg.AddVirtualEdge(v.Id, n)
 		}
 	}
 
 	for n, l := range vdg.Top {
 		if n.ID() == v.Id {
 			li := l[0]
-			node := *li
+			node := li
 			for n2 := range vdg.Top {
 				if n.ID() == v2.Id {
 					if node.ID() != n2.ID() {
