@@ -20,37 +20,22 @@ import (
 	}
 */
 
-func addNode(t *Tree, value interface{}) *TreeNode {
-	n := TreeNode{
-		Id:    t.GenNodeID(),
-		Value: value,
-	}
+func addNode(t *Tree, value interface{}) fabric.Node {
+	n := NewTreeNode(t, value)
+	t.Nodes = append(t.Nodes, n)
 
-	var i interface{} = n
-	in := i.(fabric.Node)
-
-	t.Nodes = append(t.Nodes, &in)
-
-	return &n
+	return n
 }
 
 // CreateNode ...
 // EXAMPLE: CreateNode(myTreepointer, myValue)
 var CreateNode = AddTreeNode(addNode)
 
-func addEdge(t *Tree, s, d *TreeNode) *TreeEdge {
-	e := TreeEdge{
-		Id:          t.GenEdgeID(),
-		Source:      s,
-		Destination: d,
-	}
+func addEdge(t *Tree, s, d fabric.Node) fabric.Edge {
+	e := NewTreeEdge(t, s, d)
+	t.Edges = append(t.Edges, e)
 
-	var i interface{} = e
-	ie := i.(fabric.Edge)
-
-	t.Edges = append(t.Edges, &ie)
-
-	return &e
+	return e
 }
 
 // CreateEdge ...
@@ -59,8 +44,7 @@ var CreateEdge = AddTreeEdge(addEdge)
 
 func deleteNode(t *Tree, id int) {
 	// remove node from node list
-	for i, np := range t.Nodes {
-		node := *np
+	for i, node := range t.Nodes {
 		if node.ID() == id {
 			t.Nodes = append(t.Nodes[:i], t.Nodes[i+1:]...)
 			break
@@ -68,9 +52,8 @@ func deleteNode(t *Tree, id int) {
 	}
 
 	// remove all edges that have node as destination
-	for i, ep := range t.Edges {
-		edge := *ep
-		dest := *edge.GetDestination()
+	for i, edge := range t.Edges {
+		dest := edge.GetDestination()
 		if dest.ID() == id {
 			t.Edges = append(t.Edges[:i], t.Edges[i+1:]...)
 		}
@@ -82,8 +65,7 @@ func deleteNode(t *Tree, id int) {
 var RemoveNode = DeleteTreeEntity(deleteNode)
 
 func deleteEdge(t *Tree, id int) {
-	for i, ep := range t.Edges {
-		edge := *ep
+	for i, edge := range t.Edges {
 		if edge.ID() == id {
 			t.Edges = append(t.Edges[:i], t.Edges[i+1:]...)
 			break
@@ -96,10 +78,9 @@ func deleteEdge(t *Tree, id int) {
 var RemoveEdge = DeleteTreeEntity(deleteEdge)
 
 func readNode(t *Tree, id int) interface{} {
-	for _, node := range t.Nodes {
-		n := *node
+	for _, n := range t.Nodes {
 		if n.ID() == id {
-			tn := n.(TreeNode)
+			tn := n.(*TreeNode)
 			return tn.Value
 		}
 	}
@@ -112,14 +93,13 @@ func readNode(t *Tree, id int) interface{} {
 var ReadNodeValue = ReadTreeNode(readNode)
 
 func updateNode(t *Tree, id int, v interface{}) {
-	for i, np := range t.Nodes {
-		node := *np
+	for i, node := range t.Nodes {
 		if node.ID() == id {
-			tn := node.(TreeNode)
+			tn := node.(*TreeNode)
 			tn.Value = v
 			var in interface{} = tn
 			newNode := in.(fabric.Node)
-			t.Nodes[i] = &newNode
+			t.Nodes[i] = newNode
 		}
 	}
 }

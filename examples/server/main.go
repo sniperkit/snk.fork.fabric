@@ -20,12 +20,12 @@ var sessions []Session
 // Session is a user session object ...
 type Session struct {
 	ID     int
-	VPoset *dg.VDGPoset
-	VUI    *fabric.UI
+	VPoset fabric.VPoset
+	VUI    fabric.UI
 }
 
 // NewSession ...
-func NewSession(v *dg.VDGPoset) Session {
+func NewSession(v fabric.VPoset) Session {
 	return Session{
 		ID:     GenSessionID(),
 		VPoset: v,
@@ -79,9 +79,8 @@ func getSession(r *http.Request) (Session, error) {
 // NOTE: a node should mark itself started before calling SignalCheck;
 // a node is considered blocked/spinning while SignalChecking, but it also has bounded itself
 // from being added more dependencies.
-func signalCheck(np *fabric.Virtual) bool {
+func signalCheck(node fabric.Virtual) bool {
 	cont := true
-	node := *np
 
 	depSignals := node.ListSignals()
 	var wg sync.WaitGroup
@@ -152,30 +151,17 @@ func createSession(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 		branch := fabric.NewBranch(sn, &it)
 
 		// create VUI
-		sm1 := make(fabric.SignalingMap)
-		s1 := make(fabric.SignalsMap)
-		vu := dg.UI{
-			Node: dg.Node{
-				Id:        g.GenID(),
-				Type:      fabric.UINode,
-				Signalers: &sm1,
-				Signals:   &s1,
-			},
-			CDS:     &branch,
-			Virtual: true,
-		}
+		vu := dg.NewVUI(g, branch)
 
 		// add vui to graph
-		vp, err := g.AddVUI(vu)
+		_, err = g.AddVUI(vu)
 		if err != nil {
 			w.WriteHeader(http.StatusInternalServerError)
 			w.Write([]byte("500 - Could not create VUI!"))
 		}
 
 		// set VUI for session
-		dgn := *vp
-		vui := dgn.(fabric.UI)
-		session.VUI = &vui
+		session.VUI = vu
 
 		// add session to global sessions store
 		sessions = append(sessions, session)
@@ -205,12 +191,10 @@ func deleteSession(g *fabric.Graph) http.HandlerFunc {
 			}
 
 			// remove VDG
-			g.RemoveVDG(sess.VPoset.Vdg)
+			g.RemoveVDG(sess.VPoset.VDG())
 
 			// Remove VUI
-			var iv interface{} = *sess.VUI
-			vui := iv.(fabric.DGNode)
-			err = g.RemoveVUI(vui)
+			err = g.RemoveVUI(sess.VUI)
 			if err != nil {
 				w.Write([]byte(err.Error()))
 				return
@@ -229,29 +213,15 @@ func createNode(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// Create Virtual Node
-		sm1 := make(fabric.SignalingMap)
-		s1 := make(fabric.SignalsMap)
 		var list fabric.ProcedureList
 		list = append(list, db.CreateNode)
-		v := dg.Virtual{
-			Node: dg.Node{
-				Id:               sess.VPoset.VDG().GenID(),
-				Type:             fabric.VDGNode,
-				Priority:         db.CreateNode.Priority(),
-				AccessProcedures: &list,
-				Signalers:        &sm1,
-				Signals:          &s1,
-			},
-			Start: false,
-			Root:  false,
-			Space: sess.VUI,
-		}
+		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.CreateNode.Priority())
 
 		// Order Virtual Node
 		vn := sess.VPoset.Order(v)
 
 		// Start Virtual Node
-		v.Start = true
+		vn.Start()
 
 		// SignalCheck and then run logic
 		if signalCheck(vn) {
@@ -262,8 +232,7 @@ func createNode(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 				return
 			}
 			//newNode := db.CreateNode(t, value[0])
-			vui := *sess.VUI
-			newNode, err := t.CreateNode(vui.GetSection(), value[0])
+			newNode, err := t.CreateNode(sess.VUI.GetSection(), value[0])
 			if err != nil {
 				w.Write([]byte(err.Error()))
 				return
@@ -286,29 +255,15 @@ func createEdge(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// Create Virtual Node
-		sm1 := make(fabric.SignalingMap)
-		s1 := make(fabric.SignalsMap)
 		var list fabric.ProcedureList
 		list = append(list, db.CreateEdge)
-		v := dg.Virtual{
-			Node: dg.Node{
-				Id:               sess.VPoset.VDG().GenID(),
-				Type:             fabric.VDGNode,
-				Priority:         db.CreateEdge.Priority(),
-				AccessProcedures: &list,
-				Signalers:        &sm1,
-				Signals:          &s1,
-			},
-			Start: false,
-			Root:  false,
-			Space: sess.VUI,
-		}
+		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.CreateEdge.Priority())
 
 		// Order Virtual Node
 		vn := sess.VPoset.Order(v)
 
 		// Start Virtual Node
-		v.Start = true
+		vn.Start()
 
 		// SignalCheck and then run logic
 		if signalCheck(vn) {
@@ -317,22 +272,18 @@ func createEdge(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 			node2 := val["n2"]
 			node1id, _ := strconv.Atoi(node1[0])
 			node2id, _ := strconv.Atoi(node2[0])
-			var first *db.TreeNode
-			var second *db.TreeNode
-			for _, kp := range t.Nodes {
-				k := *kp
+			var first fabric.Node
+			var second fabric.Node
+			for _, k := range t.Nodes {
 				if k.ID() == node1id {
-					kn := k.(db.TreeNode)
-					first = &kn
+					first = k
 				}
 				if k.ID() == node2id {
-					kn := k.(db.TreeNode)
-					second = &kn
+					second = k
 				}
 			}
-			// newEdge := db.CreateEdge(t, first, second)
-			vui := *sess.VUI
-			newEdge, err := t.CreateEdge(vui.GetSection(), first, second)
+
+			newEdge, err := t.CreateEdge(sess.VUI.GetSection(), first, second)
 			if err != nil {
 				w.Write([]byte(err.Error()))
 				return
@@ -355,37 +306,21 @@ func removeNode(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// Create Virtual Node
-		sm1 := make(fabric.SignalingMap)
-		s1 := make(fabric.SignalsMap)
 		var list fabric.ProcedureList
 		list = append(list, db.RemoveNode)
-		v := dg.Virtual{
-			Node: dg.Node{
-				Id:               sess.VPoset.VDG().GenID(),
-				Type:             fabric.VDGNode,
-				Priority:         db.RemoveNode.Priority(),
-				AccessProcedures: &list,
-				Signalers:        &sm1,
-				Signals:          &s1,
-			},
-			Start: false,
-			Root:  false,
-			Space: sess.VUI,
-		}
+		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.RemoveNode.Priority())
 
 		// Order Virtual Node
 		vn := sess.VPoset.Order(v)
 
 		// Start Virtual Node
-		v.Start = true
+		vn.Start()
 
 		if signalCheck(vn) {
 			val := r.URL.Query()
 			node := val["node"]
 			nodeID, _ := strconv.Atoi(node[0])
-			// db.RemoveNode(t, nodeID)
-			vui := *sess.VUI
-			err := t.RemoveNode(vui.GetSection(), nodeID)
+			err := t.RemoveNode(sess.VUI.GetSection(), nodeID)
 			if err != nil {
 				w.Write([]byte(err.Error()))
 				return
@@ -408,37 +343,21 @@ func removeEdge(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// Create Virtual Node
-		sm1 := make(fabric.SignalingMap)
-		s1 := make(fabric.SignalsMap)
 		var list fabric.ProcedureList
 		list = append(list, db.RemoveEdge)
-		v := dg.Virtual{
-			Node: dg.Node{
-				Id:               sess.VPoset.VDG().GenID(),
-				Type:             fabric.VDGNode,
-				Priority:         db.RemoveEdge.Priority(),
-				AccessProcedures: &list,
-				Signalers:        &sm1,
-				Signals:          &s1,
-			},
-			Start: false,
-			Root:  false,
-			Space: sess.VUI,
-		}
+		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.RemoveEdge.Priority())
 
 		// Order Virtual Node
 		vn := sess.VPoset.Order(v)
 
 		// Start Virtual Node
-		v.Start = true
+		vn.Start()
 
 		if signalCheck(vn) {
 			val := r.URL.Query()
 			edge := val["edge"]
 			edgeID, _ := strconv.Atoi(edge[0])
-			// db.RemoveEdge(t, edgeID)
-			vui := *sess.VUI
-			err := t.RemoveEdge(vui.GetSection(), edgeID)
+			err := t.RemoveEdge(sess.VUI.GetSection(), edgeID)
 			if err != nil {
 				w.Write([]byte(err.Error()))
 				return
@@ -461,37 +380,22 @@ func readNodeValue(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// Create Virtual Node
-		sm1 := make(fabric.SignalingMap)
-		s1 := make(fabric.SignalsMap)
 		var list fabric.ProcedureList
 		list = append(list, db.ReadNodeValue)
-		v := dg.Virtual{
-			Node: dg.Node{
-				Id:               sess.VPoset.VDG().GenID(),
-				Type:             fabric.VDGNode,
-				Priority:         db.ReadNodeValue.Priority(),
-				AccessProcedures: &list,
-				Signalers:        &sm1,
-				Signals:          &s1,
-			},
-			Start: false,
-			Root:  false,
-			Space: sess.VUI,
-		}
+		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.ReadNodeValue.Priority())
 
 		// Order Virtual Node
 		vn := sess.VPoset.Order(v)
 
 		// Start Virtual Node
-		v.Start = true
+		vn.Start()
 
 		// Signalcheck and then run logic
 		if signalCheck(vn) {
 			val := r.URL.Query()
 			node := val["node"]
 			nodeID, _ := strconv.Atoi(node[0])
-			vui := *sess.VUI
-			value, err := t.ReadNodeValue(vui.GetSection(), nodeID)
+			value, err := t.ReadNodeValue(sess.VUI.GetSection(), nodeID)
 			if err != nil {
 				w.Write([]byte(err.Error()))
 				return
@@ -514,29 +418,15 @@ func updateNodeValue(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 		}
 
 		// Create Virtual Node
-		sm1 := make(fabric.SignalingMap)
-		s1 := make(fabric.SignalsMap)
 		var list fabric.ProcedureList
 		list = append(list, db.UpdateNodeValue)
-		v := dg.Virtual{
-			Node: dg.Node{
-				Id:               sess.VPoset.VDG().GenID(),
-				Type:             fabric.VDGNode,
-				Priority:         db.UpdateNodeValue.Priority(),
-				AccessProcedures: &list,
-				Signalers:        &sm1,
-				Signals:          &s1,
-			},
-			Start: false,
-			Root:  false,
-			Space: sess.VUI,
-		}
+		v := dg.NewVirtual(sess.VPoset.VDG(), sess.VUI, &list, db.UpdateNodeValue.Priority())
 
 		// Order Virtual Node
 		vn := sess.VPoset.Order(v)
 
 		// Start Virtual Node
-		v.Start = true
+		vn.Start()
 
 		// SignalCheck and then run logic
 		if signalCheck(vn) {
@@ -544,9 +434,7 @@ func updateNodeValue(t *db.Tree, g *fabric.Graph) http.HandlerFunc {
 			node := val["node"]
 			value := val["value"]
 			nodeID, _ := strconv.Atoi(node[0])
-			// db.UpdateNodeValue(t, nodeID, value[0])
-			vui := *sess.VUI
-			err := t.UpdateNodeValue(vui.GetSection(), nodeID, value[0])
+			err := t.UpdateNodeValue(sess.VUI.GetSection(), nodeID, value[0])
 			if err != nil {
 				w.Write([]byte(err.Error()))
 				return

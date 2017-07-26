@@ -10,7 +10,7 @@ type VDGPoset struct {
 }
 
 // NewVDGPoset ...
-func NewVDGPoset(v *fabric.VDG) *VDGPoset {
+func NewVDGPoset(v *fabric.VDG) fabric.VPoset {
 	return &VDGPoset{
 		Vdg: v,
 	}
@@ -27,20 +27,20 @@ func (v *VDGPoset) GenerateGraph(nodes []fabric.Virtual) *fabric.VDG {
 }
 
 // Order ...
-func (v *VDGPoset) Order(node fabric.Virtual) *fabric.Virtual {
+func (v *VDGPoset) Order(node fabric.Virtual) fabric.Virtual {
 	// add node to VDG
-	np, _ := v.VDG().AddTopNode(node)
+	n, _ := v.VDG().AddTopNode(node)
 
 	for vnode := range v.VDG().Top {
 		if vnode.GetPriority() < node.GetPriority() && !vnode.Started() {
 			// create an edge from all nodes with a larger priority integer to this node
-			err := v.VDG().AddVirtualEdge(vnode.ID(), np)
+			err := v.VDG().AddVirtualEdge(vnode.ID(), n)
 			if err != nil {
 				continue
 			}
 		} else if vnode.GetPriority() > node.GetPriority() {
 			// create an edge from the node to all nodes that have a smaller priority integer
-			err := v.VDG().AddVirtualEdge(node.ID(), &vnode)
+			err := v.VDG().AddVirtualEdge(node.ID(), vnode)
 			if err != nil {
 				continue
 			}
@@ -52,5 +52,5 @@ func (v *VDGPoset) Order(node fabric.Virtual) *fabric.Virtual {
 	}
 
 	// return pointer to nodes location in VDG
-	return np
+	return n
 }

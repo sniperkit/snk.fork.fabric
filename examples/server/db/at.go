@@ -5,7 +5,7 @@ import (
 )
 
 // AddTreeNode ...
-type AddTreeNode func(*Tree, interface{}) *TreeNode
+type AddTreeNode func(*Tree, interface{}) fabric.Node
 
 // ID ...
 func (a AddTreeNode) ID() int {
@@ -32,7 +32,7 @@ func (a AddTreeNode) Rollback(np fabric.RestoreNodes, el fabric.RestoreEdges) er
 }
 
 // AddTreeEdge ...
-type AddTreeEdge func(*Tree, *TreeNode, *TreeNode) *TreeEdge
+type AddTreeEdge func(*Tree, fabric.Node, fabric.Node) fabric.Edge
 
 // ID ...
 func (a AddTreeEdge) ID() int {
