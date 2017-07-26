@@ -1,27 +1,29 @@
 package fabric
 
-// wrap data structure elements to become generic CDS Nodes
+// Node is used to wrap data structure elements to become generic CDS Nodes
 type Node interface {
 	ID() int // returns node id
 	Immutable() bool
 }
 
-// A list of references to each node in the CDS
-type NodeList []*Node
+// NodeList is a list of references to each node in the CDS
+type NodeList []Node
 
 // NOTE: for undirected edges, choice of source and destination nodes
 //		are up to the developer.
+
+// Edge ...
 type Edge interface {
 	ID() int // returns edge id
-	GetSource() *Node
-	GetDestination() *Node
+	GetSource() Node
+	GetDestination() Node
 	Immutable() bool
 }
 
-// A list of references to each edge in the CDS
-type EdgeList []*Edge
+// EdgeList is a list of references to each edge in the CDS
+type EdgeList []Edge
 
-// Add these methods to data structure objects to use as CDS
+// CDS is the interface definition that must be satisfied for the global shared data structure
 type CDS interface {
 	GenNodeID() int
 	GenEdgeID() int

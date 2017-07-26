@@ -14,6 +14,7 @@ package fabric
 	Intensional Conditions can be used if the CDS is small enough to not become a processing burden.
 */
 
+// Section is the interface definition for cutting out a section of the global CDS
 type Section interface {
 	ListNodes() *NodeList
 	ListEdges() *EdgeList
@@ -24,6 +25,8 @@ type Section interface {
 }
 
 /* Sub-graphs are non-disjoint collections of nodes and edges */
+
+// Subgraph ...
 type Subgraph struct {
 	Nodes *NodeList
 	Edges *EdgeList
@@ -36,16 +39,13 @@ func NewSubgraph(nlp *NodeList, cp *CDS) Section {
 	nodes := *nlp
 	edges := make(EdgeList, 0)
 
-	for _, np := range nodes {
-		n := *np
+	for _, n := range nodes {
 		cdsEdges := c.ListEdges()
-		for _, ep := range cdsEdges {
-			e := *ep
-			sp := e.GetSource()
-			dp := e.GetDestination()
-			d := *dp
-			if d.ID() == n.ID() && ContainsNode(nodes, sp) {
-				edges = append(edges, ep)
+		for _, e := range cdsEdges {
+			s := e.GetSource()
+			d := e.GetDestination()
+			if d.ID() == n.ID() && ContainsNode(nodes, s) {
+				edges = append(edges, e)
 			}
 		}
 
@@ -57,18 +57,22 @@ func NewSubgraph(nlp *NodeList, cp *CDS) Section {
 	}
 }
 
+// ListNodes ...
 func (s *Subgraph) ListNodes() *NodeList {
 	return s.Nodes
 }
 
+// ListEdges ...
 func (s *Subgraph) ListEdges() *EdgeList {
 	return s.Edges
 }
 
+// UpdateNodeList ...
 func (s *Subgraph) UpdateNodeList(nlp *NodeList) {
 	s.Nodes = nlp
 }
 
+// UpdateEdgeList ...
 func (s *Subgraph) UpdateEdgeList(elp *EdgeList) {
 	s.Edges = elp
 }
@@ -78,12 +82,15 @@ func (s *Subgraph) UpdateEdgeList(elp *EdgeList) {
 	(usually of a tree graph)
 	A branch is technically a sub-graph as well.
 */
+
+// Branch ...
 type Branch struct {
 	Nodes *NodeList
 	Edges *EdgeList
 }
 
-func NewBranch(root *Node, cp *CDS) Section {
+// NewBranch ...
+func NewBranch(root Node, cp *CDS) Section {
 	edges := make(EdgeList, 0)
 	nodes := make(NodeList, 0)
 
@@ -95,20 +102,19 @@ func NewBranch(root *Node, cp *CDS) Section {
 	}
 }
 
-func dfs(start *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeList) {
+func dfs(start Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeList) {
 	c := *cp
 	// if node is not already in branch -- add
 	if !ContainsNode(nodes, start) {
 		nodes = append(nodes, start)
 	}
 
-	for _, ep := range c.ListEdges() {
-		e := *ep
+	for _, e := range c.ListEdges() {
 		// for all edges in CDS with node as source
 		if e.GetSource() == start {
-			if !ContainsEdge(edges, ep) {
+			if !ContainsEdge(edges, e) {
 				// add edge to branch
-				edges = append(edges, ep)
+				edges = append(edges, e)
 				// for the destination node, add node and its edges to branch
 				nodes, edges = dfs(e.GetDestination(), nodes, edges, cp)
 			}
@@ -118,18 +124,22 @@ func dfs(start *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeLi
 	return nodes, edges
 }
 
+// ListNodes ...
 func (b *Branch) ListNodes() *NodeList {
 	return b.Nodes
 }
 
+// ListEdges ...
 func (b *Branch) ListEdges() *EdgeList {
 	return b.Edges
 }
 
+// UpdateNodeList ...
 func (b *Branch) UpdateNodeList(nlp *NodeList) {
 	b.Nodes = nlp
 }
 
+// UpdateEdgeList ...
 func (b *Branch) UpdateEdgeList(elp *EdgeList) {
 	b.Edges = elp
 }
@@ -138,12 +148,15 @@ func (b *Branch) UpdateEdgeList(elp *EdgeList) {
 	Partitions are only for linear CDSs
 	(i.e. each node can only have at most 2 edges)
 */
+
+// Partition ...
 type Partition struct {
 	Nodes *NodeList
 	Edges *EdgeList
 }
 
-func NewPartition(start, end *Node, cp *CDS) Section {
+// NewPartition ...
+func NewPartition(start, end Node, cp *CDS) Section {
 	nodes := make(NodeList, 0)
 	edges := make(EdgeList, 0)
 
@@ -155,27 +168,24 @@ func NewPartition(start, end *Node, cp *CDS) Section {
 	}
 }
 
-func partDFS(startp, endp *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeList) {
+func partDFS(start, end Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeList, EdgeList) {
 	c := *cp
-	start := *startp
-	end := *endp
 	// add node to partition nodes
-	if !ContainsNode(nodes, startp) {
-		nodes = append(nodes, startp)
+	if !ContainsNode(nodes, start) {
+		nodes = append(nodes, start)
 		if start.ID() == end.ID() {
 			return nodes, edges
 		}
 	}
 
-	for _, ep := range c.ListEdges() {
-		e := *ep
+	for _, e := range c.ListEdges() {
 		// for all edges in CDS with node as source
-		if e.GetSource() == startp {
-			if !ContainsEdge(edges, ep) {
+		if e.GetSource() == start {
+			if !ContainsEdge(edges, e) {
 				// add edge to branch
-				edges = append(edges, ep)
+				edges = append(edges, e)
 				// for the destination node, add node and its edge to branch
-				nodes, edges = partDFS(e.GetDestination(), endp, nodes, edges, cp)
+				nodes, edges = partDFS(e.GetDestination(), end, nodes, edges, cp)
 			}
 		}
 	}
@@ -183,23 +193,29 @@ func partDFS(startp, endp *Node, nodes NodeList, edges EdgeList, cp *CDS) (NodeL
 	return nodes, edges
 }
 
+// ListNodes ...
 func (p *Partition) ListNodes() *NodeList {
 	return p.Nodes
 }
 
+// ListEdges ...
 func (p *Partition) ListEdges() *EdgeList {
 	return p.Edges
 }
 
+// UpdateNodeList ...
 func (p *Partition) UpdateNodeList(nlp *NodeList) {
 	p.Nodes = nlp
 }
 
+// UpdateEdgeList ...
 func (p *Partition) UpdateEdgeList(elp *EdgeList) {
 	p.Edges = elp
 }
 
 /* Subsets are used for generic node selection (but not generic edge selection) */
+
+// Subset ...
 type Subset struct {
 	Nodes *NodeList
 	Edges *EdgeList
@@ -213,11 +229,10 @@ func NewSubset(nlp *NodeList, cp *CDS) Section {
 	cdsEdges := c.ListEdges()
 	edges := make(EdgeList, 0)
 	for _, n := range nodes {
-		for _, ep := range cdsEdges {
-			e := *ep
+		for _, e := range cdsEdges {
 			if e.GetSource() == n || e.GetDestination() == n {
-				if !ContainsEdge(edges, ep) {
-					edges = append(edges, ep)
+				if !ContainsEdge(edges, e) {
+					edges = append(edges, e)
 				}
 			}
 		}
@@ -229,28 +244,35 @@ func NewSubset(nlp *NodeList, cp *CDS) Section {
 	}
 }
 
+// ListNodes ...
 func (s *Subset) ListNodes() *NodeList {
 	return s.Nodes
 }
 
+// ListEdges ...
 func (s *Subset) ListEdges() *EdgeList {
 	return s.Edges
 }
 
+// UpdateNodeList ...
 func (s *Subset) UpdateNodeList(nlp *NodeList) {
 	s.Nodes = nlp
 }
 
+// UpdateEdgeList ...
 func (s *Subset) UpdateEdgeList(elp *EdgeList) {
 	s.Edges = elp
 }
 
 /* Disjoints are a collection of arbitrary nodes and arbitrary edges */
+
+// Disjoint ...
 type Disjoint struct {
 	Nodes *NodeList
 	Edges *EdgeList
 }
 
+// NewDisjoint ...
 func NewDisjoint(nlp *NodeList, elp *EdgeList) *Disjoint {
 	return &Disjoint{
 		Nodes: nlp,
@@ -292,18 +314,22 @@ func ComposeSections(graphs []*Section) Section {
 	}
 }
 
+// ListNodes ...
 func (d *Disjoint) ListNodes() *NodeList {
 	return d.Nodes
 }
 
+// ListEdges ...
 func (d *Disjoint) ListEdges() *EdgeList {
 	return d.Edges
 }
 
+// UpdateNodeList ...
 func (d *Disjoint) UpdateNodeList(nlp *NodeList) {
 	d.Nodes = nlp
 }
 
+// UpdateEdgeList ...
 func (d *Disjoint) UpdateEdgeList(elp *EdgeList) {
 	d.Edges = elp
 }

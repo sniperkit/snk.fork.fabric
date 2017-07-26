@@ -31,10 +31,8 @@ func containsDGNode(s []*DGNode, ip *DGNode) bool {
 	return false
 }
 
-func containsVirtual(s []*Virtual, ip *Virtual) bool {
-	for _, vp := range s {
-		v := *vp
-		i := *ip
+func containsVirtual(s []Virtual, i Virtual) bool {
+	for _, v := range s {
 		if i.ID() == v.ID() {
 			return true
 		}
@@ -43,10 +41,8 @@ func containsVirtual(s []*Virtual, ip *Virtual) bool {
 }
 
 // ContainsNode checks if a CDS node (reference) is in a NodeList
-func ContainsNode(l NodeList, np *Node) bool {
-	n := *np
-	for _, vp := range l {
-		v := *vp
+func ContainsNode(l NodeList, n Node) bool {
+	for _, v := range l {
 		if v.ID() == n.ID() {
 			return true
 		}
@@ -55,10 +51,8 @@ func ContainsNode(l NodeList, np *Node) bool {
 }
 
 // ContainsEdge checks if a CDS edge (reference) is in an Edglist
-func ContainsEdge(l EdgeList, ep *Edge) bool {
-	e := *ep
-	for _, vp := range l {
-		v := *vp
+func ContainsEdge(l EdgeList, e Edge) bool {
+	for _, v := range l {
 		if v.ID() == e.ID() {
 			return true
 		}

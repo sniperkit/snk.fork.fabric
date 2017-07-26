@@ -354,8 +354,7 @@ FIRST:
 		// check that at least one UI contains it
 		for _, u := range uiSlice {
 			s := u.GetSection()
-			sp := *s
-			uiCDSNodesPointer := sp.ListNodes()
+			uiCDSNodesPointer := s.ListNodes()
 			uiCDSNodes := *uiCDSNodesPointer
 			// if UI contains node; check next CDS node
 			if ContainsNode(uiCDSNodes, v) {
@@ -373,8 +372,7 @@ SECOND:
 		// check that at least one UI contains it
 		for _, u := range uiSlice {
 			s := u.GetSection()
-			sp := *s
-			uiCDSEdgesPointer := sp.ListEdges()
+			uiCDSEdgesPointer := s.ListEdges()
 			uiCDSEdges := *uiCDSEdgesPointer
 			// if UI contains edge; check next CDS edge
 			if ContainsEdge(uiCDSEdges, v) {
@@ -419,6 +417,7 @@ func (g *Graph) AddVUI(node UI) (*DGNode, error) {
 
 // RemoveVUI ...
 func (g *Graph) RemoveVUI(n DGNode) error {
+	// FIXME: sometimes this check fails randomly ...
 	node, ok := n.(UI)
 	if !ok {
 		return fmt.Errorf("Not a UI node")

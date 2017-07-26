@@ -10,7 +10,7 @@ type Poset interface {
 	// dependencies to assign a node in the wrapped Graph i.e. it determines
 	// what edges to make for the node in the Graph.
 	// Order returns the location of the DGnode inside the Graph
-	Order(DGNode) *DGNode
+	Order(DGNode) DGNode
 }
 
 // VPoset is an object that wraps a virtual dependency graph
@@ -23,7 +23,7 @@ type VPoset interface {
 	// dependencies to assign a node in the wrapped VDG i.e. it determines
 	// what edges to make for the node in the VDG.
 	// Order returns the location of the Virtual node inside the VDG
-	Order(Virtual) *Virtual
+	Order(Virtual) Virtual
 }
 
 // EXAMPLE: Access Type Priority Ordering

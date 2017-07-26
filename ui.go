@@ -10,9 +10,10 @@ package fabric
 	This interface definition satisfies both UI and VUI objects.
 */
 
+// UI ...
 type UI interface {
 	DGNode
-	GetSection() *Section
+	GetSection() Section
 	IsUnique() bool  // specifies whether a UI is *strictly* unique or not (a UI will always have totality-uniqueness)
 	IsVirtual() bool // specifies whether a UI is virtual or not
 }
