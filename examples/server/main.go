@@ -204,6 +204,7 @@ func deleteSession(g *fabric.Graph) http.HandlerFunc {
 func createNode(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		t := c.(*db.Tree)
+
 		// grab session
 		sess, err := getSession(r)
 		if err != nil {
@@ -234,12 +235,13 @@ func createNode(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 				w.Write([]byte("Please provide a value for the node."))
 				return
 			}
-			//newNode := db.CreateNode(t, value[0])
+
 			newNode, err := t.CreateNode(sess.VUI.GetSection(), value[0])
 			if err != nil {
 				w.Write([]byte(err.Error()))
 				return
 			}
+			db.CreateNode.Commit(v.(fabric.DGNode))
 			w.Write([]byte(strconv.Itoa(newNode.ID())))
 		}
 
@@ -296,6 +298,7 @@ func createEdge(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 				w.Write([]byte(err.Error()))
 				return
 			}
+			db.CreateEdge.Commit(v.(fabric.DGNode))
 			w.Write([]byte(strconv.Itoa(newEdge.ID())))
 		}
 
@@ -338,6 +341,7 @@ func removeNode(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 				w.Write([]byte(err.Error()))
 				return
 			}
+			db.RemoveNode.Commit(v.(fabric.DGNode))
 			w.Write([]byte("Node Removed successfully."))
 		}
 
@@ -380,6 +384,7 @@ func removeEdge(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 				w.Write([]byte(err.Error()))
 				return
 			}
+			db.RemoveEdge.Commit(v.(fabric.DGNode))
 			w.Write([]byte("Edge removed successfully."))
 		}
 
@@ -423,6 +428,7 @@ func readNodeValue(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 				w.Write([]byte(err.Error()))
 				return
 			}
+			db.ReadNodeValue.Commit(v.(fabric.DGNode))
 			w.Write([]byte(value.(string)))
 		}
 
@@ -467,6 +473,7 @@ func updateNodeValue(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
 				w.Write([]byte(err.Error()))
 				return
 			}
+			db.UpdateNodeValue.Commit(v.(fabric.DGNode))
 			w.Write([]byte("Node updated successfully."))
 		}
 

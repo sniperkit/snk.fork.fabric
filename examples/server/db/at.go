@@ -19,7 +19,7 @@ func (a AddTreeNode) Priority() int {
 
 // Commit ...
 func (a AddTreeNode) Commit(n fabric.DGNode) error {
-	var list fabric.ProcedureSignals
+	list := make(fabric.ProcedureSignals, 0)
 	list[a.ID()] = fabric.Completed
 	n.Signal(list)
 	return nil
@@ -45,7 +45,7 @@ func (a AddTreeEdge) Priority() int {
 
 // Commit ...
 func (a AddTreeEdge) Commit(n fabric.DGNode) error {
-	var list fabric.ProcedureSignals
+	list := make(fabric.ProcedureSignals, 0)
 	list[a.ID()] = fabric.Completed
 	n.Signal(list)
 	return nil
@@ -71,7 +71,7 @@ func (d DeleteTreeEntity) Priority() int {
 
 // Commit ...
 func (d DeleteTreeEntity) Commit(n fabric.DGNode) error {
-	var list fabric.ProcedureSignals
+	list := make(fabric.ProcedureSignals, 0)
 	list[d.ID()] = fabric.Completed
 	n.Signal(list)
 	return nil
@@ -97,7 +97,7 @@ func (r ReadTreeNode) Priority() int {
 
 // Commit ...
 func (r ReadTreeNode) Commit(n fabric.DGNode) error {
-	var list fabric.ProcedureSignals
+	list := make(fabric.ProcedureSignals, 0)
 	list[r.ID()] = fabric.Completed
 	n.Signal(list)
 	return nil
@@ -123,7 +123,7 @@ func (u UpdateTreeNode) Priority() int {
 
 // Commit ...
 func (u UpdateTreeNode) Commit(n fabric.DGNode) error {
-	var list fabric.ProcedureSignals
+	list := make(fabric.ProcedureSignals, 0)
 	list[u.ID()] = fabric.Completed
 	n.Signal(list)
 	return nil
