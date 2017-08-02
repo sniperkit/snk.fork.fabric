@@ -500,6 +500,9 @@ func main() {
 	graph := fabric.NewGraph()
 
 	// TODO: have a single UI that covers the entire tree
+	// create Section (entire CDS)
+	// create UI
+	// add UI to graph
 
 	http.HandleFunc("/createsession", createSession(tree, graph))
 	http.HandleFunc("/deletesession", deleteSession(graph))

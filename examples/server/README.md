@@ -8,10 +8,12 @@
 - Every **user session** creates a single **VUI** *per resource*.
     + Each VUI contains all the user's entities of that resource type
 - VUIs can be ordered in the resource's global graph by the resource POSET if necessary
-- Each VUI is the space for a VDG tree. This VDG tree is the **User Request Tree** (User Request POSET) for that resource.
+- Each VUI is the space for a VDG Lattice. This VDG lattice is the **User Request Lattice** (User Request POSET) for that resource.
 
 **Important:** when designing the system it is critical that structural updates (any updates, really) made to the CDS are reflected in each DG node.
 
 ## Idea
 
 A single tree resource. A tree with a root node, and each branch of the tree belongs to a different user. A user can add, remove, update, and read nodes in its branch.
+
+Note: a tree structure is only preserved at the top level right now. It is still possible for a user to extend the tree with structures that make the tree structure no longer a tree structure.
