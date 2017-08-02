@@ -20,31 +20,26 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// dgnodeCmd represents the dgnode command
-var dgnodeCmd = &cobra.Command{
-	Use:   "dgnode",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+// dgnCmd represents the dgn command
+var dgnCmd = &cobra.Command{
+	Use:   "dgn",
+	Short: "Dependency Graph Node methods generator.",
+	Long:  `dgn will generate the methods for your type to satisfy the fabric DGNode interface definition.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("dgnode called")
+		fmt.Println("dgn called")
 	},
 }
 
 func init() {
-	RootCmd.AddCommand(dgnodeCmd)
+	RootCmd.AddCommand(dgnCmd)
 
 	// Here you will define your flags and configuration settings.
 
 	// Cobra supports Persistent Flags which will work for this command
 	// and all subcommands, e.g.:
-	// dgnodeCmd.PersistentFlags().String("foo", "", "A help for foo")
+	// dgnCmd.PersistentFlags().String("foo", "", "A help for foo")
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	// dgnodeCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
+	// dgnCmd.Flags().BoolP("toggle", "t", false, "Help message for toggle")
 }

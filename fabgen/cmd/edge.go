@@ -23,13 +23,8 @@ import (
 // edgeCmd represents the edge command
 var edgeCmd = &cobra.Command{
 	Use:   "edge",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Short: "CDS Edge methods generator.",
+	Long:  `edge will generate the methods for your type to satisfy the fabric Edge interface definition.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println("edge called")
 	},
