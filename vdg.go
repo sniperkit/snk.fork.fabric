@@ -69,7 +69,7 @@ func (r *Root) ListSignals() SignalsMap {
 }
 
 // Signal ...
-func (r *Root) Signal(p ProcedureSignals) {
+func (r *Root) Signal(s NodeSignal) {
 	return
 }
 
@@ -202,7 +202,7 @@ func (g *VDG) CreateSignalers(n Virtual) SignalingMap {
 
 	deps := g.Dependents(n)
 	for _, d := range deps {
-		c := make(chan ProcedureSignals)
+		c := make(chan NodeSignal)
 		sm[d.ID()] = c
 	}
 
@@ -355,7 +355,7 @@ func (g *VDG) AddVirtualEdge(source int, d Virtual) error {
 				// update SignalingMap for destination
 				depSig := d.ListSignalers()
 				depS := d.ListSignals()
-				depSig[i.ID()] = make(chan ProcedureSignals)
+				depSig[i.ID()] = make(chan NodeSignal)
 				d.UpdateSignaling(depSig, depS)
 
 				// update SignalsMap for source

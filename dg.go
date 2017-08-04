@@ -35,7 +35,15 @@ const (
 // EXAMPLE: a system design calls for a single thread having multiple access procedures,
 // 	only some of which induce a dependent to invoke a responsive operation, then to know which
 // 	procedure a signal is from you can use this map.
-type ProcedureSignals map[int]Signal
+// type ProcedureSignals map[int]Signal
+
+// NodeSignal carries all the information a dependent node will need in order to know what
+// action a dependent node has just taken.
+type NodeSignal struct {
+	AccessType int // should be equivalent to the ID() method return value for the Access Type
+	Value      Signal
+	Space      UI
+}
 
 // NodeType defines the possible values for types of dependency graph nodes
 type NodeType int
@@ -55,13 +63,11 @@ const (
 	Unknown
 )
 
-// SignalingMap is a map of dependent node ids to a set of
-// access procedures and their current signal states.
-type SignalingMap map[int]chan ProcedureSignals
+// SignalingMap is a map of dependent node ids to a channel of signals
+type SignalingMap map[int]chan NodeSignal
 
-// SignalsMap is a map of dependency node ids to a set of
-// their access procedures and their current signal states.
-type SignalsMap map[int]<-chan ProcedureSignals
+// SignalsMap is a map of dependency node ids to recieve-only channel of signals
+type SignalsMap map[int]<-chan NodeSignal
 
 // DGNode (Dependency Graph Node) ...
 // every DGNode has an id, a Type, a state, and a set of Access Procedures
@@ -75,7 +81,7 @@ type DGNode interface {
 	UpdateSignaling(SignalingMap, SignalsMap) // makes it possible to update the SignalingMap and SignalsMap for a DGNode
 	ListSignalers() SignalingMap
 	ListSignals() SignalsMap
-	Signal(ProcedureSignals) // used to send the same signal to all dependents in signalers list
+	Signal(NodeSignal) // used to send the same signal to all dependents in signalers list
 }
 
 // Graph can be either UI DDAG, Temporal DAG or VDG
@@ -155,7 +161,7 @@ func (g *Graph) SignalsAndSignalers() {
 		sm := make(SignalingMap)
 		deps := g.Dependents(&n)
 		for _, d := range deps {
-			c := make(chan ProcedureSignals)
+			c := make(chan NodeSignal)
 			sm[d.ID()] = c
 		}
 
@@ -208,7 +214,7 @@ func (g *Graph) AddRealEdge(source int, dest *DGNode) {
 				// update SignalingMap for destination
 				depSig := d.ListSignalers()
 				depS := d.ListSignals()
-				depSig[i.ID()] = make(chan ProcedureSignals)
+				depSig[i.ID()] = make(chan NodeSignal)
 				d.UpdateSignaling(depSig, depS)
 
 				// update SignalsMap for source
