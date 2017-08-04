@@ -30,13 +30,6 @@ const (
 	PartialAbort
 )
 
-// ProcedureSignals is used to map a signal to the access type that caused the signal
-// NOTE: the int key should be equivalent to the ID() method return value for that AccessType
-// EXAMPLE: a system design calls for a single thread having multiple access procedures,
-// 	only some of which induce a dependent to invoke a responsive operation, then to know which
-// 	procedure a signal is from you can use this map.
-// type ProcedureSignals map[int]Signal
-
 // NodeSignal carries all the information a dependent node will need in order to know what
 // action a dependent node has just taken.
 type NodeSignal struct {
