@@ -100,7 +100,7 @@ func (u *UI) UpdateSignaling(sm fabric.SignalingMap, s fabric.SignalsMap) {
 }
 
 // Signal ...
-func (u *UI) Signal(s fabric.ProcedureSignals) {
+func (u *UI) Signal(s fabric.NodeSignal) {
 	sm := *u.Signalers
 
 	for _, c := range sm {

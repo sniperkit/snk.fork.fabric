@@ -70,7 +70,7 @@ func (v *Virtual) UpdateSignaling(sm fabric.SignalingMap, s fabric.SignalsMap) {
 }
 
 // Signal ...
-func (v *Virtual) Signal(s fabric.ProcedureSignals) {
+func (v *Virtual) Signal(s fabric.NodeSignal) {
 	sm := *v.Signalers
 
 	for _, c := range sm {
@@ -84,10 +84,13 @@ func (v *Virtual) Start() {
 	v.Executing = true
 
 	// signal to dependents that node has started
-	sig := make(fabric.ProcedureSignals, 0)
 	proc := v.ListProcedures()
-	sig[proc[0].ID()] = fabric.Started
-	v.Signal(sig)
+	s := fabric.NodeSignal{
+		AccessType: proc[0].ID(),
+		Value:      fabric.Started,
+		Space:      v.Subspace(),
+	}
+	v.Signal(s)
 }
 
 // Started ...

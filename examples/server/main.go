@@ -95,30 +95,28 @@ func signalCheck(node fabric.Virtual) bool {
 	return cont
 }
 
-func signalHandler(c <-chan fabric.ProcedureSignals, wg sync.WaitGroup) {
+func signalHandler(c <-chan fabric.NodeSignal, wg sync.WaitGroup) {
 	for {
 		select {
-		case sigMap := <-c:
-			for _, value := range sigMap {
-				// NOTE: the switch cases could revolve around different access types and different signal values
-				switch value {
-				case fabric.Waiting:
-					continue
-				case fabric.Started:
-					continue
-				case fabric.Completed:
-					wg.Done()
-					return
-				case fabric.Aborted:
-					wg.Done()
-					return
-				case fabric.AbortRetry:
-					wg.Done()
-					break
-				case fabric.PartialAbort:
-					wg.Done()
-					return
-				}
+		case sig := <-c:
+			// NOTE: the switch cases could revolve around different access types, different signal values, and different UIs
+			switch sig.Value {
+			case fabric.Waiting:
+				continue
+			case fabric.Started:
+				continue
+			case fabric.Completed:
+				wg.Done()
+				return
+			case fabric.Aborted:
+				wg.Done()
+				return
+			case fabric.AbortRetry:
+				wg.Done()
+				break
+			case fabric.PartialAbort:
+				wg.Done()
+				return
 			}
 		default:
 			continue
