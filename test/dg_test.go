@@ -61,7 +61,7 @@ func (u UI) UpdateSignaling(sm fabric.SignalingMap, s fabric.SignalsMap) {
 	*u.Signals = s
 }
 
-func (u UI) Signal(s fabric.ProcedureSignals) {
+func (u UI) Signal(s fabric.NodeSignal) {
 	sm := *u.Signalers
 
 	for _, c := range sm {
@@ -115,7 +115,7 @@ func (t Temporal) UpdateSignaling(sm fabric.SignalingMap, s fabric.SignalsMap) {
 	*t.Signals = s
 }
 
-func (t Temporal) Signal(s fabric.ProcedureSignals) {
+func (t Temporal) Signal(s fabric.NodeSignal) {
 	sm := *t.Signalers
 
 	for _, c := range sm {

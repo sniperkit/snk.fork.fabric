@@ -43,7 +43,7 @@ func (v Virtual) UpdateSignaling(sm fabric.SignalingMap, s fabric.SignalsMap) {
 	*v.Signals = s
 }
 
-func (v Virtual) Signal(s fabric.ProcedureSignals) {
+func (v Virtual) Signal(s fabric.NodeSignal) {
 	sm := *v.Signalers
 
 	for _, c := range sm {
