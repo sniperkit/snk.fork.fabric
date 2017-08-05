@@ -12,8 +12,6 @@ type Node struct {
 	AccessProcedures *fabric.ProcedureList
 	Signalers        *fabric.SignalingMap
 	Signals          *fabric.SignalsMap
-	IsRoot           bool
-	IsLeaf           bool
 }
 
 // UI ...
