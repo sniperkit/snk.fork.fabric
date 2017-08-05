@@ -3,6 +3,7 @@ package fabric
 import (
 	"fmt"
 	"math/rand"
+	"sync"
 	"time"
 )
 
@@ -221,6 +222,29 @@ func (g *VDG) Signals(n Virtual) SignalsMap {
 	}
 
 	return sm
+}
+
+// TotalBlock is the most basic format for signal checking
+// (used when a node wants to simply totally-block all further operations until its dependencies have signaled)
+// as it only accepts a BasicSignalHandler it will not be a very powerful form of blocking (only use if lazy)
+func (g *VDG) TotalBlock(nodeID int, handler BasicSignalHandler) bool {
+	var wg sync.WaitGroup
+
+	for n := range g.Top {
+		if n.ID() == nodeID {
+			depSignals := n.ListSignals()
+			for _, channel := range depSignals {
+				wg.Add(1)
+				go handler(channel, wg)
+			}
+			break
+		}
+	}
+
+	// Virtual Node blocks/spins
+	wg.Wait()
+
+	return true
 }
 
 // Dependents ...

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand"
 	"reflect"
+	"sync"
 	"time"
 )
 
@@ -169,6 +170,34 @@ func (g *Graph) SignalsAndSignalers() {
 
 		n.UpdateSignaling(sm, s)
 	}
+}
+
+// BasicSignalHandler is the basic function type for handling signals from a dependency node
+// Used in total-blocking, to call wg.Done() on certain Signal Values and return.
+// will not allow for more complex signal handling e.g. handling an Abort or AbortRetry with more resilience (use with caution)
+type BasicSignalHandler func(<-chan NodeSignal, sync.WaitGroup)
+
+// TotalBlock is the most basic format for signal checking
+// (used when a node wants to simply totally-block all further operations until its dependencies have signaled)
+// as it only accepts a BasicSignalHandler it will not be a very powerful form of blocking (only use if lazy)
+func (g *Graph) TotalBlock(nodeID int, handler BasicSignalHandler) bool {
+	var wg sync.WaitGroup
+
+	for n := range g.Top {
+		if n.ID() == nodeID {
+			depSignals := n.ListSignals()
+			for _, channel := range depSignals {
+				wg.Add(1)
+				go handler(channel, wg)
+			}
+			break
+		}
+	}
+
+	// Virtual Node blocks/spins
+	wg.Wait()
+
+	return true
 }
 
 // AddRealNode ...
