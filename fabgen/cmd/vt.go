@@ -22,16 +22,11 @@ import (
 
 // vtCmd represents the vt command
 var vtCmd = &cobra.Command{
-	Use:   "vt",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "vt <my_name>",
+	Short: "Virtual Temporal node methods generator",
+	Long:  `vt will generate the methods for your type to satisfy the fabric (Virtual) Temporal interface definition.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("vt called")
+		fmt.Println(args[0])
 	},
 }
 

@@ -22,11 +22,11 @@ import (
 
 // cdsCmd represents the cds command
 var cdsCmd = &cobra.Command{
-	Use:   "cds",
+	Use:   "cds <my_name>",
 	Short: "Concurrent data structure methods generator.",
 	Long:  `cds will generate the methods for your type to satisfy the fabric CDS interface definition.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("cds called")
+		fmt.Println(args[0])
 	},
 }
 

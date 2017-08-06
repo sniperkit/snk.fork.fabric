@@ -22,11 +22,11 @@ import (
 
 // nodeCmd represents the node command
 var nodeCmd = &cobra.Command{
-	Use:   "node",
-	Short: "A brief description of your command",
+	Use:   "node <my_name>",
+	Short: "CDS Node methods generator.",
 	Long:  `node will generate the methods for your type to satisfy the fabric Node interface definition.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("node called")
+		fmt.Println(args[0])
 	},
 }
 

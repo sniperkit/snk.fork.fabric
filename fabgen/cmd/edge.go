@@ -22,11 +22,11 @@ import (
 
 // edgeCmd represents the edge command
 var edgeCmd = &cobra.Command{
-	Use:   "edge",
+	Use:   "edge <my_name>",
 	Short: "CDS Edge methods generator.",
 	Long:  `edge will generate the methods for your type to satisfy the fabric Edge interface definition.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("edge called")
+		fmt.Println(args[0])
 	},
 }
 

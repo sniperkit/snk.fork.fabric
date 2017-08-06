@@ -22,11 +22,11 @@ import (
 
 // dgnCmd represents the dgn command
 var dgnCmd = &cobra.Command{
-	Use:   "dgn",
+	Use:   "dgn <my_name>",
 	Short: "Dependency Graph Node methods generator.",
 	Long:  `dgn will generate the methods for your type to satisfy the fabric DGNode interface definition.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("dgn called")
+		fmt.Println(args[0])
 	},
 }
 

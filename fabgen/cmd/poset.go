@@ -22,16 +22,11 @@ import (
 
 // posetCmd represents the poset command
 var posetCmd = &cobra.Command{
-	Use:   "poset",
-	Short: "A brief description of your command",
-	Long: `A longer description that spans multiple lines and likely contains examples
-and usage of using your command. For example:
-
-Cobra is a CLI library for Go that empowers applications.
-This application is a tool to generate the needed files
-to quickly create a Cobra application.`,
+	Use:   "poset <my_name>",
+	Short: "Poset methods generator",
+	Long:  `poset will generate the methods for your type to satisfy the fabric Poset interface definition.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("poset called")
+		fmt.Println(args[0])
 	},
 }
 

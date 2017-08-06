@@ -22,11 +22,11 @@ import (
 
 // atCmd represents the at command
 var atCmd = &cobra.Command{
-	Use:   "at <my_file.go>",
+	Use:   "at <my_name>",
 	Short: "Access Type methods generator.",
 	Long:  `at will generate the methods for your type to satisfy the fabric AccessType interface definition.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("at called")
+		fmt.Println(args[0])
 	},
 }
 
