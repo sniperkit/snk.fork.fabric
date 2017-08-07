@@ -10,7 +10,7 @@ In other words: **the purpose of this package is to use it in creating your own 
 
 ## Future (TODO)
 
-- **Fabgen:** Provide a small DSL that can be used to generate boilerplate for projects that will be using the `fabric` package.
+- **Fabgen:** Provide a small code generation tool that can be used to generate boilerplate for projects that will be using the `fabric` package.
 - **FabCheck:** methods for formal verification of system design using fabric package in order to avoid undesired behavior
 - Make fabric work for multiple CDSs simultaneously
 - Parallel distributed batch process scheduling
