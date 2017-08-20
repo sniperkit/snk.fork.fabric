@@ -1,5 +1,7 @@
 # Fabric
 
+Slides discussing the core concepts behind Fabric: http://jeremykhawaja.com/fabric/fabric.html
+
 The concepts behind this package can be found here: https://github.com/JKhawaja/concurrency
 
 A Concurrency control primitives package. Utilizing dependency graphs to avoid conflict in concurrent access to a single data structure. **Fine-Grained Blocking**.
