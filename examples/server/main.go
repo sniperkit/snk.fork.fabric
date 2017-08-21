@@ -86,7 +86,10 @@ func signalCheck(node fabric.Virtual) bool {
 	var wg sync.WaitGroup
 	for _, channel := range depSignals {
 		wg.Add(1)
-		go signalHandler(channel, wg)
+		// go signalHandler(channel, wg)
+		go func(c <-chan fabric.NodeSignal, wait sync.WaitGroup) {
+			signalHandler(c, wait)
+		}(channel, wg)
 	}
 
 	// Virtual Node blocks/spins
@@ -96,14 +99,17 @@ func signalCheck(node fabric.Virtual) bool {
 }
 
 func signalHandler(c <-chan fabric.NodeSignal, wg sync.WaitGroup) {
+	// blocking select that waits for a signal from a dependency node
 	select {
 	case sig := <-c:
 		// NOTE: the switch cases could revolve around different access types, different signal values, and different UIs
 		switch sig.Value {
 		case fabric.Waiting:
 			// do nothing
+			// NOTE: this require our select statement to be inside an infinite for loop in order for this to work correctly
 		case fabric.Started:
 			// do nothing
+			// NOTE: this require our select statement to be inside an infinite for loop in order for this to work correctly
 		case fabric.Completed:
 			wg.Done()
 			return
