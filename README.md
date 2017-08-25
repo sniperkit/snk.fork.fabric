@@ -2,7 +2,7 @@
 
 ## Concepts
 
-Slides discussing the core concepts behind Fabric: http://jeremykhawaja.com/fabric/fabric.html
+Slides discussing the core concepts behind Fabric: http://jeremykhawaja.com/fabric/Fabric.html#1
 
 The initial paper outlining the core concepts (needs revision): https://github.com/JKhawaja/concurrency
 
