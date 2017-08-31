@@ -27,7 +27,7 @@ const (
 	Aborted
 	// AbortRetry EXAMPLE: could use exponential backoff checks on retries for AbortRetry signals from dependencies ...
 	AbortRetry
-	// PartialAbort can be used to specify if an operation partially-completed before aborting)
+	// PartialAbort can be used to specify if an operation partially-completed before aborting
 	PartialAbort
 )
 
@@ -80,15 +80,15 @@ type DGNode interface {
 
 // Graph can be either UI DDAG, Temporal DAG or VDG
 type Graph struct {
-	DS  *CDS // reference to data structure that the dependency graph is for
-	Top map[DGNode][]*DGNode
+	DS  CDS
+	Top map[DGNode][]DGNode
 	VDG []*VDG
 }
 
 // NewGraph creates a new empty graph
 func NewGraph() *Graph {
 	return &Graph{
-		Top: make(map[DGNode][]*DGNode),
+		Top: make(map[DGNode][]DGNode),
 		VDG: make([]*VDG, 0),
 	}
 }
@@ -129,7 +129,7 @@ func (g *Graph) GenID() int {
 }
 
 // IsLeafBoundary ...
-func (g *Graph) IsLeafBoundary(n *DGNode) bool {
+func (g *Graph) IsLeafBoundary(n DGNode) bool {
 	if len(g.Dependencies(n)) == 0 {
 		return true
 	}
@@ -138,7 +138,7 @@ func (g *Graph) IsLeafBoundary(n *DGNode) bool {
 }
 
 // IsRootBoundary ...
-func (g *Graph) IsRootBoundary(n *DGNode) bool {
+func (g *Graph) IsRootBoundary(n DGNode) bool {
 	if len(g.Dependents(n)) == 0 {
 		return true
 	}
@@ -153,7 +153,7 @@ func (g *Graph) SignalsAndSignalers() {
 	for n, l := range g.Top {
 		// create its SignalersMap
 		sm := make(SignalingMap)
-		deps := g.Dependents(&n)
+		deps := g.Dependents(n)
 		for _, d := range deps {
 			c := make(chan NodeSignal)
 			sm[d.ID()] = c
@@ -161,8 +161,7 @@ func (g *Graph) SignalsAndSignalers() {
 
 		// create its SignalsMap
 		s := make(SignalsMap)
-		for _, np := range l {
-			dep := *np
+		for _, dep := range l {
 			channels := dep.ListSignalers()
 			ch := channels[dep.ID()]
 			s[dep.ID()] = ch
@@ -203,48 +202,47 @@ func (g *Graph) TotalBlock(nodeID int, handler BasicSignalHandler) bool {
 // AddRealNode ...
 // This should only be used for adding nodes to a graph
 // to intialize the graph.
-func (g *Graph) AddRealNode(node DGNode) (*DGNode, error) {
-	var pointer *DGNode
+func (g *Graph) AddRealNode(node DGNode) (DGNode, error) {
+	var newNode DGNode
 	if !reflect.ValueOf(node).Type().Comparable() {
-		return pointer, fmt.Errorf("Node type is not comparable and cannot be used in the graph topology. \n Try removing any slices, maps, and functions from struct definition.")
+		return newNode, fmt.Errorf("Node type is not comparable and cannot be used in the graph topology. \n Try removing any slices, maps, and functions from struct definition.")
 	}
 
 	if _, ok := g.Top[node]; !ok {
-		g.Top[node] = []*DGNode{}
+		g.Top[node] = []DGNode{}
 	} else {
-		return pointer, fmt.Errorf("Node already exists in Dependency Graph.")
+		return newNode, fmt.Errorf("Node already exists in Dependency Graph.")
 	}
 
 	for n := range g.Top {
 		if n.ID() == node.ID() {
-			pointer = &n
+			newNode = n
 		}
 	}
-	return pointer, nil
+	return newNode, nil
 }
 
 // AddRealEdge will create an edge and an appropriate signaling channel between nodes
-func (g *Graph) AddRealEdge(source int, dest *DGNode) {
-	d := *dest
+func (g *Graph) AddRealEdge(source int, dest DGNode) {
 
 	for i, k := range g.Top {
 		if i.ID() == source {
-			if !containsDGNode(k, dest) {
+			if !contains(k, dest) {
 				k = append(k, dest)
 				g.Top[i] = k
 
 				// update SignalingMap for destination
-				depSig := d.ListSignalers()
-				depS := d.ListSignals()
+				depSig := dest.ListSignalers()
+				depS := dest.ListSignals()
 				depSig[i.ID()] = make(chan NodeSignal)
-				d.UpdateSignaling(depSig, depS)
+				dest.UpdateSignaling(depSig, depS)
 
 				// update SignalsMap for source
 				signals := i.ListSignals()
 				signalers := i.ListSignalers()
-				for j, v := range d.ListSignalers() {
+				for j, v := range dest.ListSignalers() {
 					if j == i.ID() {
-						signals[d.ID()] = v
+						signals[dest.ID()] = v
 						break
 					}
 				}
@@ -271,8 +269,8 @@ func (g *Graph) CycleDetect() bool {
 	return false
 }
 
-// Allowed checks whether or not an access procedure is allowed to act on a node ...
-func (g *Graph) Allowed(node DGNode, procedure AccessType) bool {
+// AllowedProcedure checks whether or not an access procedure is allowed to act on a node ...
+func (g *Graph) AllowedProcedure(node DGNode, procedure AccessType) bool {
 	allowed := false
 	for _, p := range node.ListProcedures() {
 		if p.ID() == procedure.ID() {
@@ -287,8 +285,7 @@ func (g *Graph) Allowed(node DGNode, procedure AccessType) bool {
 func (g *Graph) cycleDfs(start DGNode, seen, done []DGNode) (bool, []DGNode) {
 	seen = append(seen, start)
 	adj := g.Top[start]
-	for _, vp := range adj {
-		v := *vp
+	for _, v := range adj {
 		if contains(done, v) {
 			continue
 		}
@@ -314,13 +311,13 @@ func (g *Graph) GetAdjacents(node DGNode) []DGNode {
 		if n.ID() == node.ID() {
 			// Add all dependents to list
 			for n2, l2 := range g.Top {
-				if containsDGNode(l2, &n) {
+				if contains(l2, n) {
 					list = append(list, n2)
 				}
 			}
 			// Add all dependencies to list
 			for _, np := range l {
-				list = append(list, *np)
+				list = append(list, np)
 			}
 		}
 	}
@@ -372,7 +369,7 @@ func (g *Graph) Covered() bool {
 	}
 
 	// grab all CDS nodes and edges
-	ds := *g.DS
+	ds := g.DS
 	nodes := ds.ListNodes()
 	edges := ds.ListEdges()
 
@@ -416,11 +413,11 @@ SECOND:
 }
 
 // AddVUI requires that the node return a true value for its IsVirtual method
-func (g *Graph) AddVUI(node UI) (*DGNode, error) {
-	var pointer *DGNode
+func (g *Graph) AddVUI(node UI) (DGNode, error) {
+	var newNode DGNode
 
 	if !node.IsVirtual() {
-		return pointer, fmt.Errorf("Not a virtual node.")
+		return newNode, fmt.Errorf("Not a virtual node.")
 	}
 
 	var nodeSlice []DGNode
@@ -429,36 +426,34 @@ func (g *Graph) AddVUI(node UI) (*DGNode, error) {
 	}
 
 	if !contains(nodeSlice, node) {
-		g.Top[node.(DGNode)] = []*DGNode{}
+		g.Top[node.(DGNode)] = []DGNode{}
 	} else {
-		return pointer, fmt.Errorf("Node already exists in Dependency Graph")
+		return newNode, fmt.Errorf("Node already exists in Dependency Graph")
 	}
 
 	for n := range g.Top {
 		if n.ID() == node.ID() {
-			pointer = &n
+			newNode = n
 		}
 	}
 
-	return pointer, nil
+	return newNode, nil
 }
 
 // RemoveVUI ...
 func (g *Graph) RemoveVUI(n DGNode) error {
-	// FIXME: sometimes this check fails randomly ...
 	node, ok := n.(UI)
 	if !ok {
 		return fmt.Errorf("Not a UI node")
 	}
 
-	// FIXME: sometimes this check fails randomly ...
 	if !node.IsVirtual() {
 		return fmt.Errorf("Not a virtual node")
 	}
 
 	for n1 := range g.Top {
 		if n1.ID() == n.ID() {
-			if len(g.Dependencies(&n1)) != 0 {
+			if len(g.Dependencies(n1)) != 0 {
 				return fmt.Errorf("VUI node still has dependencies")
 			}
 		}
@@ -468,7 +463,7 @@ func (g *Graph) RemoveVUI(n DGNode) error {
 	for n1 := range g.Top {
 		if n1.ID() == n.ID() {
 			for n2, l := range g.Top {
-				if containsDGNode(l, &n1) {
+				if contains(l, n1) {
 					signals := n2.ListSignals()
 					delete(signals, n1.ID())
 					n2.UpdateSignaling(n2.ListSignalers(), signals)
@@ -484,13 +479,12 @@ func (g *Graph) RemoveVUI(n DGNode) error {
 }
 
 // Dependents ...
-func (g *Graph) Dependents(np *DGNode) []DGNode {
+func (g *Graph) Dependents(n DGNode) []DGNode {
 	var list []DGNode
-	n := *np
 
 	for i, v := range g.Top {
 		if i.ID() != n.ID() {
-			if containsDGNode(v, np) {
+			if contains(v, n) {
 				list = append(list, i)
 			}
 		}
@@ -500,19 +494,18 @@ func (g *Graph) Dependents(np *DGNode) []DGNode {
 }
 
 // Dependencies ...
-func (g *Graph) Dependencies(np *DGNode) []DGNode {
+func (g *Graph) Dependencies(n DGNode) []DGNode {
 	var list []DGNode
 
-	n := *np
 	v, ok := g.Top[n]
 	if !ok {
 		return list
 	}
 
 	for _, p := range v {
-		pp := *p
-		list = append(list, pp)
+		list = append(list, p)
 	}
+
 	return list
 }
 

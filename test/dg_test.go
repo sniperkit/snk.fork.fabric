@@ -155,10 +155,10 @@ func TestDG(t *testing.T) {
 	// Check that UI node is both a leaf and root boundary
 	for n := range graph.Top {
 		if n.ID() == u.Id {
-			if graph.IsLeafBoundary(&n) != true {
+			if graph.IsLeafBoundary(n) != true {
 				t.Fatal("Incorrectly classified a leaf boundary node.")
 			}
-			if graph.IsRootBoundary(&n) != true {
+			if graph.IsRootBoundary(n) != true {
 				t.Fatal("Incorrectly classified a root boundary node.")
 			}
 		}
@@ -206,13 +206,13 @@ func TestDG(t *testing.T) {
 	// Do some Leaf and Root Boundary checks again
 	for n := range graph.Top {
 		if n.ID() == u.Id {
-			if !graph.IsRootBoundary(&n) {
+			if !graph.IsRootBoundary(n) {
 				t.Fatal("Incorrectly classified a root boundary node.")
 			}
 		}
 
 		if n.ID() == u2.Id {
-			if !graph.IsLeafBoundary(&n) {
+			if !graph.IsLeafBoundary(n) {
 				t.Fatal("Incorrectly classified a leaf boundary node.")
 			}
 		}
@@ -254,7 +254,7 @@ func TestDG(t *testing.T) {
 	}
 
 	// Remove VUI from graph (check)
-	err = graph.RemoveVUI(*vup)
+	err = graph.RemoveVUI(vup)
 	if err != nil {
 		t.Fatalf("Could not remove VUI node from graph: %v", err)
 	}
@@ -495,7 +495,7 @@ func TestTotalityUnique(t *testing.T) {
 
 	// Create graph (and add CDS to graph)
 	graph := fabric.NewGraph()
-	graph.DS = &li
+	graph.DS = li
 
 	// create section
 	branch := fabric.NewBranch(list.Nodes[0], li)
@@ -565,7 +565,7 @@ func TestCovered(t *testing.T) {
 
 	// Create graph (and add CDS reference to graph)
 	graph := fabric.NewGraph()
-	graph.DS = &li
+	graph.DS = li
 
 	// Create a section
 	branch := fabric.NewBranch(list.Nodes[0], li)

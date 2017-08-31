@@ -19,18 +19,6 @@ func containsV(s []Virtual, i Virtual) bool {
 	return false
 }
 
-func containsDGNode(s []*DGNode, ip *DGNode) bool {
-	i := *ip
-	for _, vp := range s {
-		v := *vp
-		if i.ID() == v.ID() {
-			return true
-		}
-	}
-
-	return false
-}
-
 func containsVirtual(s []Virtual, i Virtual) bool {
 	for _, v := range s {
 		if i.ID() == v.ID() {
