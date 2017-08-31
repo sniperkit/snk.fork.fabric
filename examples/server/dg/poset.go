@@ -21,8 +21,8 @@ func (v *VDGPoset) VDG() *fabric.VDG {
 	return v.Vdg
 }
 
-// GenerateGraph ...
-func (v *VDGPoset) GenerateGraph(nodes []fabric.Virtual) *fabric.VDG {
+// InitGraph ...
+func (v *VDGPoset) InitGraph(nodes []fabric.Virtual) *fabric.VDG {
 	return v.Vdg
 }
 

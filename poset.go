@@ -4,8 +4,8 @@ package fabric
 type Poset interface {
 	// Graph should return a pointer to the graph that our POSET object is "wrapping"
 	Graph() *Graph
-	// GenerateGraph should take a list of nodes and order them according to the Order() method and return a new Graph
-	GenerateGraph([]DGNode) *Graph
+	// InitGraph should take a list of nodes and order them according to the Order() method and return a new Graph
+	InitGraph([]DGNode) *Graph
 	// Order should be a method that determines what dependents and what
 	// dependencies to assign a node in the wrapped Graph i.e. it determines
 	// what edges to make for the node in the Graph.
@@ -17,8 +17,8 @@ type Poset interface {
 type VPoset interface {
 	// VDG should return a pointer to the VDG that our VPOSET object is "wrapping"
 	VDG() *VDG
-	// GenerateGraph should take a list of nodes and order them according to the Order() method and return a new VDG
-	GenerateGraph([]Virtual) *VDG
+	// InitGraph should take a list of nodes and order them according to the Order() method and return a new VDG
+	InitGraph([]Virtual) *VDG
 	// Order should be a method that determines what dependents and what
 	// dependencies to assign a node in the wrapped VDG i.e. it determines
 	// what edges to make for the node in the VDG.
