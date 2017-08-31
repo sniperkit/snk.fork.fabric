@@ -36,7 +36,8 @@ func (a AddTreeNode) Commit(n fabric.DGNode) error {
 		if !ok {
 			return fmt.Errorf("Could not convert node to (V)Temporal node.")
 		}
-		ui = t.GetRoot()
+		uis := t.GetRoots()
+		ui = uis[0]
 	case fabric.VDGNode:
 		v, ok := n.(fabric.Virtual)
 		if !ok {
@@ -91,7 +92,8 @@ func (a AddTreeEdge) Commit(n fabric.DGNode) error {
 		if !ok {
 			return fmt.Errorf("Could not convert node to (V)Temporal node.")
 		}
-		ui = t.GetRoot()
+		uis := t.GetRoots()
+		ui = uis[0]
 	case fabric.VDGNode:
 		v, ok := n.(fabric.Virtual)
 		if !ok {
@@ -146,7 +148,8 @@ func (d DeleteTreeEntity) Commit(n fabric.DGNode) error {
 		if !ok {
 			return fmt.Errorf("Could not convert node to (V)Temporal node.")
 		}
-		ui = t.GetRoot()
+		uis := t.GetRoots()
+		ui = uis[0]
 	case fabric.VDGNode:
 		v, ok := n.(fabric.Virtual)
 		if !ok {
@@ -201,7 +204,8 @@ func (r ReadTreeNode) Commit(n fabric.DGNode) error {
 		if !ok {
 			return fmt.Errorf("Could not convert node to (V)Temporal node.")
 		}
-		ui = t.GetRoot()
+		uis := t.GetRoots()
+		ui = uis[0]
 	case fabric.VDGNode:
 		v, ok := n.(fabric.Virtual)
 		if !ok {
@@ -256,7 +260,8 @@ func (u UpdateTreeNode) Commit(n fabric.DGNode) error {
 		if !ok {
 			return fmt.Errorf("Could not convert node to (V)Temporal node.")
 		}
-		ui = t.GetRoot()
+		uis := t.GetRoots()
+		ui = uis[0]
 	case fabric.VDGNode:
 		v, ok := n.(fabric.Virtual)
 		if !ok {
