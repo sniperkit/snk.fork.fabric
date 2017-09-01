@@ -93,6 +93,25 @@ func NewGraph() *Graph {
 	}
 }
 
+func SingleUIGraph(cds CDS) (*Graph, error) {
+	graph := &Graph{
+		Top: make(map[DGNode][]DGNode),
+		VDG: make([]*VDG, 0),
+	}
+
+	edges := cds.ListEdges()
+	nodes := cds.ListNodes()
+	dis := NewDisjoint(&nodes, &edges)
+	ui := NewTotalUI(Section(dis))
+
+	_, err := graph.AddRealNode(ui.(DGNode))
+	if err != nil {
+		return graph, err
+	}
+
+	return graph, err
+}
+
 // AddVDG ...
 func (g *Graph) AddVDG(v *VDG) error {
 	// check if VDG already exists in graph

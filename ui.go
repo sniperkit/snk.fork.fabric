@@ -40,6 +40,19 @@ func NewEmptyUI() UI {
 	}
 }
 
+func NewTotalUI(section Section) UI {
+	sm := make(SignalingMap, 0)
+	s := make(SignalsMap, 0)
+	p := make(ProcedureList, 0)
+
+	return &EmptyUI{
+		Signalers:        &sm,
+		Signals:          &s,
+		AccessProcedures: &p,
+		CDS:              section,
+	}
+}
+
 // ID ...
 func (u *EmptyUI) ID() int {
 	return 0
