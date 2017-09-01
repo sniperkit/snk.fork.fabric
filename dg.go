@@ -29,6 +29,8 @@ const (
 	AbortRetry
 	// PartialAbort can be used to specify if an operation partially-completed before aborting
 	PartialAbort
+	// Help can be used to specify that a helping mechanism should be triggered in the dependent node
+	Help
 )
 
 // NodeSignal carries all the information a dependent node will need in order to know what
