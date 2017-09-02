@@ -16,3 +16,6 @@
 
 # Todo files
 *.todo
+
+# Slides
+.slides/
