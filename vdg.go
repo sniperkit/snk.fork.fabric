@@ -421,7 +421,7 @@ func (g *VDG) CycleDetect() bool {
 	var done []Virtual
 
 	for i := range g.Top {
-		if !containsV(done, i) {
+		if !containsVirtual(done, i) {
 			result, d := g.cycleDfs(i, seen, done)
 			done = d
 			if result {
@@ -437,11 +437,11 @@ func (g *VDG) cycleDfs(start Virtual, seen, done []Virtual) (bool, []Virtual) {
 	seen = append(seen, start)
 	adj := g.Top[start]
 	for _, v := range adj {
-		if containsV(done, v) {
+		if containsVirtual(done, v) {
 			continue
 		}
 
-		if containsV(seen, v) {
+		if containsVirtual(seen, v) {
 			return true, done
 		}
 

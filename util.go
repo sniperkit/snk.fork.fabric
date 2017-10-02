@@ -10,15 +10,6 @@ func contains(s []DGNode, i DGNode) bool {
 	return false
 }
 
-func containsV(s []Virtual, i Virtual) bool {
-	for _, v := range s {
-		if i.ID() == v.ID() {
-			return true
-		}
-	}
-	return false
-}
-
 func containsVirtual(s []Virtual, i Virtual) bool {
 	for _, v := range s {
 		if i.ID() == v.ID() {
