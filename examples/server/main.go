@@ -85,45 +85,41 @@ func signalCheck(node fabric.Virtual) bool {
 	depSignals := node.ListSignals()
 	var wg sync.WaitGroup
 	for _, channel := range depSignals {
+		// create signal handler for each dependency
 		wg.Add(1)
-		// go signalHandler(channel, wg)
-		go func(c <-chan fabric.NodeSignal, wait sync.WaitGroup) {
-			signalHandler(c, wait)
-		}(channel, wg)
+		go func(c <-chan fabric.NodeSignal) {
+			// blocking select that waits for a signal from a dependency node
+			select {
+			case sig := <-c:
+				// NOTE: the switch cases could revolve around different access types, different signal values, and different UIs
+				switch sig.Value {
+				case fabric.Waiting:
+					// do nothing
+					// NOTE: this require our select statement to be inside an infinite for loop in order for this to work correctly
+				case fabric.Started:
+					// do nothing
+					// NOTE: this require our select statement to be inside an infinite for loop in order for this to work correctly
+				case fabric.Completed:
+					wg.Done()
+					return
+				case fabric.Aborted:
+					wg.Done()
+					return
+				case fabric.AbortRetry:
+					wg.Done()
+					break
+				case fabric.PartialAbort:
+					wg.Done()
+					return
+				}
+			}
+		}(channel)
 	}
 
 	// Virtual Node blocks/spins
 	wg.Wait()
 
 	return cont
-}
-
-func signalHandler(c <-chan fabric.NodeSignal, wg sync.WaitGroup) {
-	// blocking select that waits for a signal from a dependency node
-	select {
-	case sig := <-c:
-		// NOTE: the switch cases could revolve around different access types, different signal values, and different UIs
-		switch sig.Value {
-		case fabric.Waiting:
-			// do nothing
-			// NOTE: this require our select statement to be inside an infinite for loop in order for this to work correctly
-		case fabric.Started:
-			// do nothing
-			// NOTE: this require our select statement to be inside an infinite for loop in order for this to work correctly
-		case fabric.Completed:
-			wg.Done()
-			return
-		case fabric.Aborted:
-			wg.Done()
-			return
-		case fabric.AbortRetry:
-			wg.Done()
-			break
-		case fabric.PartialAbort:
-			wg.Done()
-			return
-		}
-	}
 }
 
 func createSession(c fabric.CDS, g *fabric.Graph) http.HandlerFunc {
